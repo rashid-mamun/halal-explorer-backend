@@ -7,7 +7,8 @@ const searchDocuments = async () => {
     const collection = db.collection("projectDb");
 
     // Find documents that match a query
-    const query = { name: "Casa Roberta" }; // Replace with your desired query
+    const keyword = "Raoul";
+    const query = { address: { $regex: keyword, $options: "i" } };
     const documents = await collection.find(query).toArray();
     console.log("Documents found:", documents);
   } catch (err) {
