@@ -1,7 +1,7 @@
 const createIndexes = async (client) => {
     try {
-      const db = client.db("local");
-      const collection = db.collection("projectDb");
+      const db = client.db("projectDb");
+      const collection = db.collection("halalDb");
   
       // Create indexes on specified fields
       await collection.createIndex({ name: 1 });
