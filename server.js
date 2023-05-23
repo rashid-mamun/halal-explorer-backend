@@ -1,6 +1,6 @@
 const app = require("./src/app");
 const { connectWithDb } = require("./src/config/database");
-const searchDocuments = require("./src/config/searchData");
+// const searchDocuments = require("./src/config/searchData");
 require("dotenv").config();
 
 const port = process.env.PORT || 5000;
