@@ -14,80 +14,93 @@ const searchHotels = async (req) => {
         await createAddressIndexIfNotExists(collection);
         const query = { $text: { $search: keyword } };
         const projection = { id: 1 };
-        const cursor = collection.find(query, projection).limit(300);
-
+        const cursor = collection.find(query, projection);
+       
         const hotelsDataMapping = await getHotelsDataMapping(cursor);
 
+        // console.log(JSON.stringify(hotelsDataMapping));
+        const  page  =req.page;
+        const pageNumber = parseInt(page, 10) || 1;
+        const pageSizeNumber = parseInt(20, 10) || 10;
+
+        // Calculate the offset and limit
+        const offset = (pageNumber - 1) * pageSizeNumber;
+        const limit = pageSizeNumber;
+        
         const ids = Object.keys(hotelsDataMapping);
-        const isValidDate = validateCheckinCheckout(req.checkin, req.checkout);
-        if (!isValidDate) {
-            return {
-                success: false,
-                message: 'Invalid Format checkin and checkout dates. Please make sure the checkout date is after the checkin date.'
-            }
-        }
+        const hotels = Object.values(hotelsDataMapping);
+        const totalHotels=hotels.length;
+        const paginatedData = hotels.slice(offset, offset + limit);
+        // const isValidDate = validateCheckinCheckout(req.checkin, req.checkout);
+        // if (!isValidDate) {
+        //     return {
+        //         success: false,
+        //         message: 'Invalid Format checkin and checkout dates. Please make sure the checkout date is after the checkin date.'
+        //     }
+        // }
 
-        if (Number(req.guests) > 6) {
-            return {
-                success: false,
-                message: 'Please reduce the number of guests'
-            }
-        }
-        const isCountryCodeValid = isValidCountryCode(req.residency);
+        // if (Number(req.guests) > 6) {
+        //     return {
+        //         success: false,
+        //         message: 'Please reduce the number of guests'
+        //     }
+        // }
+        // const isCountryCodeValid = isValidCountryCode(req.residency);
 
-        if (!isCountryCodeValid) {
-            console.log('Invalid residency country code. Please provide a valid two-letter country code.!');
-            return {
-                success: false,
-                message: 'Invalid residency country code. Please provide a valid two-letter country code.!'
-            }
-        }
+        // if (!isCountryCodeValid) {
+        //     console.log('Invalid residency country code. Please provide a valid two-letter country code.!');
+        //     return {
+        //         success: false,
+        //         message: 'Invalid residency country code. Please provide a valid two-letter country code.!'
+        //     }
+        // }
 
-        const isCurrencyCodeValid = isValidCurrencyCode(req.currency);
-        if (!isCurrencyCodeValid) {
-            const errorMessage = "Invalid currency code. Please provide a valid three-letter currency code.!";
-            console.log(errorMessage);
-            return {
-                success: false,
-                message: errorMessage
-            }
-        }
-        const requestBody = prepareRequestBody(req, ids);
+        // const isCurrencyCodeValid = isValidCurrencyCode(req.currency);
+        // if (!isCurrencyCodeValid) {
+        //     const errorMessage = "Invalid currency code. Please provide a valid three-letter currency code.!";
+        //     console.log(errorMessage);
+        //     return {
+        //         success: false,
+        //         message: errorMessage
+        //     }
+        // }
+        // const requestBody = prepareRequestBody(req, ids);
 
 
-        const response = await makeHotelSearchRequest(requestBody);
-        console.log(JSON.stringify(response.data.data));
-        if (response.data.status === "error") {
-            return {
-                success: false,
-                message: 'no hotel found!'
-            }
-        }
-        if (!response.data.data.hotels.length) {
-            return {
-                success: false,
-                message: 'no hotel found! please change the search parameters'
-            }
-        }
+        // const response = await makeHotelSearchRequest(requestBody);
+        // // console.log(JSON.stringify(response.data.data));
+        // if (response.data.status === "error") {
+        //     return {
+        //         success: false,
+        //         message: 'no hotel found!'
+        //     }
+        // }
+        // if (!response.data.data.hotels.length) {
+        //     return {
+        //         success: false,
+        //         message: 'no hotel found! please change the search parameters'
+        //     }
+        // }
 
-        const hotelsInfo = response.data.data.hotels;
+        // const hotelsInfo = response.data.data.hotels;
 
-        const updatedHotelsDataMapping = mapUpdatedHotelsDataMapping(hotelsInfo, hotelsDataMapping);
+        // const updatedHotelsDataMapping = mapUpdatedHotelsDataMapping(hotelsInfo, hotelsDataMapping);
 
-        // console.log(JSON.stringify(updatedHotelsDataMapping));
+        // // console.log(JSON.stringify(updatedHotelsDataMapping));
 
-        const hotels = Object.values(updatedHotelsDataMapping);
-        const filteredHotels = hotels.filter(item => item.region.country_code.toLowerCase() === req.residency.toLowerCase());
-        if (!filteredHotels.length) {
-            return {
-                success: false,
-                message: 'no hotel found! please change the search parameters'
-            }
-        }
+        // const hotels = Object.values(updatedHotelsDataMapping);
+        // // const filteredHotels = hotels.filter(item => item.region.country_code.toLowerCase() === req.residency.toLowerCase());
+        // // if (!filteredHotels.length) {
+        // //     return {
+        // //         success: false,
+        // //         message: 'no hotel found! please change the search parameters'
+        // //     }
+        // // }
 
         return {
             success: true,
-            data: filteredHotels
+            totalHotels,
+            data: paginatedData,
         }
 
     } catch (err) {
@@ -155,7 +168,10 @@ const getHotelsDataMapping = async (cursor) => {
     const hotelsDataMapping = {};
 
     await cursor.forEach((doc) => {
-        hotelsDataMapping[doc.id] = mapHotelData(doc);
+        const hotelData = mapHotelData(doc);
+        if (hotelData.images.length > 0 && hotelData.amenities.length > 0) {
+            hotelsDataMapping[doc.id] = hotelData;
+        }
     });
 
     return hotelsDataMapping;
@@ -169,21 +185,38 @@ const mapHotelData = (doc) => ({
     longitude: doc.longitude,
     region: doc.region,
     images: transformImageUrls(doc.images, '1024x768'),
+    amenities:getGeneralAmenities(doc),
+    mealIncluded:hasMealAmenities(doc),
     rating: doc.star_rating,
 });
 
 const transformImageUrls = (images, size) => {
-    images.map((imageUrl) => {
+    return images.map((imageUrl) => {
         const transformedUrl = imageUrl.replace('{size}', size);
         return transformedUrl;
     });
 }
-
-
+const getGeneralAmenities = (hotelData) => {
+    const generalGroup = hotelData.amenity_groups.find(
+      (group) => group.group_name === "General"
+    );
+  
+    if (generalGroup) {
+      return generalGroup.amenities;
+    }
+  
+    return [];
+  };
+const hasMealAmenities = (hotelData) => {
+    return hotelData.amenity_groups.some(
+      (group) => group.group_name === "Meals"
+    );
+  };
 const makeHotelSearchRequest = async (data) => {
-    const authHeader = `Basic ${btoa(`${process.env.username}:${process.env.password}`)}`;
-    const apiUrl = 'https://api.worldota.net/api/b2b/v3/search/serp/hotels/';
 
+    const authHeader = `Basic ${btoa(`4679:${process.env.password}`)}`;
+    const apiUrl = 'https://api.worldota.net/api/b2b/v3/search/serp/hotels/';
+    // console.log(JSON.stringify(data));
     try {
         const response = await axios.post(apiUrl, data, {
             headers: {
@@ -191,7 +224,7 @@ const makeHotelSearchRequest = async (data) => {
                 'Authorization': authHeader
             },
         });
-
+        console.log(response);
         return response;
     } catch (error) {
         // console.error(error);
@@ -223,7 +256,7 @@ const mapUpdatedHotelsDataMapping = (hotelsInfo, hotelsDataMapping) => {
             if (hotelInfo.rates[0].meal) {
                 mealIncluded = true;
             }
-
+            // console.log(JSON.stringify( hotelsDataMapping[hotelId].images));
             updatedHotelsDataMapping[hotelId] = {
                 hotelName: hotelsDataMapping[hotelId].hotelName,
                 address: hotelsDataMapping[hotelId].address,
