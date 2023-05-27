@@ -17,20 +17,28 @@ const searchHotels = async (req) => {
         const cursor = collection.find(query, projection);
        
         const hotelsDataMapping = await getHotelsDataMapping(cursor);
-
         // console.log(JSON.stringify(hotelsDataMapping));
-        const  page  =req.page;
+
+        const page = req.page;
         const pageNumber = parseInt(page, 10) || 1;
-        const pageSizeNumber = parseInt(20, 10) || 10;
+        const pageSize = parseInt(req.pageSize, 10) || 10;
+        const hotels = Object.values(hotelsDataMapping);
+        const totalHotels = hotels.length;
+
+        // Validate page number
+        const maxPageNumber = Math.ceil(totalHotels / pageSize);
+        if (pageNumber > maxPageNumber) {
+        return {
+            success: false,
+            message: 'Invalid page number',
+        };
+        }
 
         // Calculate the offset and limit
-        const offset = (pageNumber - 1) * pageSizeNumber;
-        const limit = pageSizeNumber;
-        
-        const ids = Object.keys(hotelsDataMapping);
-        const hotels = Object.values(hotelsDataMapping);
-        const totalHotels=hotels.length;
+        const offset = (pageNumber - 1) * pageSize;
+        const limit = pageSize;
         const paginatedData = hotels.slice(offset, offset + limit);
+        
         // const isValidDate = validateCheckinCheckout(req.checkin, req.checkout);
         // if (!isValidDate) {
         //     return {
