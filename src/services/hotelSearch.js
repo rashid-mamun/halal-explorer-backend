@@ -18,11 +18,75 @@ const searchHotels = async (req) => {
        
         const hotelsDataMapping = await getHotelsDataMapping(cursor);
         // console.log(JSON.stringify(hotelsDataMapping));
+        const dumsIds = Object.keys(hotelsDataMapping);
+        let ids;
+        if(dumsIds.length>300){
+             ids = dumsIds.slice(0, 299);
+        }else{
+            ids=dumsIds;
+        }
+        console.log(ids.length);
+        const isValidDate = validateCheckinCheckout(req.checkin, req.checkout);
+        if (!isValidDate) {
+            return {
+                success: false,
+                message: 'Invalid Format checkin and checkout dates. Please make sure the checkout date is after the checkin date.'
+            }
+        }
 
+        if (Number(req.guests) > 6) {
+            return {
+                success: false,
+                message: 'Please reduce the number of guests'
+            }
+        }
+        const isCountryCodeValid = isValidCountryCode(req.residency);
+
+        if (!isCountryCodeValid) {
+            console.log('Invalid residency country code. Please provide a valid two-letter country code.!');
+            return {
+                success: false,
+                message: 'Invalid residency country code. Please provide a valid two-letter country code.!'
+            }
+        }
+
+        const isCurrencyCodeValid = isValidCurrencyCode(req.currency);
+        if (!isCurrencyCodeValid) {
+            const errorMessage = "Invalid currency code. Please provide a valid three-letter currency code.!";
+            console.log(errorMessage);
+            return {
+                success: false,
+                message: errorMessage
+            }
+        }
+        const requestBody = prepareRequestBody(req, ids);
+
+
+        const response = await makeHotelSearchRequest(requestBody);
+        // console.log(JSON.stringify(response.data.data));
+        if (response.data.status === "error") {
+            return {
+                success: false,
+                message: 'no hotel found!'
+            }
+        }
+        if (!response.data.data.hotels.length) {
+            return {
+                success: false,
+                message: 'no hotel found! please change the search parameters'
+            }
+        }
+
+        const hotelsInfo = response.data.data.hotels;
+
+        const updatedHotelsDataMapping = mapUpdatedHotelsDataMapping(hotelsInfo, hotelsDataMapping);
+
+        // console.log(JSON.stringify(updatedHotelsDataMapping));
+
+        const hotels = Object.values(updatedHotelsDataMapping);
         const page = req.page;
         const pageNumber = parseInt(page, 10) || 1;
         const pageSize = parseInt(req.pageSize, 10) || 10;
-        const hotels = Object.values(hotelsDataMapping);
         const totalHotels = hotels.length;
 
         // Validate page number
@@ -38,65 +102,6 @@ const searchHotels = async (req) => {
         const offset = (pageNumber - 1) * pageSize;
         const limit = pageSize;
         const paginatedData = hotels.slice(offset, offset + limit);
-        
-        // const isValidDate = validateCheckinCheckout(req.checkin, req.checkout);
-        // if (!isValidDate) {
-        //     return {
-        //         success: false,
-        //         message: 'Invalid Format checkin and checkout dates. Please make sure the checkout date is after the checkin date.'
-        //     }
-        // }
-
-        // if (Number(req.guests) > 6) {
-        //     return {
-        //         success: false,
-        //         message: 'Please reduce the number of guests'
-        //     }
-        // }
-        // const isCountryCodeValid = isValidCountryCode(req.residency);
-
-        // if (!isCountryCodeValid) {
-        //     console.log('Invalid residency country code. Please provide a valid two-letter country code.!');
-        //     return {
-        //         success: false,
-        //         message: 'Invalid residency country code. Please provide a valid two-letter country code.!'
-        //     }
-        // }
-
-        // const isCurrencyCodeValid = isValidCurrencyCode(req.currency);
-        // if (!isCurrencyCodeValid) {
-        //     const errorMessage = "Invalid currency code. Please provide a valid three-letter currency code.!";
-        //     console.log(errorMessage);
-        //     return {
-        //         success: false,
-        //         message: errorMessage
-        //     }
-        // }
-        // const requestBody = prepareRequestBody(req, ids);
-
-
-        // const response = await makeHotelSearchRequest(requestBody);
-        // // console.log(JSON.stringify(response.data.data));
-        // if (response.data.status === "error") {
-        //     return {
-        //         success: false,
-        //         message: 'no hotel found!'
-        //     }
-        // }
-        // if (!response.data.data.hotels.length) {
-        //     return {
-        //         success: false,
-        //         message: 'no hotel found! please change the search parameters'
-        //     }
-        // }
-
-        // const hotelsInfo = response.data.data.hotels;
-
-        // const updatedHotelsDataMapping = mapUpdatedHotelsDataMapping(hotelsInfo, hotelsDataMapping);
-
-        // // console.log(JSON.stringify(updatedHotelsDataMapping));
-
-        // const hotels = Object.values(updatedHotelsDataMapping);
         // // const filteredHotels = hotels.filter(item => item.region.country_code.toLowerCase() === req.residency.toLowerCase());
         // // if (!filteredHotels.length) {
         // //     return {
@@ -177,7 +182,7 @@ const getHotelsDataMapping = async (cursor) => {
 
     await cursor.forEach((doc) => {
         const hotelData = mapHotelData(doc);
-        if (hotelData.images.length > 0 && hotelData.amenities.length > 0) {
+        if (hotelData.images.length > 0 ) {
             hotelsDataMapping[doc.id] = hotelData;
         }
     });
@@ -232,7 +237,7 @@ const makeHotelSearchRequest = async (data) => {
                 'Authorization': authHeader
             },
         });
-        console.log(response);
+        // console.log(response);
         return response;
     } catch (error) {
         // console.error(error);
