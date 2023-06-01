@@ -14,7 +14,7 @@ exports.halalRating = async (req, res) => {
 
     const hotelInfo = req.body;
     const result = await saveOrUpdateHotelInfo(hotelInfo);
-    console.log(JSON.stringify(result,null,2));
+    // console.log(JSON.stringify(result,null,2));
     if (result.success) {
       return res.status(200).json({
         success: true,

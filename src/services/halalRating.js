@@ -18,18 +18,17 @@ const saveOrUpdateHotelInfo = async (hotelInfo) => {
 
     if (existingHotel) {
       await collection.updateOne({ id: hotelInfo.id }, { $set: hotelInfo });
-      return {
-        success: true,
-        message: 'Hotel information updated successfully',
-      };
     } else {
       // Insert new hotel information
       await collection.insertOne(hotelInfo);
-      return {
-        success: true,
-        message: 'Hotel information saved successfully',
-      };
     }
+
+    const halalHotelsData = await collection.find().toArray();
+    return {
+      success: true,
+      message: 'Hotel information saved/updated successfully',
+      data: halalHotelsData,
+    };
   } catch (err) {
     return {
       success: false,
