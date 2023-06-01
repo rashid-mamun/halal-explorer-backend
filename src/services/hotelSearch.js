@@ -5,25 +5,37 @@ const btoa = require('btoa');
 
 const searchHotels = async (req) => {
     try {
-
+        
         const keyword = req.city;
         const client = getClient();
         const db = client.db(process.env.DbName);
-        const collection = db.collection(process.env.collectionName);
-
-        await createAddressIndexIfNotExists(collection);
+        const dumbHotelcollection = db.collection(process.env.collectionName);
+        const halalHotelCollection = db.collection('halalHotels');
+        
+        await createAddressIndexIfNotExists(dumbHotelcollection);
+        // await createAddressIndexIfNotExists(halalHotelCollection);
+       
         const query = { $text: { $search: keyword } };
         const projection = { id: 1 };
-        const cursor = collection.find(query, projection);
-       
-        const hotelsDataMapping = await getHotelsDataMapping(cursor);
+        const dumbsHotelData = dumbHotelcollection.find(query, projection);
+
+
+        const halalHotelsData = await halalHotelCollection.find().toArray();
+        const halalHotelsDataIds = halalHotelsData.map((hotel) => hotel.id);
+        // console.log(JSON.stringify(halalHotelsDataIds, null, 2));
+
+        const hotelsDataMapping = await getHotelsDataMapping(dumbsHotelData);
         // console.log(JSON.stringify(hotelsDataMapping));
-        const dumsIds = Object.keys(hotelsDataMapping);
+        let dumsIds = Object.keys(hotelsDataMapping);
+        
+        // Update dumsIds with data present in halalHotelsDataIds
+        // dumsIds = dumsIds.filter((id) => halalHotelsDataIds.includes(id));
+
         let ids;
-        if(dumsIds.length>300){
-             ids = dumsIds.slice(0, 299);
-        }else{
-            ids=dumsIds;
+        if (dumsIds.length > 300) {
+            ids = dumsIds.slice(0, 299);
+        } else {
+            ids = dumsIds;
         }
         console.log(ids.length);
         const isValidDate = validateCheckinCheckout(req.checkin, req.checkout);
@@ -92,10 +104,10 @@ const searchHotels = async (req) => {
         // Validate page number
         const maxPageNumber = Math.ceil(totalHotels / pageSize);
         if (pageNumber > maxPageNumber) {
-        return {
-            success: false,
-            message: 'Invalid page number',
-        };
+            return {
+                success: false,
+                message: 'Invalid page number',
+            };
         }
 
         // Calculate the offset and limit
@@ -182,7 +194,7 @@ const getHotelsDataMapping = async (cursor) => {
 
     await cursor.forEach((doc) => {
         const hotelData = mapHotelData(doc);
-        if (hotelData.images.length > 0 ) {
+        if (hotelData.images.length > 0) {
             hotelsDataMapping[doc.id] = hotelData;
         }
     });
@@ -198,8 +210,8 @@ const mapHotelData = (doc) => ({
     longitude: doc.longitude,
     region: doc.region,
     images: transformImageUrls(doc.images, '1024x768'),
-    amenities:getGeneralAmenities(doc),
-    mealIncluded:hasMealAmenities(doc),
+    amenities: getGeneralAmenities(doc),
+    mealIncluded: hasMealAmenities(doc),
     rating: doc.star_rating,
 });
 
@@ -211,20 +223,20 @@ const transformImageUrls = (images, size) => {
 }
 const getGeneralAmenities = (hotelData) => {
     const generalGroup = hotelData.amenity_groups.find(
-      (group) => group.group_name === "General"
+        (group) => group.group_name === "General"
     );
-  
+
     if (generalGroup) {
-      return generalGroup.amenities;
+        return generalGroup.amenities;
     }
-  
+
     return [];
-  };
+};
 const hasMealAmenities = (hotelData) => {
     return hotelData.amenity_groups.some(
-      (group) => group.group_name === "Meals"
+        (group) => group.group_name === "Meals"
     );
-  };
+};
 const makeHotelSearchRequest = async (data) => {
 
     const authHeader = `Basic ${btoa(`4679:${process.env.password}`)}`;
