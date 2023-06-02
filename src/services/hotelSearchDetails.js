@@ -5,6 +5,17 @@ const btoa = require('btoa');
 
 const searchHotelDetails= async (req) => {
     try {
+
+        const keyword = req.id;
+        const client = getClient();
+        const db = client.db(process.env.DbName);
+        const dumbHotelcollection = db.collection(process.env.collectionName);
+        await createIdIndexIfNotExists(dumbHotelcollection);
+        const query = { id: keyword };
+        let dumbsHotelData = await dumbHotelcollection.findOne(query);
+       
+        dumbsHotelData=prepareDumbHotelData(dumbsHotelData);
+        // console.log(JSON.stringify(dumbsHotelData));
         const isValidDate = validateCheckinCheckout(req.checkin, req.checkout);
         if (!isValidDate) {
             return {
@@ -42,7 +53,7 @@ const searchHotelDetails= async (req) => {
 
 
         const response = await makeHotelSearchDetailsRequest(requestBody);
-        console.log(JSON.stringify(response.data.data));
+        // console.log(JSON.stringify(response.data));
         if (response.data.status === "error") {
             return {
                 success: false,
@@ -59,10 +70,11 @@ const searchHotelDetails= async (req) => {
         return {
             success: true,
             data: response.data.data.hotels,
+            dumpHotelInfo:dumbsHotelData
         }
 
     } catch (err) {
-        // console.error(err);
+        console.error(err);
         // throw err;
         return {
             success: false,
@@ -71,12 +83,13 @@ const searchHotelDetails= async (req) => {
     }
 };
 
-const createAddressIndexIfNotExists = async (collection) => {
-    const indexExists = await collection.indexExists('address_text');
+const createIdIndexIfNotExists = async (collection) => {
+    const indexExists = await collection.indexExists('id_index');
     if (!indexExists) {
-        await collection.createIndex({ address: "text" });
+      await collection.createIndex({ id: 1 }, { name: 'id_index' });
     }
-};
+  };
+  
 const isValidDate = (dateString) => {
     const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
     if (!dateRegex.test(dateString)) {
@@ -135,6 +148,27 @@ const getHotelsDataMapping = async (cursor) => {
     return hotelsDataMapping;
 };
 
+const prepareDumbHotelData = (doc) => ({
+    hotelName: doc.name,
+    address: doc.address,
+    id: doc.id,
+    phone: doc.phone,
+    postal_code:doc.postal_code,
+    latitude: doc.latitude,
+    longitude: doc.longitude,
+    region: doc.region,
+    description_struct:doc.description_struct,
+    images: transformImageUrls(doc.images, '1024x768'),
+    rating: doc.star_rating,
+    email:doc.email,
+    is_closed:doc.is_closed,
+    metapolicy_extra_info:doc.metapolicy_extra_info,
+    facts: doc.facts,
+    hotel_chain: doc.hotel_chain,
+    front_desk_time_start: doc.front_desk_time_start,
+    front_desk_time_end: doc.front_desk_time_end,
+    is_gender_specification_required:doc.is_gender_specification_required,
+})
 const mapHotelData = (doc) => ({
     hotelName: doc.name,
     address: doc.address,

@@ -22,7 +22,7 @@ const searchHalalHotels = async (req) => {
     // console.log(JSON.stringify(hotelIds,null,2));
     const hotelsDataMapping = await getHotelsDataMapping(dumbsHotelData);
     let hotels = Object.values(hotelsDataMapping);
-    console.log(JSON.stringify(hotels));
+    // console.log(JSON.stringify(hotels));
 
     const page = req.page;
     const pageNumber = parseInt(page, 10) || 1;
