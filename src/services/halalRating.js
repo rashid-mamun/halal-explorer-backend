@@ -37,6 +37,46 @@ const saveOrUpdateHotelInfo = async (hotelInfo) => {
   }
 };
 
+const getHalalHotelInfo = async (req) => {
+ try {
+  const client = getClient();
+  const db = client.db(process.env.DbName);
+  const collection = db.collection('halalHotels');
+  const halalHotelsData = await collection.find().toArray();
+  const page = req.page;
+  const pageNumber = parseInt(page, 10) || 1;
+  const pageSize = parseInt(req.pageSize, 10) || 20;
+  const totalHotels = halalHotelsData.length;
+
+    // Validate page number
+  const maxPageNumber = Math.ceil(totalHotels / pageSize);
+  if (pageNumber > maxPageNumber) {
+      return {
+        success: false,
+        message: 'Invalid page number',
+      };
+  }
+
+    // Calculate the offset and limit
+  const offset = (pageNumber - 1) * pageSize;
+  const limit = pageSize;
+  const paginatedData = halalHotelsData.slice(offset, offset + limit);
+  return {
+    success: true,
+    message: 'Get Hotel information  successfully',
+    data: paginatedData,
+   };
+   
+ } catch (error) {
+   console.log(error);
+  return {
+    success: false,
+    error: 'Failed to get hotel information',
+  };
+ }
+}
+
 module.exports = {
   saveOrUpdateHotelInfo,
+  getHalalHotelInfo,
 };

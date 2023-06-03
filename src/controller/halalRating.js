@@ -1,5 +1,24 @@
 const { saveOrUpdateHotelInfo } = require("../services/halalRating");
+const { getHalalHotelInfo } = require("../services/halalRating");
+const halalService = require("../services/index");
 
+exports.halalSearch = async (req, res) => {
+  req = req.query;
+  try {
+      console.log("---- halal search calling----------", req);
+      if (!req.city) {
+          return res.status(500).json({
+              success: false,
+              error: 'please provide all necessary request property'
+          })
+      }
+      const hotels = await halalService.searchHalalHotels(req);
+      return res.json(hotels);
+  } catch (error) {
+      console.error(error);
+      return res.status(500).json({ error: 'Internal server error' });
+  }
+};
 exports.halalRating = async (req, res) => {
   try {
     const { id, ratings } = req.body;
@@ -34,3 +53,27 @@ exports.halalRating = async (req, res) => {
   }
 };
 
+exports.geAlltHalalHotel = async (req, res) => {
+  try {
+   
+    const result = await getHalalHotelInfo(req);
+    // console.log(JSON.stringify(result,null,2));
+    if (result.success) {
+      return res.status(200).json({
+        success: true,
+        message: result.message,
+        data:result.data
+      });
+    } else {
+      return res.status(500).json({
+        success: false,
+        error: result.error,
+      });
+    }
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      error: 'Internal server error',
+    });
+  }
+};
