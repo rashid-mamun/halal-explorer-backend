@@ -1,4 +1,5 @@
 const { saveOrUpdateHotelInfo } = require("../services/halalRating");
+const { getAllHalalHotelInfo } = require("../services/halalRating");
 const { getHalalHotelInfo } = require("../services/halalRating");
 const halalService = require("../services/index");
 
@@ -52,11 +53,34 @@ exports.halalRating = async (req, res) => {
     });
   }
 };
-
-exports.geAlltHalalHotel = async (req, res) => {
+exports.getHalalHotel = async (req, res) => {
+  try {
+    const result = await getHalalHotelInfo(req.query);
+    // console.log(JSON.stringify(result,null,2));
+    if (result.success) {
+      return res.status(200).json({
+        success: true,
+        message: result.message,
+        data:result.data
+      });
+    } else {
+      return res.status(500).json({
+        success: false,
+        message:result.message,
+        error: result.error,
+      });
+    }
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      error: 'Internal server error',
+    });
+  }
+};
+exports.getAllHalalHotel = async (req, res) => {
   try {
    
-    const result = await getHalalHotelInfo(req);
+    const result = await getAllHalalHotelInfo(req);
     // console.log(JSON.stringify(result,null,2));
     if (result.success) {
       return res.status(200).json({
