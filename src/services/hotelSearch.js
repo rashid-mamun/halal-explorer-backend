@@ -11,8 +11,23 @@ const searchHotels = async (req) => {
         const db = client.db(process.env.DbName);
         const dumbHotelcollection = db.collection(process.env.collectionName);
         const halalHotelCollection = db.collection('halalHotels');
-        
+        const reviewCollection = db.collection('review');
+
         await createAddressIndexIfNotExists(dumbHotelcollection);
+        await createIdIndexIfNotExists(reviewCollection);
+        let reviewData = await reviewCollection.find().toArray();
+
+        const reviewsDataObj = reviewData.reduce((obj, review) => {
+            obj[review.id] = {
+              id: review.id,
+              rating: review.rating,
+              detailed_ratings: review.detailed_ratings,
+              reviews: review.reviews,
+            };
+            return obj;
+          }, {});
+          
+    //    console.log(JSON.stringify(reviewData));
         // await createAddressIndexIfNotExists(halalHotelCollection);
        
         const query = { $text: { $search: keyword } };
@@ -21,7 +36,15 @@ const searchHotels = async (req) => {
 
 
         const halalHotelsData = await halalHotelCollection.find().toArray();
-        const halalHotelsDataIds = halalHotelsData.map((hotel) => hotel.id);
+        const halalHotelsDataObj = halalHotelsData.reduce((obj, hotel) => {
+        obj[hotel.id] = {
+            id: hotel.id,
+            halalRating: hotel.star_rating
+        };
+        return obj;
+        }, {});
+        const halalHotelsDataIds = Object.keys(halalHotelsDataObj);
+        console.log(JSON.stringify(halalHotelsDataObj,null,2));
         // console.log(JSON.stringify(halalHotelsDataIds, null, 2));
 
         const hotelsDataMapping = await getHotelsDataMapping(dumbsHotelData);
@@ -91,7 +114,7 @@ const searchHotels = async (req) => {
 
         const hotelsInfo = response.data.data.hotels;
 
-        const updatedHotelsDataMapping = mapUpdatedHotelsDataMapping(hotelsInfo, hotelsDataMapping);
+        const updatedHotelsDataMapping = mapUpdatedHotelsDataMapping(hotelsInfo, hotelsDataMapping,reviewsDataObj,halalHotelsDataObj);
 
         // console.log(JSON.stringify(updatedHotelsDataMapping));
 
@@ -129,7 +152,7 @@ const searchHotels = async (req) => {
         }
 
     } catch (err) {
-        // console.error(err);
+        console.error(err);
         // throw err;
         return {
             success: false,
@@ -137,7 +160,12 @@ const searchHotels = async (req) => {
         }
     }
 };
-
+const createIdIndexIfNotExists = async (collection) => {
+    const indexExists = await collection.indexExists('id_index');
+    if (!indexExists) {
+      await collection.createIndex({ id: 1 }, { name: 'id_index' });
+    }
+  };
 const createAddressIndexIfNotExists = async (collection) => {
     const indexExists = await collection.indexExists('address_text');
     if (!indexExists) {
@@ -260,48 +288,49 @@ const makeHotelSearchRequest = async (data) => {
     }
 };
 
-const mapUpdatedHotelsDataMapping = (hotelsInfo, hotelsDataMapping) => {
-
+const mapUpdatedHotelsDataMapping = (hotelsInfo, hotelsDataMapping, reviewsDataObj, halalHotelsDataObj) => {
     return hotelsInfo.reduce((updatedHotelsDataMapping, hotelInfo) => {
-
-        const hotelId = hotelInfo.id;
-        if (hotelsDataMapping.hasOwnProperty(hotelId)) {
-            let mealIncluded = false;
-            let freeCancellation = false;
-            let price = 0;
-
-            hotelInfo.rates[0].daily_prices.forEach(p => {
-                price += Number(p);
-            });
-
-            if (!hotelInfo.rates[0].no_show) {
-                freeCancellation = true;
-            }
-
-            if (hotelInfo.rates[0].meal) {
-                mealIncluded = true;
-            }
-            // console.log(JSON.stringify( hotelsDataMapping[hotelId].images));
-            updatedHotelsDataMapping[hotelId] = {
-                hotelName: hotelsDataMapping[hotelId].hotelName,
-                address: hotelsDataMapping[hotelId].address,
-                id: hotelsDataMapping[hotelId].id,
-                latitude: hotelsDataMapping[hotelId].latitude,
-                longitude: hotelsDataMapping[hotelId].longitude,
-                region: hotelsDataMapping[hotelId].region,
-                images: hotelsDataMapping[hotelId].images,
-                amenities: hotelInfo.rates[0].amenities_data,
-                mealIncluded: mealIncluded,
-                freeCancellation: freeCancellation,
-                price: parseFloat(price),
-                currency: 'BDT',
-                rating: hotelsDataMapping[hotelId].rating,
-            };
+      const hotelId = hotelInfo.id;
+      if (hotelsDataMapping.hasOwnProperty(hotelId)) {
+        let mealIncluded = false;
+        let freeCancellation = false;
+        let price = 0;
+  
+        hotelInfo.rates[0].daily_prices.forEach((p) => {
+          price += Number(p);
+        });
+  
+        if (!hotelInfo.rates[0].no_show) {
+          freeCancellation = true;
         }
-
-        return updatedHotelsDataMapping;
+  
+        if (hotelInfo.rates[0].meal) {
+          mealIncluded = true;
+        }
+  
+        updatedHotelsDataMapping[hotelId] = {
+          hotelName: hotelsDataMapping[hotelId].hotelName,
+          address: hotelsDataMapping[hotelId].address,
+          id: hotelsDataMapping[hotelId].id,
+          latitude: hotelsDataMapping[hotelId].latitude,
+          longitude: hotelsDataMapping[hotelId].longitude,
+          region: hotelsDataMapping[hotelId].region,
+          images: hotelsDataMapping[hotelId].images,
+          amenities: hotelInfo.rates[0].amenities_data,
+          mealIncluded: mealIncluded,
+          freeCancellation: freeCancellation,
+          price: parseFloat(price),
+          currency: 'BDT',
+          rating: hotelsDataMapping[hotelId].rating,
+            ...(reviewsDataObj[hotelId] && { review: reviewsDataObj[hotelId] }),
+            ...(halalHotelsDataObj[hotelId] && { halalRating: halalHotelsDataObj[hotelId].halalRating }),
+        };
+      }
+  
+      return updatedHotelsDataMapping;
     }, {});
-};
+  };
+  
 
 module.exports = {
     searchHotels
