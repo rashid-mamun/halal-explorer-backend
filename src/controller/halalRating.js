@@ -6,18 +6,18 @@ const halalService = require("../services/index");
 exports.halalSearch = async (req, res) => {
   req = req.query;
   try {
-      console.log("---- halal search calling----------", req);
-      if (!req.city) {
-          return res.status(500).json({
-              success: false,
-              error: 'please provide all necessary request property'
-          })
-      }
-      const hotels = await halalService.searchHalalHotels(req);
-      return res.json(hotels);
+    console.log("---- halal search calling----------", req);
+    if (!req.city) {
+      return res.status(500).json({
+        success: false,
+        error: 'please provide all necessary request property'
+      })
+    }
+    const hotels = await halalService.searchHalalHotels(req);
+    return res.json(hotels);
   } catch (error) {
-      console.error(error);
-      return res.status(500).json({ error: 'Internal server error' });
+    console.error(error);
+    return res.status(500).json({ error: 'Internal server error' });
   }
 };
 exports.halalRating = async (req, res) => {
@@ -61,12 +61,12 @@ exports.getHalalHotel = async (req, res) => {
       return res.status(200).json({
         success: true,
         message: result.message,
-        data:result.data
+        data: result.data
       });
     } else {
       return res.status(500).json({
         success: false,
-        message:result.message,
+        message: result.message,
         error: result.error,
       });
     }
@@ -79,14 +79,14 @@ exports.getHalalHotel = async (req, res) => {
 };
 exports.getAllHalalHotel = async (req, res) => {
   try {
-   
+
     const result = await getAllHalalHotelInfo(req);
     // console.log(JSON.stringify(result,null,2));
     if (result.success) {
       return res.status(200).json({
         success: true,
         message: result.message,
-        data:result.data
+        data: result.data
       });
     } else {
       return res.status(500).json({

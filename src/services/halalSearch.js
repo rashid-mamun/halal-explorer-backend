@@ -17,7 +17,7 @@ const searchHalalHotels = async (req) => {
     const cursor = collection.find(query, projection);
 
     const dumbsHotelData = await cursor.toArray();
-   
+
     // const hotelIds = hotels.map((hotel) => hotel.id);
     // console.log(JSON.stringify(hotelIds,null,2));
     const hotelsDataMapping = await getHotelsDataMapping(dumbsHotelData);
@@ -60,10 +60,10 @@ const getHotelsDataMapping = async (cursor) => {
   const hotelsDataMapping = {};
 
   await cursor.forEach((doc) => {
-      const hotelData = mapHotelData(doc);
-      if (hotelData.images.length > 0) {
-          hotelsDataMapping[doc.id] = hotelData;
-      }
+    const hotelData = mapHotelData(doc);
+    if (hotelData.images.length > 0) {
+      hotelsDataMapping[doc.id] = hotelData;
+    }
   });
 
   return hotelsDataMapping;
@@ -86,10 +86,10 @@ const transformImageUrl = (imageUrl, size) => {
 };
 
 const createAddressIndexIfNotExists = async (collection) => {
-    const indexExists = await collection.indexExists('address_text');
-    if (!indexExists) {
-        await collection.createIndex({ address: "text" });
-    }
+  const indexExists = await collection.indexExists('address_text');
+  if (!indexExists) {
+    await collection.createIndex({ address: "text" });
+  }
 };
 
 module.exports = {

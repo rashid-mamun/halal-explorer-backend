@@ -3,7 +3,7 @@ const axios = require('axios');
 const btoa = require('btoa');
 
 
-const searchHotelDetails= async (req) => {
+const searchHotelDetails = async (req) => {
     try {
 
         const keyword = req.id;
@@ -13,8 +13,8 @@ const searchHotelDetails= async (req) => {
         await createIdIndexIfNotExists(dumbHotelcollection);
         const query = { id: keyword };
         let dumbsHotelData = await dumbHotelcollection.findOne(query);
-       
-        dumbsHotelData=prepareDumbHotelData(dumbsHotelData);
+
+        dumbsHotelData = prepareDumbHotelData(dumbsHotelData);
         // console.log(JSON.stringify(dumbsHotelData));
         const isValidDate = validateCheckinCheckout(req.checkin, req.checkout);
         if (!isValidDate) {
@@ -70,7 +70,7 @@ const searchHotelDetails= async (req) => {
         return {
             success: true,
             data: response.data.data.hotels,
-            dumpHotelInfo:dumbsHotelData
+            dumpHotelInfo: dumbsHotelData
         }
 
     } catch (err) {
@@ -86,10 +86,10 @@ const searchHotelDetails= async (req) => {
 const createIdIndexIfNotExists = async (collection) => {
     const indexExists = await collection.indexExists('id_index');
     if (!indexExists) {
-      await collection.createIndex({ id: 1 }, { name: 'id_index' });
+        await collection.createIndex({ id: 1 }, { name: 'id_index' });
     }
-  };
-  
+};
+
 const isValidDate = (dateString) => {
     const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
     if (!dateRegex.test(dateString)) {
@@ -140,7 +140,7 @@ const getHotelsDataMapping = async (cursor) => {
 
     await cursor.forEach((doc) => {
         const hotelData = mapHotelData(doc);
-        if (hotelData.images.length > 0 ) {
+        if (hotelData.images.length > 0) {
             hotelsDataMapping[doc.id] = hotelData;
         }
     });
@@ -153,21 +153,21 @@ const prepareDumbHotelData = (doc) => ({
     address: doc.address,
     id: doc.id,
     phone: doc.phone,
-    postal_code:doc.postal_code,
+    postal_code: doc.postal_code,
     latitude: doc.latitude,
     longitude: doc.longitude,
     region: doc.region,
-    description_struct:doc.description_struct,
+    description_struct: doc.description_struct,
     images: transformImageUrls(doc.images, '1024x768'),
     rating: doc.star_rating,
-    email:doc.email,
-    is_closed:doc.is_closed,
-    metapolicy_extra_info:doc.metapolicy_extra_info,
+    email: doc.email,
+    is_closed: doc.is_closed,
+    metapolicy_extra_info: doc.metapolicy_extra_info,
     facts: doc.facts,
     hotel_chain: doc.hotel_chain,
     front_desk_time_start: doc.front_desk_time_start,
     front_desk_time_end: doc.front_desk_time_end,
-    is_gender_specification_required:doc.is_gender_specification_required,
+    is_gender_specification_required: doc.is_gender_specification_required,
 })
 const mapHotelData = (doc) => ({
     hotelName: doc.name,
@@ -177,8 +177,8 @@ const mapHotelData = (doc) => ({
     longitude: doc.longitude,
     region: doc.region,
     images: transformImageUrls(doc.images, '1024x768'),
-    amenities:getGeneralAmenities(doc),
-    mealIncluded:hasMealAmenities(doc),
+    amenities: getGeneralAmenities(doc),
+    mealIncluded: hasMealAmenities(doc),
     rating: doc.star_rating,
 });
 
@@ -190,20 +190,20 @@ const transformImageUrls = (images, size) => {
 }
 const getGeneralAmenities = (hotelData) => {
     const generalGroup = hotelData.amenity_groups.find(
-      (group) => group.group_name === "General"
+        (group) => group.group_name === "General"
     );
-  
+
     if (generalGroup) {
-      return generalGroup.amenities;
+        return generalGroup.amenities;
     }
-  
+
     return [];
-  };
+};
 const hasMealAmenities = (hotelData) => {
     return hotelData.amenity_groups.some(
-      (group) => group.group_name === "Meals"
+        (group) => group.group_name === "Meals"
     );
-  };
+};
 const makeHotelSearchDetailsRequest = async (data) => {
 
     const authHeader = `Basic ${btoa(`4679:${process.env.password}`)}`;

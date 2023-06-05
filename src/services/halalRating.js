@@ -3,7 +3,7 @@ const { getClient } = require("../config/database");
 const saveOrUpdateHotelInfo = async (hotelInfo) => {
   try {
     const totalRating = hotelInfo.ratings.reduce((total, rating) => total + rating.rating, 0);
-    
+
     if (totalRating > 100) {
       return {
         success: false,
@@ -12,7 +12,7 @@ const saveOrUpdateHotelInfo = async (hotelInfo) => {
     }
     const inserthotelInfo = {
       ...hotelInfo,
-      star_rating:totalRating
+      star_rating: totalRating
     }
     const client = getClient();
     const db = client.db(process.env.DbName);
@@ -42,42 +42,42 @@ const saveOrUpdateHotelInfo = async (hotelInfo) => {
 };
 
 const getAllHalalHotelInfo = async (req) => {
- try {
-  const client = getClient();
-  const db = client.db(process.env.DbName);
-  const collection = db.collection('halalHotels');
-  const halalHotelsData = await collection.find().toArray();
-  const page = req.page;
-  const pageNumber = parseInt(page, 10) || 1;
-  const pageSize = parseInt(req.pageSize, 10) || 20;
-  const totalHotels = halalHotelsData.length;
+  try {
+    const client = getClient();
+    const db = client.db(process.env.DbName);
+    const collection = db.collection('halalHotels');
+    const halalHotelsData = await collection.find().toArray();
+    const page = req.page;
+    const pageNumber = parseInt(page, 10) || 1;
+    const pageSize = parseInt(req.pageSize, 10) || 20;
+    const totalHotels = halalHotelsData.length;
 
     // Validate page number
-  const maxPageNumber = Math.ceil(totalHotels / pageSize);
-  if (pageNumber > maxPageNumber) {
+    const maxPageNumber = Math.ceil(totalHotels / pageSize);
+    if (pageNumber > maxPageNumber) {
       return {
         success: false,
         message: 'Invalid page number',
       };
-  }
+    }
 
     // Calculate the offset and limit
-  const offset = (pageNumber - 1) * pageSize;
-  const limit = pageSize;
-  const paginatedData = halalHotelsData.slice(offset, offset + limit);
-  return {
-    success: true,
-    message: 'Get Hotel information  successfully',
-    data: paginatedData,
-   };
-   
- } catch (error) {
-   console.log(error);
-  return {
-    success: false,
-    error: 'Failed to get hotel information',
-  };
- }
+    const offset = (pageNumber - 1) * pageSize;
+    const limit = pageSize;
+    const paginatedData = halalHotelsData.slice(offset, offset + limit);
+    return {
+      success: true,
+      message: 'Get Hotel information  successfully',
+      data: paginatedData,
+    };
+
+  } catch (error) {
+    console.log(error);
+    return {
+      success: false,
+      error: 'Failed to get hotel information',
+    };
+  }
 }
 const getHalalHotelInfo = async (req) => {
   try {
@@ -109,7 +109,7 @@ const getHalalHotelInfo = async (req) => {
     };
   }
 };
- 
+
 module.exports = {
   saveOrUpdateHotelInfo,
   getHalalHotelInfo,

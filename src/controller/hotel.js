@@ -21,7 +21,7 @@ exports.hotelSearchDetails = async (req, res) => {
     req = req.query;
     try {
         console.log("---- hotel search Deatails calling----------", req);
-        if ( !req.checkin || !req.checkout || !req.guests || !req.currency || !req.residency || !req.id) {
+        if (!req.checkin || !req.checkout || !req.guests || !req.currency || !req.residency || !req.id) {
             return res.status(500).json({
                 success: false,
                 error: 'please provide all necessary request property'
