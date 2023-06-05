@@ -15,6 +15,20 @@ const searchHotelDetails = async (req) => {
         let dumbsHotelData = await dumbHotelcollection.findOne(query);
 
         dumbsHotelData = prepareDumbHotelData(dumbsHotelData);
+
+        const reviewCollection = db.collection('review');
+        await createIdIndexIfNotExists(reviewCollection);
+        let reviewData = await reviewCollection.find().toArray();
+
+        const reviewsDataObj = reviewData.reduce((obj, review) => {
+            obj[review.id] = {
+                id: review.id,
+                rating: review.rating,
+                detailed_ratings: review.detailed_ratings,
+                reviews: review.reviews,
+            };
+            return obj;
+        }, {});
         // console.log(JSON.stringify(dumbsHotelData));
         const isValidDate = validateCheckinCheckout(req.checkin, req.checkout);
         if (!isValidDate) {
@@ -70,7 +84,8 @@ const searchHotelDetails = async (req) => {
         return {
             success: true,
             data: response.data.data.hotels,
-            dumpHotelInfo: dumbsHotelData
+            dumpHotelInfo: dumbsHotelData,
+            ...(reviewsDataObj[req.id] && { review: reviewsDataObj[req.id] }),
         }
 
     } catch (err) {
