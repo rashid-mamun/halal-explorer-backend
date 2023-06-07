@@ -4,4 +4,5 @@ module.exports = {
     ...require('./halalSearch'),
     ...require('./halalRating'),
     ...require('./manager'),
+    ...require('./dumbHotelById'),
 }

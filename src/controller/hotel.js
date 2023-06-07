@@ -34,3 +34,21 @@ exports.hotelSearchDetails = async (req, res) => {
         return res.status(500).json({ error: 'Internal server error' });
     }
 };
+
+exports.dumbHotelById = async (req, res) => {
+    req = req.query;
+    try {
+        console.log("---- Dumb hotel  Deatails calling----------", req);
+        if (!req.id) {
+            return res.status(500).json({
+                success: false,
+                error: 'please provide all necessary request property'
+            })
+        }
+        const hotels = await hotelService.dumbHotelById(req);
+        return res.json(hotels);
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ error: 'Internal server error' });
+    }
+};

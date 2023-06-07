@@ -4,6 +4,7 @@ const apiRoutes = require('../controller/index');
 
 router.get('/search', apiRoutes.hotelSearch);
 router.get('/search-details', apiRoutes.hotelSearchDetails);
+router.get('/dumb', apiRoutes.dumbHotelById);
 router.get('/api', async (req, res) => {
   res.status(200).json({
     message: 'Hotel api running up',
