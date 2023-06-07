@@ -44,7 +44,7 @@ const searchHotels = async (req) => {
             return obj;
         }, {});
         const halalHotelsDataIds = Object.keys(halalHotelsDataObj);
-        console.log(JSON.stringify(halalHotelsDataObj, null, 2));
+        console.log('\n------------halalHotelsDataObj-------------\n', JSON.stringify(halalHotelsDataObj, null, 2));
         // console.log(JSON.stringify(halalHotelsDataIds, null, 2));
 
         const hotelsDataMapping = await getHotelsDataMapping(dumbsHotelData);
@@ -52,7 +52,7 @@ const searchHotels = async (req) => {
         let dumsIds = Object.keys(hotelsDataMapping);
 
         // Update dumsIds with data present in halalHotelsDataIds
-        // dumsIds = dumsIds.filter((id) => halalHotelsDataIds.includes(id));
+        dumsIds = dumsIds.filter((id) => halalHotelsDataIds.includes(id));
 
         let ids;
         if (dumsIds.length > 300) {
@@ -61,6 +61,7 @@ const searchHotels = async (req) => {
             ids = dumsIds;
         }
         console.log(ids.length);
+        console.log('\n----------final hotel ids----------------\n', JSON.stringify(dumsIds, null, 2));
         const isValidDate = validateCheckinCheckout(req.checkin, req.checkout);
         if (!isValidDate) {
             return {

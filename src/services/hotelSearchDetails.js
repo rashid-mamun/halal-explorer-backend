@@ -10,16 +10,21 @@ const searchHotelDetails = async (req) => {
         const client = getClient();
         const db = client.db(process.env.DbName);
         const dumbHotelcollection = db.collection(process.env.collectionName);
+        const halalHotelCollection = db.collection('halalHotels');
+        const reviewCollection = db.collection('review');
+
         await createIdIndexIfNotExists(dumbHotelcollection);
+        await createIdIndexIfNotExists(halalHotelCollection);
+        await createIdIndexIfNotExists(reviewCollection);
+
         const query = { id: keyword };
         let dumbsHotelData = await dumbHotelcollection.findOne(query);
-
         dumbsHotelData = prepareDumbHotelData(dumbsHotelData);
 
-        const reviewCollection = db.collection('review');
-        await createIdIndexIfNotExists(reviewCollection);
-        let reviewData = await reviewCollection.find().toArray();
+        let halalHotelData = await halalHotelCollection.findOne(query);
+        console.log('\n------------halalHotelData------------\n', JSON.stringify(halalHotelData, null, 2));
 
+        let reviewData = await reviewCollection.find().toArray();
         const reviewsDataObj = reviewData.reduce((obj, review) => {
             obj[review.id] = {
                 id: review.id,
@@ -86,6 +91,7 @@ const searchHotelDetails = async (req) => {
             data: response.data.data.hotels,
             dumpHotelInfo: dumbsHotelData,
             ...(reviewsDataObj[req.id] && { review: reviewsDataObj[req.id] }),
+            ...(halalHotelData && { halalHotelInfo: halalHotelData }),
         }
 
     } catch (err) {
