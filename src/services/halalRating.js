@@ -40,7 +40,47 @@ const saveOrUpdateHotelInfo = async (hotelInfo) => {
     };
   }
 };
+const saveOrUpdateStructure = async (hotelInfo) => {
+  try {
+    const totalRating = hotelInfo.ratings.reduce((total, rating) => total + rating.rating, 0);
 
+    if (totalRating > 100) {
+      return {
+        success: false,
+        error: 'Total rating exceeds 100',
+      };
+    }
+    const inserthotelInfo = {
+      ...hotelInfo,
+      star_rating: totalRating,
+      id:'structure'
+    }
+    const client = getClient();
+    const db = client.db(process.env.DbName);
+    const collection = db.collection('halalHotelSturcture');
+
+    const existingHotel = await collection.findOne({ id:'structure' });
+
+    if (existingHotel) {
+      await collection.updateOne({ id: 'structure' }, { $set: inserthotelInfo });
+    } else {
+      // Insert new hotel information
+      await collection.insertOne(inserthotelInfo);
+    }
+
+    const halalHotelsData = await collection.find().toArray();
+    return {
+      success: true,
+      message: 'Halal rating structure information saved/updated successfully',
+      data: halalHotelsData,
+    };
+  } catch (err) {
+    return {
+      success: false,
+      error: 'Failed to save/update structure information',
+    };
+  }
+};
 const getAllHalalHotelInfo = async (req) => {
   try {
     const client = getClient();
@@ -110,8 +150,42 @@ const getHalalHotelInfo = async (req) => {
   }
 };
 
+const getHalalRatingStrucuture = async (req) => {
+  try {
+    const client = getClient();
+    const db = client.db(process.env.DbName);
+    const collection = db.collection('halalHotelSturcture');
+    console.log(req.id);
+    const halalHotel = await collection.findOne({ id: 'structure' });
+
+    if (halalHotel) {
+      return {
+        success: true,
+        message: 'Halal rating structure  retrieved successfully',
+        data: halalHotel,
+      };
+    } else {
+      return {
+        success: false,
+        message: 'No Halal rating structurel found',
+        error: 'Halal rating structure not found',
+      };
+    }
+  } catch (error) {
+    console.error('Failed to get Halal rating structure:', error);
+    return {
+      success: false,
+      message: 'Failed to retrieve Halal rating structure',
+      error: 'Internal server error',
+    };
+  }
+};
+
+
 module.exports = {
   saveOrUpdateHotelInfo,
   getHalalHotelInfo,
-  getAllHalalHotelInfo
+  getAllHalalHotelInfo,
+  saveOrUpdateStructure,
+  getHalalRatingStrucuture
 };

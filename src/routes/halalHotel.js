@@ -6,6 +6,8 @@ router.get('/search', apiRoutes.halalSearch);
 router.post('/rating', apiRoutes.halalRating);
 router.get('/all-hotels', apiRoutes.getAllHalalHotel);
 router.get('/hotel', apiRoutes.getHalalHotel);
+router.post('/structure', apiRoutes.halalRatingStrucuture);
+router.get('/structure', apiRoutes.getHalalRatingStrucuture);
 
 router.get('/api', async (req, res) => {
   res.status(200).json({
