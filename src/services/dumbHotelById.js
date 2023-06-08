@@ -19,22 +19,28 @@ const dumbHotelById = async (req) => {
 
         const query = { id: keyword };
         let dumbsHotelData = await dumbHotelcollection.findOne(query);
+        console.log(dumbsHotelData);
+        if (!dumbsHotelData) {
+            return {
+                success: false,
+                error: 'No hotel found!'
+            }
+        }
         dumbsHotelData = prepareDumbHotelData(dumbsHotelData);
 
         let halalHotelData = await halalHotelCollection.findOne(query);
         console.log('\n------------halalHotelData------------\n', JSON.stringify(halalHotelData, null, 2));
-
         let managerInfoCollectionData = await managerInfoCollection.find().toArray();
         const managerDataObj = managerInfoCollectionData.reduce((obj, manager) => {
             obj[manager.id] = {
-                name: manager.rating,
-                email:manager.email,
-               
+                name: manager.managerName,
+                email: manager.email,
+
             };
             return obj;
         }, {});
         // console.log(JSON.stringify(dumbsHotelData));
-       
+
 
 
         return {
@@ -75,6 +81,7 @@ const prepareDumbHotelData = (doc) => ({
     email: doc.email,
     is_closed: doc.is_closed,
     metapolicy_extra_info: doc.metapolicy_extra_info,
+    policy_struct: doc.policy_struct,
     facts: doc.facts,
     hotel_chain: doc.hotel_chain,
     front_desk_time_start: doc.front_desk_time_start,

@@ -53,13 +53,13 @@ const saveOrUpdateStructure = async (hotelInfo) => {
     const inserthotelInfo = {
       ...hotelInfo,
       star_rating: totalRating,
-      id:'structure'
+      id: 'structure'
     }
     const client = getClient();
     const db = client.db(process.env.DbName);
     const collection = db.collection('halalHotelSturcture');
 
-    const existingHotel = await collection.findOne({ id:'structure' });
+    const existingHotel = await collection.findOne({ id: 'structure' });
 
     if (existingHotel) {
       await collection.updateOne({ id: 'structure' }, { $set: inserthotelInfo });
