@@ -10,7 +10,7 @@ router.get('/api', async (req, res) => {
 
 router.get('/search', apiController.halalSearch);
 router.post('/info', apiController.managerInfo);
-router.get('/all', apiController.getAllManagers);
+router.get('/all', apiController.getAllManager);
 router.get('/one', apiController.getManager);
 
 module.exports = router;
