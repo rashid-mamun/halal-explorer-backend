@@ -1,14 +1,15 @@
 const express = require('express');
 const router = express.Router();
-const apiRoutes = require('../controller/index');
+const apiController = require('../controller/index');
 
-router.get('/search', apiRoutes.hotelSearch);
-router.get('/search-details', apiRoutes.hotelSearchDetails);
-router.get('/dumb', apiRoutes.dumbHotelById);
 router.get('/api', async (req, res) => {
   res.status(200).json({
-    message: 'Hotel api running up',
+    message: 'Hotel API running',
   });
 });
+
+router.get('/search', apiController.hotelSearch);
+router.get('/search-details', apiController.hotelSearchDetails);
+router.get('/dumb', apiController.dumbHotelById);
 
 module.exports = router;

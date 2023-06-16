@@ -1,18 +1,18 @@
 const express = require('express');
 const router = express.Router();
-const apiRoutes = require('../controller/index');
-
-router.get('/search', apiRoutes.halalSearch);
-router.post('/rating', apiRoutes.halalRating);
-router.get('/all-hotels', apiRoutes.getAllHalalHotel);
-router.get('/hotel', apiRoutes.getHalalHotel);
-router.post('/structure', apiRoutes.halalRatingStrucuture);
-router.get('/structure', apiRoutes.getHalalRatingStrucuture);
+const apiController = require('../controller/index');
 
 router.get('/api', async (req, res) => {
   res.status(200).json({
-    message: 'Halal hotel api running up',
+    message: 'Halal hotel API running',
   });
 });
+
+router.get('/search', apiController.halalSearch);
+router.get('/all-hotels', apiController.getAllHalalHotels);
+router.get('/hotel', apiController.getHalalHotel);
+router.post('/rating', apiController.halalRating);
+router.get('/structure', apiController.getHalalRatingStructure);
+router.post('/structure', apiController.halalRatingStructure);
 
 module.exports = router;

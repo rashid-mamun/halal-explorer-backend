@@ -1,16 +1,16 @@
 const express = require('express');
 const router = express.Router();
-const apiRoutes = require('../controller/index');
-
-router.get('/search', apiRoutes.halalSearch);
-router.post('/info', apiRoutes.managerInfo);
-router.get('/all', apiRoutes.getAllManager);
-router.get('/one', apiRoutes.getManager);
+const apiController = require('../controller/index');
 
 router.get('/api', async (req, res) => {
-    res.status(200).json({
-        message: 'Manager api running up',
-    });
+  res.status(200).json({
+    message: 'Manager API running',
+  });
 });
+
+router.get('/search', apiController.halalSearch);
+router.post('/info', apiController.managerInfo);
+router.get('/all', apiController.getAllManagers);
+router.get('/one', apiController.getManager);
 
 module.exports = router;
