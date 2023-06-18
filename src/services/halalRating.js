@@ -15,7 +15,7 @@ const saveOrUpdateHotelInfo = async (hotelInfo) => {
       star_rating: totalRating
     }
     const client = getClient();
-    const db = client.db(process.env.DbName);
+    const db = client.db(process.env.DB_NAME);
     const collection = db.collection('halalHotels');
 
     const existingHotel = await collection.findOne({ id: hotelInfo.id });
@@ -56,7 +56,7 @@ const saveOrUpdateStructure = async (hotelInfo) => {
       id: 'structure'
     }
     const client = getClient();
-    const db = client.db(process.env.DbName);
+    const db = client.db(process.env.DB_NAME);
     const collection = db.collection('halalHotelSturcture');
 
     const existingHotel = await collection.findOne({ id: 'structure' });
@@ -84,7 +84,7 @@ const saveOrUpdateStructure = async (hotelInfo) => {
 const getAllHalalHotelInfo = async (req) => {
   try {
     const client = getClient();
-    const db = client.db(process.env.DbName);
+    const db = client.db(process.env.DB_NAME);
     const collection = db.collection('halalHotels');
     const halalHotelsData = await collection.find().toArray();
     const page = req.page;
@@ -122,7 +122,7 @@ const getAllHalalHotelInfo = async (req) => {
 const getHalalHotelInfo = async (req) => {
   try {
     const client = getClient();
-    const db = client.db(process.env.DbName);
+    const db = client.db(process.env.DB_NAME);
     const collection = db.collection('halalHotels');
     console.log(req.id);
     const halalHotel = await collection.findOne({ id: req.id });
@@ -153,7 +153,7 @@ const getHalalHotelInfo = async (req) => {
 const getHalalRatingStrucuture = async (req) => {
   try {
     const client = getClient();
-    const db = client.db(process.env.DbName);
+    const db = client.db(process.env.DB_NAME);
     const collection = db.collection('halalHotelSturcture');
     console.log(req.id);
     const halalHotel = await collection.findOne({ id: 'structure' });

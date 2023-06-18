@@ -8,7 +8,7 @@ const searchHalalHotels = async (req) => {
 
     const keyword = req.city;
     const client = getClient();
-    const db = client.db(process.env.DbName);
+    const db = client.db(process.env.DB_NAME);
     const collection = db.collection(process.env.collectionName);
 
     await createAddressIndexIfNotExists(collection);

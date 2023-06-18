@@ -8,7 +8,7 @@ const searchHotels = async (req) => {
 
         const keyword = req.city;
         const client = getClient();
-        const db = client.db(process.env.DbName);
+        const db = client.db(process.env.DB_NAME);
         const dumbHotelcollection = db.collection(process.env.collectionName);
         const halalHotelCollection = db.collection('halalHotels');
         const reviewCollection = db.collection('review');
@@ -268,7 +268,7 @@ const hasMealAmenities = (hotelData) => {
 };
 const makeHotelSearchRequest = async (data) => {
 
-    const authHeader = `Basic ${btoa(`4679:${process.env.password}`)}`;
+    const authHeader = `Basic ${btoa(`${process.env.RATEHAWK_USERNAME}:${process.env.RATEHAWK_PASSWORD}`)}`;
     const apiUrl = 'https://api.worldota.net/api/b2b/v3/search/serp/hotels/';
     // console.log(JSON.stringify(data));
     try {
