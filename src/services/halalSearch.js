@@ -9,7 +9,7 @@ const searchHalalHotels = async (req) => {
     const keyword = req.city;
     const client = getClient();
     const db = client.db(process.env.DB_NAME);
-    const collection = db.collection(process.env.collectionName);
+    const collection = db.collection(process.env.DUMB_HOTEL_COLLECTION);
 
     await createAddressIndexIfNotExists(collection);
     const query = { $text: { $search: keyword } };

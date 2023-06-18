@@ -9,9 +9,9 @@ const dumbHotelById = async (req) => {
         const keyword = req.id;
         const client = getClient();
         const db = client.db(process.env.DB_NAME);
-        const dumbHotelcollection = db.collection(process.env.collectionName);
-        const halalHotelCollection = db.collection('halalHotels');
-        const managerInfoCollection = db.collection('managerInfo');
+        const dumbHotelcollection = db.collection(process.env.DUMB_HOTEL_COLLECTION);
+        const halalHotelCollection = db.collection(process.env.HALAL_HOTELS_COLLECTION);
+        const managerInfoCollection = db.collection(process.env.MANAGER_INFO_COLLECTION);
 
         await createIdIndexIfNotExists(dumbHotelcollection);
         await createIdIndexIfNotExists(halalHotelCollection);

@@ -4,7 +4,7 @@ const saveOrUpdateManagerInfo = async (managerInfo) => {
     try {
         const client = getClient();
         const db = client.db(process.env.DB_NAME);
-        const collection = db.collection('managerInfo');
+        const collection = db.collection(process.env.MANAGER_INFO_COLLECTION);
 
         const existingManager = await collection.findOne({ id: managerInfo.id });
 
@@ -33,7 +33,7 @@ const getAllManagerInfo = async (req) => {
     try {
         const client = getClient();
         const db = client.db(process.env.DB_NAME);
-        const collection = db.collection('managerInfo');
+        const collection = db.collection(process.env.MANAGER_INFO_COLLECTION);
         const managersData = await collection.find().toArray();
         const page = req.page;
         const pageNumber = parseInt(page, 10) || 1;
@@ -71,7 +71,7 @@ const getManagerInfo = async (req) => {
     try {
         const client = getClient();
         const db = client.db(process.env.DB_NAME);
-        const collection = db.collection('managerInfo');
+        const collection = db.collection(process.env.MANAGER_INFO_COLLECTION);
         console.log(req.id);
         const manager = await collection.findOne({ id: req.id });
 

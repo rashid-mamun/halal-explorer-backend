@@ -16,7 +16,7 @@ const saveOrUpdateHotelInfo = async (hotelInfo) => {
     }
     const client = getClient();
     const db = client.db(process.env.DB_NAME);
-    const collection = db.collection('halalHotels');
+    const collection = db.collection(process.env.HALAL_HOTELS_COLLECTION);
 
     const existingHotel = await collection.findOne({ id: hotelInfo.id });
 
@@ -85,7 +85,7 @@ const getAllHalalHotelInfo = async (req) => {
   try {
     const client = getClient();
     const db = client.db(process.env.DB_NAME);
-    const collection = db.collection('halalHotels');
+    const collection = db.collection(process.env.HALAL_HOTELS_COLLECTION);
     const halalHotelsData = await collection.find().toArray();
     const page = req.page;
     const pageNumber = parseInt(page, 10) || 1;
@@ -123,7 +123,7 @@ const getHalalHotelInfo = async (req) => {
   try {
     const client = getClient();
     const db = client.db(process.env.DB_NAME);
-    const collection = db.collection('halalHotels');
+    const collection = db.collection(process.env.HALAL_HOTELS_COLLECTION);
     console.log(req.id);
     const halalHotel = await collection.findOne({ id: req.id });
 

@@ -9,9 +9,9 @@ const searchHotels = async (req) => {
         const keyword = req.city;
         const client = getClient();
         const db = client.db(process.env.DB_NAME);
-        const dumbHotelcollection = db.collection(process.env.collectionName);
-        const halalHotelCollection = db.collection('halalHotels');
-        const reviewCollection = db.collection('review');
+        const dumbHotelcollection = db.collection(process.env.DUMB_HOTEL_COLLECTION);
+        const halalHotelCollection = db.collection(process.env.HALAL_HOTELS_COLLECTION);
+        const reviewCollection = db.collection(process.env.REVIEW_COLLECTION);
 
         await createAddressIndexIfNotExists(dumbHotelcollection);
         await createIdIndexIfNotExists(reviewCollection);
