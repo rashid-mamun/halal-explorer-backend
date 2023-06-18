@@ -1,4 +1,4 @@
-const { getClient } = require("../config/database");
+const { getClient } = require("../../config/database");
 
 const saveOrUpdateHotelInfo = async (hotelInfo) => {
   try {

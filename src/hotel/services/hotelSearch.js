@@ -1,4 +1,4 @@
-const { getClient } = require("../config/database");
+const { getClient } = require("../../config/database");
 const axios = require('axios');
 const btoa = require('btoa');
 
