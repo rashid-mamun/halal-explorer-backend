@@ -1,36 +1,67 @@
-const { saveOrUpdateHotelInfo } = require("../services/halalRating");
-const { getAllHalalHotelInfo } = require("../services/halalRating");
-const { getHalalHotelInfo } = require("../services/halalRating");
-const { saveOrUpdateStructure } = require('../services/halalRating');
-const { getHalalRatingStrucuture } = require('../services/halalRating');
+const {
+  saveOrUpdateHotelInfo,
+  getAllHalalHotelInfo,
+  getHalalHotelInfo,
+  saveOrUpdateStructure,
+  getHalalRatingStructure
+} = require("../services/halalRating");
 const halalService = require("../services/index");
+const Joi = require('joi');
 
-exports.halalSearch = async (req, res) => {
-  req = req.query;
-  try {
-    console.log("---- halal search calling----------", req);
-    if (!req.city) {
-      return res.status(500).json({
-        success: false,
-        error: 'please provide all necessary request property'
+const hotelInfoSchema = Joi.object({
+  id: Joi.string().required(),
+  ratings: Joi.array()
+    .items(
+      Joi.object({
+        name: Joi.string().required(),
+        rating: Joi.number().required(),
       })
+    )
+    .min(1)
+    .required(),
+});
+
+const structureSchema = Joi.object({
+  ratings: Joi.array()
+    .items(
+      Joi.object({
+        name: Joi.string().required(),
+        rating: Joi.number().required(),
+      })
+    )
+    .min(1)
+    .required(),
+});
+const getHalalHotelSchema = Joi.object({
+  id: Joi.string().required()
+});
+exports.halalSearch = async (req, res) => {
+  const { city } = req.query;
+
+  try {
+    if (!city) {
+      return res.status(400).json({
+        success: false,
+        error: 'Please provide the city parameter.'
+      });
     }
-    const hotels = await halalService.searchHalalHotels(req);
+
+    const hotels = await halalService.searchHalalHotels(req.query);
     return res.json(hotels);
   } catch (error) {
     console.error(error);
     return res.status(500).json({ error: 'Internal server error' });
   }
 };
-exports.halalRating = async (req, res) => {
-  try {
-    const { id, ratings } = req.body;
 
-    // Validate request body
-    if (!id || !Array.isArray(ratings) || !ratings.length) {
+exports.rateHotel = async (req, res) => {
+  try {
+    const { error } = hotelInfoSchema.validate(req.body);
+
+    if (error) {
       return res.status(400).json({
         success: false,
-        error: 'Invalid request body',
+        error: error.details[0].message,
       });
     }
 
@@ -55,20 +86,20 @@ exports.halalRating = async (req, res) => {
     });
   }
 };
-exports.halalRatingStrucuture = async (req, res) => {
-  try {
-    const {ratings } = req.body;
 
-    // Validate request body
-    if ( !Array.isArray(ratings) || !ratings.length) {
+exports.halalRatingStructure = async (req, res) => {
+  try {
+    const { error } = structureSchema.validate(req.body);
+
+    if (error) {
       return res.status(400).json({
         success: false,
-        error: 'Invalid request body',
+        error: error.details[0].message,
       });
     }
 
-    const hotelInfo = req.body;
-    const result = await saveOrUpdateStructure(hotelInfo);
+    const structureInfo = req.body;
+    const result = await saveOrUpdateStructure(structureInfo);
     // console.log(JSON.stringify(result,null,2));
     if (result.success) {
       return res.status(200).json({
@@ -88,9 +119,10 @@ exports.halalRatingStrucuture = async (req, res) => {
     });
   }
 };
-exports.getHalalRatingStrucuture = async (req, res) => {
+
+exports.getHalalRatingStructure = async (req, res) => {
   try {
-    const result = await getHalalRatingStrucuture(req.query);
+    const result = await getHalalRatingStructure(req.query);
     // console.log(JSON.stringify(result,null,2));
     if (result.success) {
       return res.status(200).json({
@@ -113,9 +145,18 @@ exports.getHalalRatingStrucuture = async (req, res) => {
   }
 };
 exports.getHalalHotel = async (req, res) => {
+  const { error, value } = getHalalHotelSchema.validate(req.query);
+
+  if (error) {
+    return res.status(400).json({
+      success: false,
+      error: error.details[0].message,
+    });
+  }
+
   try {
-    const result = await getHalalHotelInfo(req.query);
-    // console.log(JSON.stringify(result,null,2));
+    const result = await getHalalHotelInfo(value.id);
+
     if (result.success) {
       return res.status(200).json({
         success: true,

@@ -9,10 +9,10 @@ router.get('/api', async (req, res) => {
 });
 
 router.get('/search', apiController.halalSearch);
-router.post('/rating', apiController.halalRating);
+router.post('/rating', apiController.rateHotel);
 router.get('/all-hotels', apiController.getAllHalalHotel);
 router.get('/hotel', apiController.getHalalHotel);
-router.post('/structure', apiController.halalRatingStrucuture);
-router.get('/structure', apiController.getHalalRatingStrucuture);
+router.post('/structure', apiController.halalRatingStructure);
+router.get('/structure', apiController.getHalalRatingStructure);
 
 module.exports = router;

@@ -119,13 +119,13 @@ const getAllHalalHotelInfo = async (req) => {
     };
   }
 }
-const getHalalHotelInfo = async (req) => {
+const getHalalHotelInfo = async (id) => {
   try {
     const client = getClient();
     const db = client.db(process.env.DB_NAME);
     const collection = db.collection(process.env.HALAL_HOTELS_COLLECTION);
-    console.log(req.id);
-    const halalHotel = await collection.findOne({ id: req.id });
+
+    const halalHotel = await collection.findOne({ id });
 
     if (halalHotel) {
       return {
@@ -133,13 +133,13 @@ const getHalalHotelInfo = async (req) => {
         message: 'Hotel information retrieved successfully',
         data: halalHotel,
       };
-    } else {
-      return {
-        success: false,
-        message: 'No halal hotel found with the specified ID',
-        error: 'Hotel not found',
-      };
     }
+
+    return {
+      success: false,
+      message: 'No halal hotel found with the specified ID',
+      error: 'Hotel not found',
+    };
   } catch (error) {
     console.error('Failed to get hotel information:', error);
     return {
@@ -149,28 +149,27 @@ const getHalalHotelInfo = async (req) => {
     };
   }
 };
-
-const getHalalRatingStrucuture = async (req) => {
+const getHalalRatingStructure = async () => {
   try {
     const client = getClient();
     const db = client.db(process.env.DB_NAME);
     const collection = db.collection('halalHotelSturcture');
-    console.log(req.id);
+
     const halalHotel = await collection.findOne({ id: 'structure' });
 
     if (halalHotel) {
       return {
         success: true,
-        message: 'Halal rating structure  retrieved successfully',
+        message: 'Halal rating structure retrieved successfully',
         data: halalHotel,
       };
-    } else {
-      return {
-        success: false,
-        message: 'No Halal rating structurel found',
-        error: 'Halal rating structure not found',
-      };
     }
+
+    return {
+      success: false,
+      message: 'No Halal rating structure found',
+      error: 'Halal rating structure not found',
+    };
   } catch (error) {
     console.error('Failed to get Halal rating structure:', error);
     return {
@@ -182,10 +181,11 @@ const getHalalRatingStrucuture = async (req) => {
 };
 
 
+
 module.exports = {
   saveOrUpdateHotelInfo,
   getHalalHotelInfo,
   getAllHalalHotelInfo,
   saveOrUpdateStructure,
-  getHalalRatingStrucuture
+  getHalalRatingStructure
 };
