@@ -45,6 +45,107 @@ const fetchData = async (url, successMessage, errorMessage) => {
   }
 };
 
+const postData = async (url, data, successMessage, errorMessage) => {
+  const headers = createHeaders();
+
+  try {
+    const response = await axios.post(url, data, { headers });
+    if (!response.data) {
+      return {
+        success: false,
+        error: "Unable to fetch the requested data. Please try again later.",
+      };
+    }
+
+    return {
+      success: true,
+      message: successMessage,
+      data: response.data,
+    };
+  } catch (error) {
+    console.log(error);
+    return {
+      success: false,
+      error: errorMessage,
+    };
+  }
+};
+
+const processActivityData = async (activitiesData, activityCodeObject,collection) => {
+  const bulkOperations = [];
+
+  for (const activityCode in activityCodeObject) {
+    const existingActivity = activitiesData.find(activity => activity.activityCode === activityCode);
+    const activity = activityCodeObject[activityCode];
+
+    if (existingActivity) {
+      // Update existing activity
+      bulkOperations.push({
+        updateOne: {
+          filter: { activityCode: activityCode },
+          update: { $set: activity }
+        }
+      });
+    } else {
+      // Insert new activity using upsert
+      bulkOperations.push({
+        updateOne: {
+          filter: { activityCode: activityCode },
+          update: { $set: activity },
+          upsert: true
+        }
+      });
+    }
+  }
+
+  const result = await collection.bulkWrite(bulkOperations);
+
+  return {
+    success: true,
+    message: 'Activity information saved/updated successfully',
+    // data: activitiesData,
+  };
+};
+
+
+const saveOrUpdateActivityInfo = async (activityInfo) => {
+  try {
+    const url = `${process.env.HOTELBEDS_API_ENDPOINT}/activity-content-api/3.0/activities`;
+    const successMessage = 'Fetched activities information successfully';
+    const errorMessage = 'Failed to fetch activities';
+
+    const data = {
+      language: 'en',
+      codes: activityInfo.codes
+    };
+
+    const response = await postData(url, data, successMessage, errorMessage);
+
+    if (!response.success) {
+      return response;
+    }
+
+    const activitiesContent = response.data.activitiesContent;
+    const activityCodeObject = activitiesContent.reduce((acc, activity) => {
+      const { activityCode } = activity;
+      acc[activityCode] = activity;
+      return acc;
+    }, {});
+    // console.log(JSON.stringify(activityCodeObject));
+    const client = getClient();
+    const db = client.db(process.env.DB_NAME);
+    const collection = db.collection('activityInfo');
+    const activitiesData = await collection.find().toArray();
+
+    return processActivityData(activitiesData, activityCodeObject,collection);
+  } catch (error) {
+    return {
+      success: false,
+      error: 'Failed to save/update activity information: ' + error.message,
+    };
+  }
+};
+
 const getAllCountriesInfo = async () => {
   const url = `${process.env.HOTELBEDS_API_ENDPOINT}/activity-content-api/3.0/countries/en`;
   const successMessage = 'Fetch countries information successfully';
@@ -77,33 +178,6 @@ const getPortfolioInfo = async (destination, offset = 1, limit = 1000) => {
   return fetchData(url, successMessage, errorMessage);
 };
 
-const saveOrUpdateActivityInfo = async (activityInfo) => {
-  try {
-    const client = getClient();
-    const db = client.db(process.env.DB_NAME);
-    const collection = db.collection('activityInfo');
-
-    const existingActivity = await collection.findOne({ id: activityInfo.id });
-
-    if (existingActivity) {
-      await collection.updateOne({ id: activityInfo.id }, { $set: activityInfo });
-    } else {
-      await collection.insertOne(activityInfo);
-    }
-
-    const activitiesData = await collection.find().toArray();
-    return {
-      success: true,
-      message: 'Activity information saved/updated successfully',
-      data: activitiesData,
-    };
-  } catch (error) {
-    return {
-      success: false,
-      error: 'Failed to save/update activity information',
-    };
-  }
-};
 const getAllActivityInfo = async (req) => {
   try {
     const client = getClient();

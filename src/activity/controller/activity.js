@@ -31,7 +31,15 @@ const getPortfolioValidation = Joi.object({
 });
 
 const saveOrUpdateActivityValidation = Joi.object({
-  activityInfo: Joi.object().required(),
+  address: Joi.string().required(),
+  codes: Joi.array()
+  .items(
+    Joi.object({
+      activityCode: Joi.string().required(),
+    })
+  )
+  .min(1)
+  .required(),
 });
 
 const getAllDestinationHotelsValidation = Joi.object({
@@ -149,10 +157,10 @@ const getAllDestinationHotels = async (req, res) => {
 };
 const saveOrUpdateActivity = async (req, res) => {
   try {
-    // const { error } = saveOrUpdateActivityValidation.validate(req.body);
-    // if (error) {
-    //   return res.status(400).json({ error: error.details[0].message });
-    // }
+    const { error } = saveOrUpdateActivityValidation.validate(req.body);
+    if (error) {
+      return res.status(400).json({ error: error.details[0].message });
+    }
 
     const activityInfo = req.body;
     const response = await saveOrUpdateActivityInfo(activityInfo);
