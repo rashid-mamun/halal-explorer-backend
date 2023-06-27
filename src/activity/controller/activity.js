@@ -218,7 +218,7 @@ const getAllActivity = async (req, res) => {
 const activitySearch = async (req, res) => {
   const queryParams = req.query;
   try {
-      console.log("---- hotel search calling ----------", queryParams);
+      console.log("---- Activity search calling ----------", queryParams);
       const activities = await searchActivities(queryParams);
       return res.json(activities);
   } catch (error) {

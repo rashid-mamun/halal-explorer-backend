@@ -147,19 +147,11 @@ const saveOrUpdateActivityInfo = async (activityInfo) => {
     };
   }
 };
- // Create address index if not exists
- const createAddressIndexIfNotExists = async (collection) => {
-  const indexExists = await collection.indexExists('address');
-  if (!indexExists) {
-    await collection.createIndex({ address: 'text' });
-  }
-};
-
-const getActivitiesDataMapping = async (cursor) => {
+const getActivitiesDataMapping = async (activitiesDataCursor) => {
   const activitiesDataMapping = {};
 
-  await cursor.forEach((doc) => {
-    activitiesDataMapping[doc.activityCode] = doc;
+  await activitiesDataCursor.forEach((activityData) => {
+    activitiesDataMapping[activityData.activityCode] = activityData;
   });
 
   return activitiesDataMapping;
@@ -173,21 +165,32 @@ const searchActivities = async (req) => {
     const activityCollection = db.collection('activityInfo');
     const halalActivityCollection = db.collection('halalActivities');
 
-    await createAddressIndexIfNotExists(activityCollection);
+    // Create a text index on the 'address' column if it's not already created
+    const indexes = await activityCollection.indexes();
+    const addressIndexExists = indexes.some((index) => index.key.address);
+    if (!addressIndexExists) {
+      await activityCollection.createIndex({ address: 'text' });
+    }
 
-    const query = {
-      $text: { $search: keyword },
-      id: { $in: halalActivityCollection.distinct('code') }
-    };
+    // Search for activities using a regex pattern match on the 'address' field
+    const regexPattern = new RegExp(keyword, 'i');
+    const activitiesDataCursor = activityCollection.find({ address: regexPattern });
 
-    const projection = { id: 1 };
-    const activitiesDataCursor = activityCollection.find();
+    // Check if activitiesDataCursor is empty
+    if ((await activitiesDataCursor.count()) === 0) {
+      return {
+        success: true,
+        message: 'No activities found for the given search criteria.',
+        totalActivities: 0,
+        data: [],
+      };
+    }
+
+    // Retrieve the mapping of activity IDs to data
     const activitiesDataMapping = await getActivitiesDataMapping(activitiesDataCursor);
 
     const halalActivitiesDataCodes = await halalActivityCollection.distinct('code');
-    const finalActivityCodes = halalActivitiesDataCodes.filter((id) =>
-      activitiesDataMapping.hasOwnProperty(id)
-    );
+    const finalActivityCodes = halalActivitiesDataCodes.filter((code) => activitiesDataMapping.hasOwnProperty(code));
 
     const page = parseInt(req.page, 10) || 1;
     const pageSize = parseInt(req.pageSize, 10) || 10;
@@ -199,7 +202,7 @@ const searchActivities = async (req) => {
     if (page > maxPageNumber) {
       return {
         success: false,
-        message: 'Invalid page number',
+        error: 'Invalid page number',
       };
     }
 
@@ -223,6 +226,7 @@ const searchActivities = async (req) => {
     };
   }
 };
+
 
 
 const getAllCountriesInfo = async () => {
