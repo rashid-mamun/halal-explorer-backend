@@ -5,6 +5,8 @@ const {
   getPortfolioAvailInfo,
   getPortfolioInfo,
   saveOrUpdateActivityInfo,
+  getActivityInfo,
+  getAllActivityInfo,
   getAllCurrenciesInfo,
   getAllSegmentsInfo,
   getAllLanguagesInfo,
@@ -99,21 +101,6 @@ const getPortfolio = async (req, res) => {
   }
 };
 
-const saveOrUpdateActivity = async (req, res) => {
-  try {
-    const { error } = saveOrUpdateActivityValidation.validate(req.body);
-    if (error) {
-      return res.status(400).json({ error: error.details[0].message });
-    }
-
-    const { activityInfo } = req.body;
-    const response = await saveOrUpdateActivityInfo(activityInfo);
-    res.json(response);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Failed to save/update activity information' });
-  }
-};
 
 const getAllCurrencies = async (req, res) => {
   try {
@@ -160,7 +147,69 @@ const getAllDestinationHotels = async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch destination hotels' });
   }
 };
+const saveOrUpdateActivity = async (req, res) => {
+  try {
+    // const { error } = saveOrUpdateActivityValidation.validate(req.body);
+    // if (error) {
+    //   return res.status(400).json({ error: error.details[0].message });
+    // }
 
+    const activityInfo = req.body;
+    const response = await saveOrUpdateActivityInfo(activityInfo);
+    res.json(response);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Failed to save/update activity information' });
+  }
+};
+const getActivity= async (req, res) => {
+  try {
+    const result = await getActivityInfo(req.query);
+
+    if (result.success) {
+      return res.status(200).json({
+        success: true,
+        message: result.message,
+        data: result.data
+      });
+    } else {
+      return res.status(500).json({
+        success: false,
+        message: result.message,
+        error: result.error,
+      });
+    }
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      error: err.message || 'Internal server error',
+    });
+  }
+};
+
+const getAllActivity = async (req, res) => {
+  try {
+    const result = await getAllActivityInfo(req.query);
+
+    if (result.success) {
+      return res.status(200).json({
+        success: true,
+        message: result.message,
+        data: result.data
+      });
+    } else {
+      return res.status(500).json({
+        success: false,
+        error: result.error,
+      });
+    }
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      error: err.message || 'Internal server error',
+    });
+  }
+};
 module.exports = {
   getAllCountries,
   getAllDestinations,
@@ -171,4 +220,6 @@ module.exports = {
   getAllSegments,
   getAllLanguages,
   getAllDestinationHotels,
+  getAllActivity,
+  getActivity,
 };

@@ -24,6 +24,13 @@ const fetchData = async (url, successMessage, errorMessage) => {
 
   try {
     const response = await axios.get(url, { headers });
+    if (!response.data) {
+      return {
+        success: false,
+        error: "Unable to fetch the requested data. Please try again later.",
+      };
+    }
+
     return {
       success: true,
       message: successMessage,
@@ -97,6 +104,73 @@ const saveOrUpdateActivityInfo = async (activityInfo) => {
     };
   }
 };
+const getAllActivityInfo = async (req) => {
+  try {
+    const client = getClient();
+    const db = client.db(process.env.DB_NAME);
+    const collection = db.collection('activityInfo');
+    const activityData = await collection.find().toArray();
+    const page = req.page;
+    const pageNumber = parseInt(page, 10) || 1;
+    const pageSize = parseInt(req.pageSize, 10) || 20;
+    const totalActivity = activityData.length;
+
+    // Validate page number
+    const maxPageNumber = Math.ceil(totalActivity / pageSize);
+    if (pageNumber > maxPageNumber) {
+      return {
+        success: false,
+        message: 'Invalid page number',
+      };
+    }
+
+    // Calculate the offset and limit
+    const offset = (pageNumber - 1) * pageSize;
+    const limit = pageSize;
+    const paginatedData = activityData.slice(offset, offset + limit);
+    return {
+      success: true,
+      message: 'Get activity information successfully',
+      data: paginatedData,
+    };
+  } catch (error) {
+    console.error('Failed to get activity information:', error);
+    return {
+      success: false,
+      error: 'Failed to get activity information',
+    };
+  }
+};
+
+const getActivityInfo = async (req) => {
+  try {
+    const client = getClient();
+    const db = client.db(process.env.DB_NAME);
+    const collection = db.collection('activityInfo');
+    const activity = await collection.findOne({ code: req.code });
+
+    if (activity) {
+      return {
+        success: true,
+        message: 'activity information retrieved successfully',
+        data: activity,
+      };
+    } else {
+      return {
+        success: false,
+        message: 'No activity found with the specified code',
+        error: 'activity not found',
+      };
+    }
+  } catch (error) {
+    console.error('Failed to get activity information:', error);
+    return {
+      success: false,
+      message: 'Failed to retrieve activity information',
+      error: 'Internal server error',
+    };
+  }
+};
 
 const getAllCurrenciesInfo = async () => {
   const url = `${process.env.HOTELBEDS_API_ENDPOINT}/activity-content-api/3.0/currencies/en`;
@@ -136,6 +210,8 @@ module.exports = {
   getPortfolioAvailInfo,
   getPortfolioInfo,
   saveOrUpdateActivityInfo,
+  getAllActivityInfo,
+  getActivityInfo,
   getAllCurrenciesInfo,
   getAllSegmentsInfo,
   getAllLanguagesInfo,
