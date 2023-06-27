@@ -245,6 +245,38 @@ const searchActivities = async (req) => {
     };
   }
 };
+const searchActivitiesDetails = async (code) => {
+  try {
+   
+    const client = getClient();
+    const db = client.db(process.env.DB_NAME);
+    const activityCollection = db.collection('activityInfo');
+    const halalActivityCollection = db.collection('halalActivities');
+
+    const activitiesDataCursor = await activityCollection.findOne({ activityCode: code });
+    const halalActivity = await halalActivityCollection.findOne({ code });
+
+    if (halalActivity && activitiesDataCursor ) {
+      return {
+        success: true,
+        message: 'Activity information retrieved successfully',
+        data: activitiesDataCursor,
+        halalData: halalActivity,
+      };
+    }
+    return {
+      success: false,
+      message: 'No halal Activity found with the specified ID',
+      error: 'Activity not found',
+    };
+  } catch (err) {
+    console.error(err);
+    return {
+      success: false,
+      error: 'An error occurred while searching activities.',
+    };
+  }
+};
 
 
 
@@ -395,4 +427,5 @@ module.exports = {
   getAllLanguagesInfo,
   getAllDestinationHotelsInfo,
   searchActivities,
+  searchActivitiesDetails
 };

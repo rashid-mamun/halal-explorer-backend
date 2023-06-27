@@ -16,6 +16,7 @@ router.get('/portfolio/avail', activityController.getPortfolioAvail);
 router.get('/portfolio', activityController.getPortfolio);
 router.get('/destination-hotels', activityController.getAllDestinationHotels);
 router.get('/search', activityController.activitySearch);
+router.get('/search-details', activityController.activitySearchDetails);
 
 
 router.get('/halal/search',activityController.getAllActivity);

@@ -12,6 +12,7 @@ const {
   getAllLanguagesInfo,
   getAllDestinationHotelsInfo,
   searchActivities,
+  searchActivitiesDetails,
 } = require('../services/activity');
 
 // Input validation schemas
@@ -226,6 +227,17 @@ const activitySearch = async (req, res) => {
       return res.status(500).json({ error: 'Internal server error' });
   }
 };
+const activitySearchDetails = async (req, res) => {
+  const queryParams = req.query;
+  try {
+      console.log("---- Activity search Details ----------", queryParams);
+      const activities = await searchActivitiesDetails(queryParams.code);
+      return res.json(activities);
+  } catch (error) {
+      console.error(error);
+      return res.status(500).json({ error: 'Internal server error' });
+  }
+};
 
 module.exports = {
   getAllCountries,
@@ -240,4 +252,5 @@ module.exports = {
   getAllActivity,
   getActivity,
   activitySearch,
+  activitySearchDetails
 };
