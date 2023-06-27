@@ -11,6 +11,7 @@ const {
   getAllSegmentsInfo,
   getAllLanguagesInfo,
   getAllDestinationHotelsInfo,
+  searchActivities,
 } = require('../services/activity');
 
 // Input validation schemas
@@ -214,6 +215,18 @@ const getAllActivity = async (req, res) => {
     });
   }
 };
+const activitySearch = async (req, res) => {
+  const queryParams = req.query;
+  try {
+      console.log("---- hotel search calling ----------", queryParams);
+      const activities = await searchActivities(queryParams);
+      return res.json(activities);
+  } catch (error) {
+      console.error(error);
+      return res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
 module.exports = {
   getAllCountries,
   getAllDestinations,
@@ -226,4 +239,5 @@ module.exports = {
   getAllDestinationHotels,
   getAllActivity,
   getActivity,
+  activitySearch,
 };

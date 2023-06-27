@@ -127,8 +127,10 @@ const saveOrUpdateActivityInfo = async (activityInfo) => {
 
     const activitiesContent = response.data.activitiesContent;
     const activityCodeObject = activitiesContent.reduce((acc, activity) => {
-      const { activityCode } = activity;
-      acc[activityCode] = activity;
+      acc[activity.activityCode] = {
+        ...activity,
+        address: activityInfo.address
+      };
       return acc;
     }, {});
     // console.log(JSON.stringify(activityCodeObject));
@@ -145,6 +147,83 @@ const saveOrUpdateActivityInfo = async (activityInfo) => {
     };
   }
 };
+ // Create address index if not exists
+ const createAddressIndexIfNotExists = async (collection) => {
+  const indexExists = await collection.indexExists('address');
+  if (!indexExists) {
+    await collection.createIndex({ address: 'text' });
+  }
+};
+
+const getActivitiesDataMapping = async (cursor) => {
+  const activitiesDataMapping = {};
+
+  await cursor.forEach((doc) => {
+    activitiesDataMapping[doc.activityCode] = doc;
+  });
+
+  return activitiesDataMapping;
+};
+
+const searchActivities = async (req) => {
+  try {
+    const keyword = req.city;
+    const client = getClient();
+    const db = client.db(process.env.DB_NAME);
+    const activityCollection = db.collection('activityInfo');
+    const halalActivityCollection = db.collection('halalActivities');
+
+    await createAddressIndexIfNotExists(activityCollection);
+
+    const query = {
+      $text: { $search: keyword },
+      id: { $in: halalActivityCollection.distinct('code') }
+    };
+
+    const projection = { id: 1 };
+    const activitiesDataCursor = activityCollection.find();
+    const activitiesDataMapping = await getActivitiesDataMapping(activitiesDataCursor);
+
+    const halalActivitiesDataCodes = await halalActivityCollection.distinct('code');
+    const finalActivityCodes = halalActivitiesDataCodes.filter((id) =>
+      activitiesDataMapping.hasOwnProperty(id)
+    );
+
+    const page = parseInt(req.page, 10) || 1;
+    const pageSize = parseInt(req.pageSize, 10) || 10;
+
+    const totalActivities = finalActivityCodes.length;
+
+    // Validate page number
+    const maxPageNumber = Math.ceil(totalActivities / pageSize);
+    if (page > maxPageNumber) {
+      return {
+        success: false,
+        message: 'Invalid page number',
+      };
+    }
+
+    // Calculate the offset and limit
+    const offset = (page - 1) * pageSize;
+    const limit = pageSize;
+    const paginatedData = finalActivityCodes.slice(offset, offset + limit);
+
+    const paginatedActivitiesData = paginatedData.map((code) => activitiesDataMapping[code]);
+
+    return {
+      success: true,
+      totalActivities,
+      data: paginatedActivitiesData,
+    };
+  } catch (err) {
+    console.error(err);
+    return {
+      success: false,
+      error: 'An error occurred while searching activities.',
+    };
+  }
+};
+
 
 const getAllCountriesInfo = async () => {
   const url = `${process.env.HOTELBEDS_API_ENDPOINT}/activity-content-api/3.0/countries/en`;
@@ -291,4 +370,5 @@ module.exports = {
   getAllSegmentsInfo,
   getAllLanguagesInfo,
   getAllDestinationHotelsInfo,
+  searchActivities,
 };
