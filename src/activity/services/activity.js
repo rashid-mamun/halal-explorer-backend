@@ -71,7 +71,7 @@ const postData = async (url, data, successMessage, errorMessage) => {
   }
 };
 
-const processActivityData = async (activitiesData, activityCodeObject,collection) => {
+const processActivityData = async (activitiesData, activityCodeObject, collection) => {
   const bulkOperations = [];
 
   for (const activityCode in activityCodeObject) {
@@ -137,7 +137,7 @@ const saveOrUpdateActivityInfo = async (activityInfo) => {
     const collection = db.collection('activityInfo');
     const activitiesData = await collection.find().toArray();
 
-    return processActivityData(activitiesData, activityCodeObject,collection);
+    return processActivityData(activitiesData, activityCodeObject, collection);
   } catch (error) {
     return {
       success: false,
@@ -205,6 +205,7 @@ const getAllActivityInfo = async (req) => {
     return {
       success: true,
       message: 'Get activity information successfully',
+      totalActivity: totalActivity,
       data: paginatedData,
     };
   } catch (error) {

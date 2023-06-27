@@ -200,11 +200,7 @@ const getAllActivity = async (req, res) => {
     const result = await getAllActivityInfo(req.query);
 
     if (result.success) {
-      return res.status(200).json({
-        success: true,
-        message: result.message,
-        data: result.data
-      });
+      return res.status(200).json(result);
     } else {
       return res.status(500).json({
         success: false,
