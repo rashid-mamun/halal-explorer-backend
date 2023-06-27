@@ -189,8 +189,20 @@ const searchActivities = async (req) => {
     // Retrieve the mapping of activity IDs to data
     const activitiesDataMapping = await getActivitiesDataMapping(activitiesDataCursor);
 
-    const halalActivitiesDataCodes = await halalActivityCollection.distinct('code');
-    const finalActivityCodes = halalActivitiesDataCodes.filter((code) => activitiesDataMapping.hasOwnProperty(code));
+    const halalActivitiesData = await halalActivityCollection.find().toArray();
+    const halalActivitiesDataObj = halalActivitiesData.reduce((obj, hotel) => {
+      obj[hotel.code] = {
+        code: hotel.code,
+        halalRating: hotel.star_rating,
+      };
+      return obj;
+    }, {});
+    const halalActivitiesDataCodes = Object.keys(halalActivitiesDataObj);
+
+    // Filter activity codes to include only those present in activitiesDataMapping and halalActivitiesDataCodes
+    const finalActivityCodes = halalActivitiesDataCodes.filter((code) =>
+      activitiesDataMapping.hasOwnProperty(code)
+    );
 
     const page = parseInt(req.page, 10) || 1;
     const pageSize = parseInt(req.pageSize, 10) || 10;
@@ -211,7 +223,14 @@ const searchActivities = async (req) => {
     const limit = pageSize;
     const paginatedData = finalActivityCodes.slice(offset, offset + limit);
 
-    const paginatedActivitiesData = paginatedData.map((code) => activitiesDataMapping[code]);
+    // Retrieve paginated activities data with halalRating
+    const paginatedActivitiesData = paginatedData.map((code) => {
+      const activityData = activitiesDataMapping[code];
+      if (halalActivitiesDataObj[code] && halalActivitiesDataObj[code].halalRating) {
+        activityData.halalRating = halalActivitiesDataObj[code].halalRating;
+      }
+      return activityData;
+    });
 
     return {
       success: true,
@@ -226,6 +245,7 @@ const searchActivities = async (req) => {
     };
   }
 };
+
 
 
 
