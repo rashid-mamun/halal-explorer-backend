@@ -221,7 +221,7 @@ const getActivityInfo = async (req) => {
     const client = getClient();
     const db = client.db(process.env.DB_NAME);
     const collection = db.collection('activityInfo');
-    const activity = await collection.findOne({ code: req.code });
+    const activity = await collection.findOne({ activityCode: req.code });
 
     if (activity) {
       return {
