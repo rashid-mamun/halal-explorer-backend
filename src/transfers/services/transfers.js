@@ -1,4 +1,3 @@
-const { getClient } = require("../../config/database");
 const axios = require('axios');
 const crypto = require('crypto');
 
@@ -61,237 +60,75 @@ const fetchData = async (url, successMessage, errorMessage) => {
 };
 
 const getPickups = async ({ fields = 'ALL', language = 'en', codes = '', offset = 1, limit = 10 }) => {
-  let url = `${process.env.HOTELBEDS_API_ENDPOINT}transfer-cache-api/1.0/pickups?fields=${fields}&language=${language}`;
-
-  if (codes) {
-    url += `&codes=${codes}`;
-  }
-
-  if (offset) {
-    url += `&offset=${offset}`;
-  }
-
-  if (limit) {
-    url += `&limit=${limit}`;
-  }
-
+  const url = `${process.env.HOTELBEDS_API_ENDPOINT}/transfer-cache-api/1.0/pickups?fields=${fields}&language=${language}&codes=${codes}&offset=${offset}&limit=${limit}`;
   const successMessage = 'Fetch pickups information successfully';
   const errorMessage = 'Failed to fetch pickups';
   return fetchData(url, successMessage, errorMessage);
 };
 
 const getHotels = async ({ fields = 'ALL', language = 'en', countryCodes = '', destinationCodes = '', codes = '', giataCodes = '', offset = 1, limit = 10 }) => {
-  let url = `${process.env.HOTELBEDS_API_ENDPOINT}transfer-cache-api/1.0/hotels?fields=${fields}&language=${language}`;
-
-  if (countryCodes) {
-    url += `&countryCodes=${countryCodes}`;
-  }
-
-  if (destinationCodes) {
-    url += `&destinationCodes=${destinationCodes}`;
-  }
-
-  if (codes) {
-    url += `&codes=${codes}`;
-  }
-
-  if (giataCodes) {
-    url += `&giataCodes=${giataCodes}`;
-  }
-
-  if (offset) {
-    url += `&offset=${offset}`;
-  }
-
-  if (limit) {
-    url += `&limit=${limit}`;
-  }
-
+  const url = `${process.env.HOTELBEDS_API_ENDPOINT}/transfer-cache-api/1.0/hotels?fields=${fields}&language=${language}&countryCodes=${countryCodes}&destinationCodes=${destinationCodes}&codes=${codes}&giataCodes=${giataCodes}&offset=${offset}&limit=${limit}`;
   const successMessage = 'Fetch hotels information successfully';
   const errorMessage = 'Failed to fetch hotels';
   return fetchData(url, successMessage, errorMessage);
-}
+};
+
 const getCountries = async ({ fields = 'ALL', language = 'en', codes = '', offset = 0, limit = 10 }) => {
-  let url = `${process.env.HOTELBEDS_API_ENDPOINT}transfer-cache-api/1.0/locations/countries?fields=${fields}&language=${language}`;
-
-  if (codes) {
-    url += `&codes=${codes}`;
-  }
-
-  if (offset) {
-    url += `&offset=${offset}`;
-  }
-
-  if (limit) {
-    url += `&limit=${limit}`;
-  }
+  const url = `${process.env.HOTELBEDS_API_ENDPOINT}/transfer-cache-api/1.0/locations/countries?fields=${fields}&language=${language}&codes=${codes}&offset=${offset}&limit=${limit}`;
   const successMessage = 'Fetch countries information successfully';
   const errorMessage = 'Failed to fetch countries';
   return fetchData(url, successMessage, errorMessage);
-
 };
+
 const getDestinations = async ({ fields = 'ALL', language = 'en', countryCode = '', codes = '', offset = 0, limit = 10 }) => {
-  let url = `${process.env.HOTELBEDS_API_ENDPOINT}transfer-cache-api/1.0/locations/destinations?fields=${fields}&language=${language}`;
-
-  if (countryCode) {
-    url += `&countryCode=${countryCode}`;
-  }
-
-  if (codes) {
-    url += `&codes=${codes}`;
-  }
-
-  if (offset) {
-    url += `&offset=${offset}`;
-  }
-
-  if (limit) {
-    url += `&limit=${limit}`;
-
-  }
+  const url = `${process.env.HOTELBEDS_API_ENDPOINT}/transfer-cache-api/1.0/locations/destinations?fields=${fields}&language=${language}&countryCode=${countryCode}&codes=${codes}&offset=${offset}&limit=${limit}`;
   const successMessage = 'Fetch destinations information successfully';
   const errorMessage = 'Failed to fetch destinations';
   return fetchData(url, successMessage, errorMessage);
-}
-const getTerminals = async ({
-  fields = 'ALL',
-  language = 'en',
-  countryCode = '',
-  codes = '',
-  offset = 0,
-  limit = 10,
-}) => {
-  let url = `${process.env.HOTELBEDS_API_ENDPOINT}/transfer-cache-api/1.0/locations/terminals?fields=${fields}&language=${language}`;
+};
 
-  if (countryCode) {
-    url += `&countryCode=${countryCode}`;
-  }
-
-  if (codes) {
-    url += `&codes=${codes}`;
-  }
-
-  if (offset) {
-    url += `&offset=${offset}`;
-  }
-
-  if (limit) {
-    url += `&limit=${limit}`;
-  }
-
+const getTerminals = async ({ fields = 'ALL', language = 'en', countryCode = '', codes = '', offset = 0, limit = 10 }) => {
+  const url = `${process.env.HOTELBEDS_API_ENDPOINT}/transfer-cache-api/1.0/locations/terminals?fields=${fields}&language=${language}&countryCode=${countryCode}&codes=${codes}&offset=${offset}&limit=${limit}`;
   const successMessage = 'Fetch terminals information successfully';
   const errorMessage = 'Failed to fetch terminals';
   return fetchData(url, successMessage, errorMessage);
 };
-const getMasterCategories = async ({
-  fields = 'ALL',
-  language = 'en',
-  codes = '',
-  offset = 0,
-  limit = 10,
-}) => {
-  let url = `${process.env.HOTELBEDS_API_ENDPOINT}/transfer-cache-api/1.0/masters/categories?fields=${fields}&language=${language}`;
 
-  if (codes) {
-    url += `&codes=${codes}`;
-  }
-
-  if (offset) {
-    url += `&offset=${offset}`;
-  }
-
-  if (limit) {
-    url += `&limit=${limit}`;
-  }
+const getMasterCategories = async ({ fields = 'ALL', language = 'en', codes = '', offset = 0, limit = 10 }) => {
+  const url = `${process.env.HOTELBEDS_API_ENDPOINT}/transfer-cache-api/1.0/masters/categories?fields=${fields}&language=${language}&codes=${codes}&offset=${offset}&limit=${limit}`;
   const successMessage = 'Fetch Master Categories information successfully';
   const errorMessage = 'Failed to fetch Master Categories';
   return fetchData(url, successMessage, errorMessage);
-}
-const getMasterVehicles = async ({
-  fields = 'ALL',
-  language = 'en',
-  codes = '',
-  offset = 0,
-  limit = 10,
-}) => {
-  let url = `${process.env.HOTELBEDS_API_ENDPOINT}/transfer-cache-api/1.0/masters/vehicles?fields=${fields}&language=${language}`;
+};
 
-  if (codes) {
-    url += `&codes=${codes}`;
-  }
-
-  if (offset) {
-    url += `&offset=${offset}`;
-  }
-
-  if (limit) {
-    url += `&limit=${limit}`;
-  }
+const getMasterVehicles = async ({ fields = 'ALL', language = 'en', codes = '', offset = 0, limit = 10 }) => {
+  const url = `${process.env.HOTELBEDS_API_ENDPOINT}/transfer-cache-api/1.0/masters/vehicles?fields=${fields}&language=${language}&codes=${codes}&offset=${offset}&limit=${limit}`;
   const successMessage = 'Fetch Master vehicles information successfully';
   const errorMessage = 'Failed to fetch Master vehicles';
   return fetchData(url, successMessage, errorMessage);
+};
 
-}
-const getMasterTransferTypes = async ({
-  fields = 'ALL',
-  language = 'en',
-  codes = '',
-  offset = 0,
-  limit = 10,
-}) => {
-  let url = `${process.env.HOTELBEDS_API_ENDPOINT}/transfer-cache-api/1.0/masters/transferTypes?fields=${fields}&language=${language}`;
-
-  if (codes) {
-    url += `&codes=${codes}`;
-  }
-
-  if (offset) {
-    url += `&offset=${offset}`;
-  }
-
-  if (limit) {
-    url += `&limit=${limit}`;
-  }
+const getMasterTransferTypes = async ({ fields = 'ALL', language = 'en', codes = '', offset = 0, limit = 10 }) => {
+  const url = `${process.env.HOTELBEDS_API_ENDPOINT}/transfer-cache-api/1.0/masters/transferTypes?fields=${fields}&language=${language}&codes=${codes}&offset=${offset}&limit=${limit}`;
   const successMessage = 'Fetch Master transferTypes information successfully';
   const errorMessage = 'Failed to fetch Master transferTypes';
   return fetchData(url, successMessage, errorMessage);
-}
-const getCurrencies = async ({
-  fields = 'ALL',
-  language = 'en',
-  codes = '',
-  offset = 0,
-  limit = 10,
-}) => {
-  let url = `${process.env.HOTELBEDS_API_ENDPOINT}/transfer-cache-api/1.0/currencies?fields=${fields}&language=${language}`;
+};
 
-  if (codes) {
-    url += `&codes=${codes}`;
-  }
-
-  if (offset) {
-    url += `&offset=${offset}`;
-  }
-
-  if (limit) {
-    url += `&limit=${limit}`;
-  }
+const getCurrencies = async ({ fields = 'ALL', language = 'en', codes = '', offset = 0, limit = 10 }) => {
+  const url = `${process.env.HOTELBEDS_API_ENDPOINT}/transfer-cache-api/1.0/currencies?fields=${fields}&language=${language}&codes=${codes}&offset=${offset}&limit=${limit}`;
   const successMessage = 'Fetch Master currencies information successfully';
   const errorMessage = 'Failed to fetch Master currencies';
   return fetchData(url, successMessage, errorMessage);
-}
-const getRoutes = async ({
-  fields = 'ALL',
-  destinationCode,
-  offset = 0,
-  limit = 10,
-}) => {
-  const url = `${process.env.HOTELBEDS_API_ENDPOINT}/transfer-cache-api/1.0/routes?fields=${fields}&destinationCode=${destinationCode}&offset=${offset}&limit=${limit}`;
+};
 
-  const successMessage = 'Fetch  routes information successfully';
-  const errorMessage = 'Failed to fetch  routes';
+const getRoutes = async ({ fields = 'ALL', destinationCode, offset = 0, limit = 10 }) => {
+  const url = `${process.env.HOTELBEDS_API_ENDPOINT}/transfer-cache-api/1.0/routes?fields=${fields}&destinationCode=${destinationCode}&offset=${offset}&limit=${limit}`;
+  const successMessage = 'Fetch routes information successfully';
+  const errorMessage = 'Failed to fetch routes';
   return fetchData(url, successMessage, errorMessage);
-}
+};
+
 module.exports = {
   getPickups,
   getHotels,
@@ -302,8 +139,5 @@ module.exports = {
   getMasterVehicles,
   getMasterTransferTypes,
   getCurrencies,
-  getRoutes
-
-
-
+  getRoutes,
 };
