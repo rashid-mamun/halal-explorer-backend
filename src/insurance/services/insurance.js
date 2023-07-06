@@ -4,7 +4,7 @@ const addTravellerType = async (travellerType) => {
   try {
     const client = getClient();
     const db = client.db(process.env.DB_NAME);
-    const collection = db.collection('travellerTypes');
+    const collection = db.collection(process.env.INSURANCE_TRAVELLER_TYPES_COLLECTION);
 
     const existingTravellerType = await collection.findOne({ name: travellerType.name });
 
@@ -36,7 +36,7 @@ const getAllTravellerTypes = async () => {
   try {
     const client = getClient();
     const db = client.db(process.env.DB_NAME);
-    const collection = db.collection('travellerTypes');
+    const collection = db.collection(process.env.INSURANCE_TRAVELLER_TYPES_COLLECTION);
 
     const allTravellerTypes = await collection.find().project({ name: 1 }).toArray();
 
@@ -56,7 +56,7 @@ const addPolicyType = async (policyType) => {
   try {
     const client = getClient();
     const db = client.db(process.env.DB_NAME);
-    const collection = db.collection('policyTypes');
+    const collection = db.collection(process.env.INSURANCE_POLICYTYPES_TYPES_COLLECTION);
 
     const existingPolicyType = await collection.findOne({ name: policyType.name });
 
@@ -88,7 +88,7 @@ const getAllPolicyTypes = async () => {
   try {
     const client = getClient();
     const db = client.db(process.env.DB_NAME);
-    const collection = db.collection('policyTypes');
+    const collection = db.collection(process.env.INSURANCE_POLICYTYPES_TYPES_COLLECTION);
 
     const allPolicyTypes = await collection.find().project({ name: 1 }).toArray();
 
@@ -109,7 +109,7 @@ const addArea = async (area) => {
   try {
     const client = getClient();
     const db = client.db(process.env.DB_NAME);
-    const collection = db.collection('areas');
+    const collection = db.collection(process.env.INSURANCE_AREAS_COLLECTION);
 
     const existingArea = await collection.findOne({ name: area.name });
 
@@ -141,7 +141,7 @@ const getAllAreas = async () => {
   try {
     const client = getClient();
     const db = client.db(process.env.DB_NAME);
-    const collection = db.collection('areas');
+    const collection = db.collection(process.env.INSURANCE_AREAS_COLLECTION);
 
     const allAreas = await collection.find().project({ name: 1 }).toArray();
 
@@ -162,7 +162,7 @@ const addRestType = async (restType) => {
   try {
     const client = getClient();
    const db = client.db(process.env.DB_NAME);
-    const collection = db.collection('restTypes');
+    const collection = db.collection(process.env.INSURANCE_REST_TYPES_COLLECTION);
 
     const existingRestType = await collection.findOne({ name: restType.name });
 
@@ -194,7 +194,7 @@ const getAllRestTypes = async () => {
   try {
     const client = getClient();
     const db = client.db(process.env.DB_NAME);
-    const collection = db.collection('restTypes');
+    const collection = db.collection(process.env.INSURANCE_REST_TYPES_COLLECTION);
 
     const allRestTypes = await collection.find().project({ name: 1 }).toArray();
 
@@ -215,7 +215,7 @@ const addProductName = async (productName) => {
   try {
     const client = getClient();
     const db = client.db(process.env.DB_NAME);
-    const collection = db.collection('productNames');
+    const collection = db.collection(process.env.INSURANCE_PRODUCT_NAMES_COLLECTION);
 
     const existingProductName = await collection.findOne({ name: productName.name });
 
@@ -247,7 +247,7 @@ const getAllProductNames = async () => {
   try {
     const client = getClient();
     const db = client.db(process.env.DB_NAME);
-    const collection = db.collection('productNames');
+    const collection = db.collection(process.env.INSURANCE_PRODUCT_NAMES_COLLECTION);
 
     const allProductNames = await collection.find().project({ name: 1 }).toArray();
 
@@ -268,7 +268,7 @@ const addAgeGroup = async (ageGroup) => {
   try {
     const client = getClient();
     const db = client.db(process.env.DB_NAME);
-    const collection = db.collection('ageGroups');
+    const collection = db.collection(process.env.INSURANCE_AGE_GROUPS_COLLECTION);
 
     const existingAgeGroup = await collection.findOne({ name: ageGroup.name });
 
@@ -300,7 +300,7 @@ const getAllAgeGroups = async () => {
   try {
     const client = getClient();
     const db = client.db(process.env.DB_NAME);
-    const collection = db.collection('ageGroups');
+    const collection = db.collection(process.env.INSURANCE_AGE_GROUPS_COLLECTION);
 
     const allAgeGroups = await collection.find().project({ name: 1 }).toArray();
 
@@ -321,7 +321,7 @@ const addCountry = async (country) => {
   try {
     const client = getClient();
     const db = client.db(process.env.DB_NAME);
-    const collection = db.collection('countries');
+    const collection = db.collection(process.env.INSURANCE_COUNTRIES_COLLECTION);
 
     const existingCountry = await collection.findOne({ name: country.name });
 
@@ -353,7 +353,7 @@ const getAllCountries = async () => {
   try {
     const client = getClient();
     const db = client.db(process.env.DB_NAME);
-    const collection = db.collection('countries');
+    const collection = db.collection(process.env.INSURANCE_COUNTRIES_COLLECTION);
 
     const allCountries = await collection.find().project({ name: 1 }).toArray();
 
@@ -373,7 +373,7 @@ const addDuration = async (duration) => {
   try {
     const client = getClient();
     const db = client.db(process.env.DB_NAME);
-    const collection = db.collection('durations');
+    const collection = db.collection(process.env.INSURANCE_DURATIONS_COLLECTION);
 
     const existingDuration = await collection.findOne({
       startDay: duration.startDay,
@@ -413,7 +413,7 @@ const getAllDurations = async () => {
   try {
     const client = getClient();
     const db = client.db(process.env.DB_NAME);
-    const collection = db.collection('durations');
+    const collection = db.collection(process.env.INSURANCE_DURATIONS_COLLECTION);
 
     const allDurations = await collection.find().toArray();
 

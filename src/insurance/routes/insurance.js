@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 
 const insuranceController = require('../controller/insurance');
+const adminInsuranceController = require('../controller/adminPanelInsurance');
 
 
 router.get('/policy-type', insuranceController.getPolicyTypes);
@@ -27,6 +28,9 @@ router.post('/product-name', insuranceController.createProductName);
 
 router.get('/duration', insuranceController.getDurations);
 router.post('/duration', insuranceController.createDuration);
+
+router.post('/admin', adminInsuranceController.createInsurance);
+router.get('/admin', adminInsuranceController.getInsurances);
 
 
 

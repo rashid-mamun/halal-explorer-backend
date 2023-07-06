@@ -1,19 +1,19 @@
-const { 
-  addTravellerType, 
-  getAllTravellerTypes ,
+const {
+  addTravellerType,
+  getAllTravellerTypes,
   addPolicyType,
   getAllPolicyTypes,
-  addArea, 
+  addArea,
   getAllAreas,
-  addRestType, 
+  addRestType,
   getAllRestTypes,
-  addProductName, 
+  addProductName,
   getAllProductNames,
-  addAgeGroup, 
+  addAgeGroup,
   getAllAgeGroups,
-  addCountry, 
+  addCountry,
   getAllCountries,
-  addDuration, 
+  addDuration,
   getAllDurations
 } = require('../services/insurance');
 const Joi = require('joi');
@@ -103,7 +103,7 @@ const createTravellerType = async (req, res) => {
     if (result.success) {
       return res.status(201).json(result);
     } else {
-      return res.status(500).json( result);
+      return res.status(500).json(result);
     }
   } catch (error) {
     console.error(error);
@@ -140,7 +140,7 @@ const createPolicyType = async (req, res) => {
     if (result.success) {
       return res.status(201).json(result);
     } else {
-      return res.status(500).json(result );
+      return res.status(500).json(result);
     }
   } catch (error) {
     console.error(error);
@@ -155,7 +155,7 @@ const getPolicyTypes = async (req, res) => {
     if (result.success) {
       return res.status(200).json(result);
     } else {
-      return res.status(500).json(result );
+      return res.status(500).json(result);
     }
   } catch (error) {
     console.error(error);
@@ -176,7 +176,7 @@ const createArea = async (req, res) => {
     if (result.success) {
       return res.status(201).json(result);
     } else {
-      return res.status(500).json(result );
+      return res.status(500).json(result);
     }
   } catch (error) {
     console.error(error);
@@ -191,7 +191,7 @@ const getAreas = async (req, res) => {
     if (result.success) {
       return res.status(200).json(result);
     } else {
-      return res.status(500).json( result);
+      return res.status(500).json(result);
     }
   } catch (error) {
     console.error(error);
