@@ -108,7 +108,34 @@ const addInsurance = async (insurance) => {
         const db = client.db(process.env.DB_NAME);
         const collection = db.collection('insurances');
 
-        await collection.insertOne(insurance);
+        const existingInsurance = await collection.findOne({
+            travellerType,
+            policyType,
+            area,
+            restType,
+            productName,
+            ageGroup,
+            duration,
+        });
+
+        if (existingInsurance) {
+            // Update the existing insurance record
+            await collection.updateOne(
+                {
+                    travellerType,
+                    policyType,
+                    area,
+                    restType,
+                    productName,
+                    ageGroup,
+                    duration,
+                },
+                { $set: insurance }
+            );
+        } else {
+            // Insert a new insurance record
+            await collection.insertOne(insurance);
+        }
 
         const insuranceData = await collection.find().toArray();
 
@@ -124,7 +151,6 @@ const addInsurance = async (insurance) => {
         };
     }
 };
-
 const getAllInsurances = async () => {
     try {
         const client = getClient();
