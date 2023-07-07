@@ -1,4 +1,4 @@
-const { addInsurance, getAllInsurances } = require('../services/adminPanelInsurance');
+const { addInsurance, getAllInsurances,getAllInformation  } = require('../services/adminPanelInsurance');
 const Joi = require('joi');
 
 const insuranceSchema = Joi.object({
@@ -11,7 +11,18 @@ const insuranceSchema = Joi.object({
     duration: Joi.string().required(),
     price: Joi.number().required(),
 });
-
+const getAllInformationController = async (req, res) => {
+    try {
+      const result = await getAllInformation();
+      if (result.error) {
+        return res.status(500).json(result);
+      }
+      return res.status(200).json(result);
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ error: 'Failed to retrieve information' });
+    }
+  };
 const createInsurance = async (req, res) => {
     try {
         const insuranceData = req.body;
@@ -52,4 +63,5 @@ const getInsurances = async (req, res) => {
 module.exports = {
     createInsurance,
     getInsurances,
+    getAllInformationController
 };

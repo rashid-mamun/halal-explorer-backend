@@ -1,4 +1,73 @@
 const { getClient } = require("../../config/database");
+const {
+    getAllTravellerTypes,
+    getAllPolicyTypes,
+    getAllAreas,
+    getAllRestTypes,
+    getAllProductNames,
+    getAllAgeGroups,
+    getAllCountries,
+    getAllDurations
+} = require('./insurance');
+
+const getAllInformation = async () => {
+    try {
+        const travellerTypes = await getAllTravellerTypes();
+        const policyTypes = await getAllPolicyTypes();
+        const areas = await getAllAreas();
+        const restTypes = await getAllRestTypes();
+        const productNames = await getAllProductNames();
+        const ageGroups = await getAllAgeGroups();
+        const countries = await getAllCountries();
+        const durations = await getAllDurations();
+
+        const successCheck = [
+            travellerTypes,
+            policyTypes,
+            areas,
+            restTypes,
+            productNames,
+            ageGroups,
+            durations
+        ].every(result => result.success);
+
+        if (!successCheck) {
+            return {
+                success: false,
+                error: 'Invalid data. Please provide valid values for all fields.',
+            };
+        }
+
+        const {
+            data: ageGroupData,
+        } = ageGroups;
+
+        const {
+            data: durationData,
+        } = durations;
+
+        const allInformation = {
+            travellerTypes: travellerTypes.data,
+            policyTypes: policyTypes.data,
+            areas: areas.data,
+            restTypes: restTypes.data,
+            productNames: productNames.data,
+            ageGroups: ageGroupData.map(type => type.name),
+            durations: durationData.map(type => type.name),
+        };
+
+        return {
+            success: true,
+            data: allInformation,
+        };
+    } catch (error) {
+        console.error(error);
+        return {
+            success: false,
+            error: 'Failed to retrieve information',
+        };
+    }
+};
 
 // Check if the travellerType exists in the database
 const isTravellerTypeValid = async (travellerType) => {
@@ -80,28 +149,49 @@ const addInsurance = async (insurance) => {
             ageGroup,
             duration,
         } = insurance;
+        const invalidFields = [];
 
         const isTravellerTypeValidResult = await isTravellerTypeValid(travellerType);
+        if (!isTravellerTypeValidResult) {
+          invalidFields.push('travellerType');
+        }
+    
         const isPolicyTypeValidResult = await isPolicyTypeValid(policyType);
+        if (!isPolicyTypeValidResult) {
+          invalidFields.push('policyType');
+        }
+    
         const isAreaValidResult = await isAreaValid(area);
+        if (!isAreaValidResult) {
+          invalidFields.push('area');
+        }
+    
         const isRestTypeValidResult = await isRestTypeValid(restType);
+        if (!isRestTypeValidResult) {
+          invalidFields.push('restType');
+        }
+    
         const isProductNameValidResult = await isProductNameValid(productName);
+        if (!isProductNameValidResult) {
+          invalidFields.push('productName');
+        }
+    
         const isAgeGroupValidResult = await isAgeGroupValid(ageGroup);
+        if (!isAgeGroupValidResult) {
+          invalidFields.push('ageGroup');
+        }
+    
         const isDurationValidResult = await isDurationValid(duration);
-
-        if (
-            !isTravellerTypeValidResult ||
-            !isPolicyTypeValidResult ||
-            !isAreaValidResult ||
-            !isRestTypeValidResult ||
-            !isProductNameValidResult ||
-            !isAgeGroupValidResult ||
-            !isDurationValidResult
-        ) {
-            return {
-                success: false,
-                error: 'Invalid data. Please provide valid values for all fields.',
-            };
+        if (!isDurationValidResult) {
+          invalidFields.push('duration');
+        }
+    
+        if (invalidFields.length > 0) {
+          return {
+            success: false,
+            error: 'Invalid data. Please provide valid values for the following fields:',
+            invalidFields,
+          };
         }
 
         const client = getClient();
@@ -176,4 +266,5 @@ const getAllInsurances = async () => {
 module.exports = {
     addInsurance,
     getAllInsurances,
+    getAllInformation
 }

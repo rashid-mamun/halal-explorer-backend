@@ -31,6 +31,7 @@ router.post('/duration', insuranceController.createDuration);
 
 router.post('/admin', adminInsuranceController.createInsurance);
 router.get('/admin', adminInsuranceController.getInsurances);
+router.get('/admin/search', adminInsuranceController.getAllInformationController);
 
 
 
