@@ -270,22 +270,48 @@ const addAgeGroup = async (ageGroup) => {
     const db = client.db(process.env.DB_NAME);
     const collection = db.collection(process.env.INSURANCE_AGE_GROUPS_COLLECTION);
 
-    const existingAgeGroup = await collection.findOne({ name: ageGroup.name });
+    const existingAgeGroup = await collection.findOne({
+      $or: [
+        {
+          $and: [
+            { startYear: { $lte: ageGroup.startYear } },
+            { endYear: { $gte: ageGroup.startYear } },
+          ],
+        },
+        {
+          $and: [
+            { startYear: { $lte: ageGroup.endYear } },
+            { endYear: { $gte: ageGroup.endYear } },
+          ],
+        },
+        {
+          $and: [
+            { startYear: { $gte: ageGroup.startYear } },
+            { endYear: { $lte: ageGroup.endYear } },
+          ],
+        },
+      ],
+    });
 
     if (existingAgeGroup) {
       return {
         success: false,
-        error: 'Age group already exists',
+        error: 'Age group overlaps with an existing age group',
       };
     }
 
-    await collection.insertOne(ageGroup);
+    const newAgeGroup = {
+      name: `Between ${ageGroup.startYear} and ${ageGroup.endYear} Years`,
+      startYear: ageGroup.startYear,
+      endYear: ageGroup.endYear,
+    };
 
-    const ageGroupData = await collection.find().project({ name: 1 }).toArray();
+    await collection.insertOne(newAgeGroup);
+    const ageGroupData = await collection.find().toArray();
 
     return {
       success: true,
-      data: ageGroupData.map(item => item.name),
+      data: ageGroupData,
     };
   } catch (err) {
     console.error(err);
@@ -296,17 +322,18 @@ const addAgeGroup = async (ageGroup) => {
   }
 };
 
+
 const getAllAgeGroups = async () => {
   try {
     const client = getClient();
     const db = client.db(process.env.DB_NAME);
     const collection = db.collection(process.env.INSURANCE_AGE_GROUPS_COLLECTION);
 
-    const allAgeGroups = await collection.find().project({ name: 1 }).toArray();
+    const allAgeGroups = await collection.find().toArray();
 
     return {
       success: true,
-      data: allAgeGroups.map(item => item.name),
+      data: allAgeGroups,
     };
   } catch (err) {
     console.error(err);
@@ -376,14 +403,32 @@ const addDuration = async (duration) => {
     const collection = db.collection(process.env.INSURANCE_DURATIONS_COLLECTION);
 
     const existingDuration = await collection.findOne({
-      startDay: duration.startDay,
-      endDay: duration.endDay,
+      $or: [
+        {
+          $and: [
+            { startDay: { $lte: duration.startDay } },
+            { endDay: { $gte: duration.startDay } },
+          ],
+        },
+        {
+          $and: [
+            { startDay: { $lte: duration.endDay } },
+            { endDay: { $gte: duration.endDay } },
+          ],
+        },
+        {
+          $and: [
+            { startDay: { $gte: duration.startDay } },
+            { endDay: { $lte: duration.endDay } },
+          ],
+        },
+      ],
     });
 
     if (existingDuration) {
       return {
         success: false,
-        error: 'Duration already exists',
+        error: 'Duration overlaps with an existing duration',
       };
     }
 
@@ -409,6 +454,7 @@ const addDuration = async (duration) => {
     };
   }
 };
+
 const getAllDurations = async () => {
   try {
     const client = getClient();

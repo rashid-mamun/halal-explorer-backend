@@ -24,7 +24,8 @@ const travellerTypeSchema = Joi.object({
 
 // Joi schema for Age Group
 const ageGroupSchema = Joi.object({
-  name: Joi.string().required(),
+  startYear: Joi.number().required(),
+  endYear: Joi.number().required(),
 });
 
 // Joi schema for Rest Type
