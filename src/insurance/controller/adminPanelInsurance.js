@@ -8,6 +8,7 @@ const Joi = require('joi');
 
 const insuranceSchema = Joi.object({
     travellerType: Joi.string().required(),
+    packageName: Joi.string().required(),
     policyType: Joi.string().required(),
     area: Joi.string().required(),
     restType: Joi.string().required(),
@@ -28,25 +29,62 @@ const getAllInformationController = async (req, res) => {
         return res.status(500).json({ error: 'Failed to retrieve information' });
     }
 };
+// const createInsurance = async (req, res) => {
+//     try {
+//         const insuranceData = req.body;
+//         const validationResult = insuranceSchema.validate(insuranceData);
+
+//         if (validationResult.error) {
+//             return res.status(400).json({ error: validationResult.error.details[0].message });
+//         }
+
+//         const result = await addInsurance(insuranceData);
+
+//         if (result.success) {
+//             return res.status(201).json(result);
+//         } else {
+//             return res.status(500).json(result);
+//         }
+//     } catch (error) {
+//         console.error(error);
+//         return res.status(500).json({ error: 'Failed to save/update insurance information' });
+//     }
+// };
 const createInsurance = async (req, res) => {
     try {
-        const insuranceData = req.body;
-        const validationResult = insuranceSchema.validate(insuranceData);
+        const insuranceDataArray = req.body;
 
-        if (validationResult.error) {
-            return res.status(400).json({ error: validationResult.error.details[0].message });
-        }
+        const results = await Promise.all(
+            insuranceDataArray.map(async (insuranceData) => {
+                const validationResult = insuranceSchema.validate(insuranceData);
+                if (validationResult.error) {
+                    return {
+                        success: false,
+                        error: validationResult.error.details[0].message,
+                    };
+                }
+                return await addInsurance(insuranceData);
+            })
+        );
 
-        const result = await addInsurance(insuranceData);
+        const successResults = results.filter((result) => result.success);
+        const errorResults = results.filter((result) => !result.success);
 
-        if (result.success) {
-            return res.status(201).json(result);
+        if (successResults.length === insuranceDataArray.length) {
+            return res.status(201).json(
+                {
+                    success: true,
+                    message: `succesfully  save/update insurance information`
+                }
+            );
         } else {
-            return res.status(500).json(result);
+            return res.status(500).json(errorResults);
         }
     } catch (error) {
         console.error(error);
-        return res.status(500).json({ error: 'Failed to save/update insurance information' });
+        return res
+            .status(500)
+            .json({ error: "Failed to save/update insurance information" });
     }
 };
 

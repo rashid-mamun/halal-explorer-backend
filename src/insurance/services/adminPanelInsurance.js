@@ -148,6 +148,7 @@ const addInsurance = async (insurance) => {
             productName,
             ageGroup,
             duration,
+            packageName
         } = insurance;
         const invalidFields = [];
 
@@ -200,6 +201,7 @@ const addInsurance = async (insurance) => {
 
         const existingInsurance = await collection.findOne({
             travellerType,
+            packageName,
             policyType,
             area,
             restType,
@@ -348,22 +350,22 @@ const searchInsurance = async (
             ageGroup: { $in: ageGroupNames },
             duration: { $in: durationNames },
         });
-    
+
         if (matchedInsurancePolicy) {
             return {
                 success: true,
-                data: matchedInsurancePolicy, 
+                data: matchedInsurancePolicy,
             };
         } else {
             console.log('No insurance policy matched');
             return {
                 success: true,
-                message:'No insurance policy matched',
-                data: [], 
+                message: 'No insurance policy matched',
+                data: [],
             };
         }
 
-       
+
     } catch (error) {
         console.log(error);
         return {
