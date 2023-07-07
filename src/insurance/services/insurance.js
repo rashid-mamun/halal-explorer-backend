@@ -161,7 +161,7 @@ const getAllAreas = async () => {
 const addRestType = async (restType) => {
   try {
     const client = getClient();
-   const db = client.db(process.env.DB_NAME);
+    const db = client.db(process.env.DB_NAME);
     const collection = db.collection(process.env.INSURANCE_REST_TYPES_COLLECTION);
 
     const existingRestType = await collection.findOne({ name: restType.name });
@@ -401,7 +401,12 @@ const addDuration = async (duration) => {
     const client = getClient();
     const db = client.db(process.env.DB_NAME);
     const collection = db.collection(process.env.INSURANCE_DURATIONS_COLLECTION);
-
+    if (duration.endDay < duration.startDay) {
+      return {
+        success: false,
+        error: 'Duration overlaps',
+      };
+    }
     const existingDuration = await collection.findOne({
       $or: [
         {

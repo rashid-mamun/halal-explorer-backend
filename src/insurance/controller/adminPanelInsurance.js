@@ -1,4 +1,9 @@
-const { addInsurance, getAllInsurances,getAllInformation  } = require('../services/adminPanelInsurance');
+const {
+    addInsurance,
+    getAllInsurances,
+    getAllInformation,
+    searchInsurance,
+} = require('../services/adminPanelInsurance');
 const Joi = require('joi');
 
 const insuranceSchema = Joi.object({
@@ -13,16 +18,16 @@ const insuranceSchema = Joi.object({
 });
 const getAllInformationController = async (req, res) => {
     try {
-      const result = await getAllInformation();
-      if (result.error) {
-        return res.status(500).json(result);
-      }
-      return res.status(200).json(result);
+        const result = await getAllInformation();
+        if (result.error) {
+            return res.status(500).json(result);
+        }
+        return res.status(200).json(result);
     } catch (error) {
-      console.error(error);
-      return res.status(500).json({ error: 'Failed to retrieve information' });
+        console.error(error);
+        return res.status(500).json({ error: 'Failed to retrieve information' });
     }
-  };
+};
 const createInsurance = async (req, res) => {
     try {
         const insuranceData = req.body;
@@ -59,9 +64,38 @@ const getInsurances = async (req, res) => {
         return res.status(500).json({ error: 'Failed to retrieve insurances' });
     }
 };
+const searchInsuranceSchema = Joi.object({
+    departureDate: Joi.date().required(),
+    arrivalDate: Joi.date().required(),
+    travelerDOB: Joi.date().iso().required(),
+    mobile: Joi.string().required(),
+    email: Joi.string().email().required(),
+    country: Joi.string().required(),
+    restType: Joi.string().required(),
+    residenceCountry: Joi.string().required(),
+});
+
+const searchInsuranceController = async (req, res) => {
+    try {
+        const { error } = searchInsuranceSchema.validate(req.body);
+        if (error) {
+            return res.status(400).json({ error: error.details[0].message });
+        }
+
+        const { departureDate, arrivalDate, travelerDOB, mobile, email, country, restType, residenceCountry, } = req.body;
+
+        const insurancePolicies = await searchInsurance(departureDate, arrivalDate, travelerDOB, mobile, email, country, restType, residenceCountry
+        );
+        return res.status(200).json(insurancePolicies);
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ error: 'Failed to search insurance policies' });
+    }
+};
 
 module.exports = {
     createInsurance,
     getInsurances,
-    getAllInformationController
+    getAllInformationController,
+    searchInsuranceController,
 };

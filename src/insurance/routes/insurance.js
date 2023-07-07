@@ -35,4 +35,8 @@ router.get('/admin/search', adminInsuranceController.getAllInformationController
 
 
 
+router.post('/search', adminInsuranceController.searchInsuranceController);
+
+
+
 module.exports = router;

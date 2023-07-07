@@ -153,50 +153,50 @@ const addInsurance = async (insurance) => {
 
         const isTravellerTypeValidResult = await isTravellerTypeValid(travellerType);
         if (!isTravellerTypeValidResult) {
-          invalidFields.push('travellerType');
+            invalidFields.push('travellerType');
         }
-    
+
         const isPolicyTypeValidResult = await isPolicyTypeValid(policyType);
         if (!isPolicyTypeValidResult) {
-          invalidFields.push('policyType');
+            invalidFields.push('policyType');
         }
-    
+
         const isAreaValidResult = await isAreaValid(area);
         if (!isAreaValidResult) {
-          invalidFields.push('area');
+            invalidFields.push('area');
         }
-    
+
         const isRestTypeValidResult = await isRestTypeValid(restType);
         if (!isRestTypeValidResult) {
-          invalidFields.push('restType');
+            invalidFields.push('restType');
         }
-    
+
         const isProductNameValidResult = await isProductNameValid(productName);
         if (!isProductNameValidResult) {
-          invalidFields.push('productName');
+            invalidFields.push('productName');
         }
-    
+
         const isAgeGroupValidResult = await isAgeGroupValid(ageGroup);
         if (!isAgeGroupValidResult) {
-          invalidFields.push('ageGroup');
+            invalidFields.push('ageGroup');
         }
-    
+
         const isDurationValidResult = await isDurationValid(duration);
         if (!isDurationValidResult) {
-          invalidFields.push('duration');
+            invalidFields.push('duration');
         }
-    
+
         if (invalidFields.length > 0) {
-          return {
-            success: false,
-            error: 'Invalid data. Please provide valid values for the following fields:',
-            invalidFields,
-          };
+            return {
+                success: false,
+                error: 'Invalid data. Please provide valid values for the following fields:',
+                invalidFields,
+            };
         }
 
         const client = getClient();
         const db = client.db(process.env.DB_NAME);
-        const collection = db.collection('insurances');
+        const collection = db.collection(process.env.INSURANCE_INSURANCES_COLLECTION);
 
         const existingInsurance = await collection.findOne({
             travellerType,
@@ -263,8 +263,121 @@ const getAllInsurances = async () => {
 };
 
 
+const calculateTripDuration = (departureDate, arrivalDate) => {
+    const departure = new Date(departureDate);
+    const arrival = new Date(arrivalDate);
+
+    if (departure > arrival) {
+        return null; // Invalid dates
+    }
+
+    const timeDiff = Math.abs(arrival.getTime() - departure.getTime());
+    const tripDuration = Math.ceil(timeDiff / (1000 * 60 * 60 * 24)); // Duration in days
+    return tripDuration;
+};
+
+const calculateTravelerAge = (travelerDOB) => {
+    const today = new Date();
+    const birthDate = new Date(travelerDOB);
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+        age--;
+    }
+    return age;
+};
+
+const searchInsurance = async (
+    departureDate,
+    arrivalDate,
+    travelerDOB,
+    mobile,
+    email,
+    country,
+    restType,
+    residenceCountry,
+) => {
+    try {
+        const client = getClient();
+        const db = client.db(process.env.DB_NAME);
+        const durationCollection = db.collection(process.env.INSURANCE_DURATIONS_COLLECTION);
+        const insuranceCollection = db.collection(process.env.INSURANCE_INSURANCES_COLLECTION);
+        const ageGroupCollection = db.collection(process.env.INSURANCE_AGE_GROUPS_COLLECTION);
+
+        const tripDuration = calculateTripDuration(departureDate, arrivalDate);
+        console.log('-------tripDuration---------', tripDuration);
+        const travelerAge = calculateTravelerAge(travelerDOB);
+        console.log('--------travelerAge--------', travelerAge);
+
+        if (!tripDuration || tripDuration <= 0) {
+            return {
+                success: false,
+                error: 'Invalid departure or arrival date',
+            };
+        }
+        const allDurations = await durationCollection
+            .find({
+                $and: [
+                    { startDay: { $lte: tripDuration } },
+                    { endDay: { $gte: tripDuration } },
+                ],
+            })
+            .project({ _id: 0, name: 1 })
+            .toArray();
+
+        const durationNames = allDurations.map((duration) => duration.name);
+        console.log(durationNames);
+
+        const ageGroups = await ageGroupCollection
+            .find({
+                $and: [
+                    { startYear: { $lte: travelerAge } },
+                    { endYear: { $gte: travelerAge } },
+                ],
+            })
+            .project({ _id: 0, name: 1 })
+            .toArray();
+
+        const ageGroupNames = ageGroups.map((ageGroup) => ageGroup.name);
+        console.log(ageGroupNames);
+
+
+        const matchedInsurancePolicy = await insuranceCollection.findOne({
+            restType,
+            area: country,
+            ageGroup: { $in: ageGroupNames },
+            duration: { $in: durationNames },
+        });
+    
+        if (matchedInsurancePolicy) {
+            return {
+                success: true,
+                data: matchedInsurancePolicy, 
+            };
+        } else {
+            console.log('No insurance policy matched');
+            return {
+                success: true,
+                message:'No insurance policy matched',
+                data: [], 
+            };
+        }
+
+       
+    } catch (error) {
+        console.log(error);
+        return {
+            success: false,
+            error: 'Failed to search insurance policies',
+        };
+    }
+};
+
+
+
 module.exports = {
     addInsurance,
     getAllInsurances,
-    getAllInformation
+    getAllInformation,
+    searchInsurance
 }
