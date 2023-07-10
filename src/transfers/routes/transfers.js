@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 
 const transfersController = require('../controller/transfers');
+const availabilityTransfersController = require('../controller/availability');
 
 
 router.get('/locations/countries', transfersController.getCountriesController);
@@ -21,7 +22,10 @@ router.get('/masters/currencies', transfersController.getCurrenciesController);
 // router.get('/search-details', transfersController.activitySearchDetails);
 
 
-router.get('/routes',transfersController.getRoutesController);
+router.get('/routes', transfersController.getRoutesController);
+
+// router.post('/availability/routes', availabilityTransfersController.multipleAvailabilityController);
+router.post('/availability/routes/:language/:adults/:children/:infants', availabilityTransfersController.multipleAvailabilityController);
 
 
 module.exports = router;
