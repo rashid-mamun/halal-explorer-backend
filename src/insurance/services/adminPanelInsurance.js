@@ -344,23 +344,23 @@ const searchInsurance = async (
         console.log(ageGroupNames);
 
 
-        const matchedInsurancePolicy = await insuranceCollection.findOne({
+        const matchedInsurancePolicies = await insuranceCollection.find({
             restType,
             area: country,
             ageGroup: { $in: ageGroupNames },
             duration: { $in: durationNames },
-        });
+        }).toArray();
 
-        if (matchedInsurancePolicy) {
+        if (matchedInsurancePolicies.length > 0) {
             return {
                 success: true,
-                data: matchedInsurancePolicy,
+                data: matchedInsurancePolicies,
             };
         } else {
-            console.log('No insurance policy matched');
+            console.log('No insurance policies matched');
             return {
                 success: true,
-                message: 'No insurance policy matched',
+                message: 'No insurance policies matched',
                 data: [],
             };
         }
