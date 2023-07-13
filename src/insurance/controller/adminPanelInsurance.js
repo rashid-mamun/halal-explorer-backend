@@ -53,9 +53,19 @@ const getAllInformationController = async (req, res) => {
 const createInsurance = async (req, res) => {
     try {
         const insuranceDataArray = req.body;
+        const uniqueInsuranceDataArray = [];
 
+        for (const insuranceData of insuranceDataArray) {
+            const isDuplicate = uniqueInsuranceDataArray.some((item) => {
+                return JSON.stringify(item) === JSON.stringify(insuranceData);
+            });
+
+            if (!isDuplicate) {
+                uniqueInsuranceDataArray.push(insuranceData);
+            }
+        }
         const results = await Promise.all(
-            insuranceDataArray.map(async (insuranceData) => {
+            uniqueInsuranceDataArray.map(async (insuranceData) => {
                 const validationResult = insuranceSchema.validate(insuranceData);
                 if (validationResult.error) {
                     return {
@@ -70,21 +80,19 @@ const createInsurance = async (req, res) => {
         const successResults = results.filter((result) => result.success);
         const errorResults = results.filter((result) => !result.success);
 
-        if (successResults.length === insuranceDataArray.length) {
-            return res.status(201).json(
-                {
-                    success: true,
-                    message: `succesfully  save/update insurance information`
-                }
-            );
+        if (successResults.length === uniqueInsuranceDataArray.length) {
+            return res.status(201).json({
+                success: true,
+                message: `Successfully save/update insurance information`,
+            });
         } else {
             return res.status(500).json(errorResults);
         }
     } catch (error) {
         console.error(error);
-        return res
-            .status(500)
-            .json({ error: "Failed to save/update insurance information" });
+        return res.status(500).json({
+            error: "Failed to save/update insurance information",
+        });
     }
 };
 

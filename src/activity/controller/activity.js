@@ -35,13 +35,13 @@ const getPortfolioValidation = Joi.object({
 const saveOrUpdateActivityValidation = Joi.object({
   address: Joi.string().required(),
   codes: Joi.array()
-  .items(
-    Joi.object({
-      activityCode: Joi.string().required(),
-    })
-  )
-  .min(1)
-  .required(),
+    .items(
+      Joi.object({
+        activityCode: Joi.string().required(),
+      })
+    )
+    .min(1)
+    .required(),
 });
 
 const getAllDestinationHotelsValidation = Joi.object({
@@ -172,7 +172,7 @@ const saveOrUpdateActivity = async (req, res) => {
     res.status(500).json({ error: 'Failed to save/update activity information' });
   }
 };
-const getActivity= async (req, res) => {
+const getActivity = async (req, res) => {
   try {
     const result = await getActivityInfo(req.query);
 
@@ -216,26 +216,78 @@ const getAllActivity = async (req, res) => {
     });
   }
 };
+
+const activitySearchSchema = Joi.object({
+  destination: Joi.string().required(),
+  adult: Joi.number().integer().positive().required(),
+  child: Joi.number().integer().min(0).required(),
+  departure: Joi.string().required(),
+  arrival: Joi.string().required(),
+});
+const activitySearchDetailsSchema = Joi.object({
+  code: Joi.string().required(),
+  adult: Joi.number().integer().positive().required(),
+  child: Joi.number().integer().min(0).required(),
+  departure: Joi.string().required(),
+  arrival: Joi.string().required(),
+});
+
 const activitySearch = async (req, res) => {
-  const queryParams = req.query;
   try {
-      console.log("---- Activity search calling ----------", queryParams);
-      const activities = await searchActivities(queryParams);
+    const { error, value } = activitySearchSchema.validate(req.query);
+
+    if (error) {
+      return res.status(400).json({ error: error.details[0].message });
+    }
+
+    const queryParams = value;
+    console.log("---- Activity search calling ----------", queryParams);
+    const activities = await searchActivities(
+      queryParams.destination,
+      queryParams.adult,
+      queryParams.child,
+      queryParams.departure,
+      queryParams.arrival,
+      queryParams
+    );
+
+    if (activities.success) {
       return res.json(activities);
+    } else {
+      return res.status(400).json({ error: activities.error });
+    }
   } catch (error) {
-      console.error(error);
-      return res.status(500).json({ error: 'Internal server error' });
+    console.error(error);
+    return res.status(500).json({ error: 'Internal server error' });
   }
 };
 const activitySearchDetails = async (req, res) => {
-  const queryParams = req.query;
   try {
-      console.log("---- Activity search Details ----------", queryParams);
-      const activities = await searchActivitiesDetails(queryParams.code);
+    const { error, value } = activitySearchDetailsSchema.validate(req.query);
+
+    if (error) {
+      return res.status(400).json({ error: error.details[0].message });
+    }
+
+    const queryParams = value;
+    console.log("---- Activity search calling ----------", queryParams);
+    const activities = await searchActivitiesDetails(
+      queryParams.code,
+      queryParams.adult,
+      queryParams.child,
+      queryParams.departure,
+      queryParams.arrival,
+      queryParams
+    );
+
+    if (activities.success) {
       return res.json(activities);
+    } else {
+      return res.status(400).json({ error: activities.error });
+    }
   } catch (error) {
-      console.error(error);
-      return res.status(500).json({ error: 'Internal server error' });
+    console.error(error);
+    return res.status(500).json({ error: 'Internal server error' });
   }
 };
 

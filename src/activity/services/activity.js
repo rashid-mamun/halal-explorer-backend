@@ -44,32 +44,213 @@ const fetchData = async (url, successMessage, errorMessage) => {
     };
   }
 };
+const axiosPost = async (url, data, headers) => {
+  try {
+    const response = await axios.post(url, data, { headers });
+    return response.data;
+  } catch (error) {
+    console.error(`Request failed: ${error.message}`);
+    return null;
+  }
+};
 
 const postData = async (url, data, successMessage, errorMessage) => {
   const headers = createHeaders();
 
   try {
-    const response = await axios.post(url, data, { headers });
-    if (!response.data) {
+    const responseData = await axiosPost(url, data, headers);
+
+    if (!responseData) {
+      console.error('Unable to fetch the requested data. Please try again later.');
       return {
         success: false,
-        error: "Unable to fetch the requested data. Please try again later.",
+        error: 'Unable to fetch the requested data. Please try again later.',
       };
     }
 
     return {
       success: true,
       message: successMessage,
-      data: response.data,
+      data: responseData,
     };
   } catch (error) {
-    console.log(error);
+    console.error(error);
     return {
       success: false,
-      error: errorMessage,
+      error: errorMessage || 'An error occurred during the request.',
     };
   }
 };
+
+
+const createActivityData = (destination, adult, child, departure, arrival) => {
+  const filters = [
+    {
+      searchFilterItems: [
+        {
+          type: 'destination',
+          value: destination,
+        },
+      ],
+    },
+  ];
+
+  const from = departure;
+  const to = arrival;
+  const language = 'en';
+  const paxes = [];
+
+  for (let i = 0; i < adult; i++) {
+    paxes.push({
+      age: 30,
+    });
+  }
+
+  for (let i = 0; i < child; i++) {
+    paxes.push({
+      age: 5,
+    });
+  }
+
+  const pagination = {
+    itemsPerPage: 100,
+    page: 1,
+  };
+
+  const order = 'DEFAULT';
+
+  return {
+    filters,
+    from,
+    to,
+    language,
+    paxes,
+    pagination,
+    order,
+  };
+};
+const activityData = (code, adult, child, departure, arrival) => {
+  const from = departure;
+  const to = arrival;
+  const language = 'en';
+  const paxes = [];
+
+  for (let i = 0; i < adult; i++) {
+    paxes.push({
+      age: 30,
+    });
+  }
+
+  for (let i = 0; i < child; i++) {
+    paxes.push({
+      age: 5,
+    });
+  }
+
+  const pagination = {
+    itemsPerPage: 100,
+    page: 1,
+  };
+
+  const order = 'DEFAULT';
+
+  return {
+    code,
+    from,
+    to,
+    language,
+    paxes,
+    pagination,
+    order,
+  };
+};
+
+const searchActivities = async (destination, adult, child, departure, arrival, req) => {
+  try {
+
+    const client = getClient();
+    const db = client.db(process.env.DB_NAME);
+    const halalActivityCollection = db.collection('halalActivities');
+
+    const url = `${process.env.HOTELBEDS_API_ENDPOINT}activity-api/3.0/activities/availability`;
+    const successMessage = 'Fetched activities information successfully';
+    const errorMessage = 'Failed to fetch activities';
+
+    const data = createActivityData(destination, adult, child, departure, arrival);
+    const response = await postData(url, data, successMessage, errorMessage);
+
+    if (!response.success) {
+      return {
+        success: false,
+        error: 'An error occurred while searching activities.',
+      };
+    }
+
+    const activitiesData = response.data.activities;
+    const activitiesDataObj = activitiesData.reduce((acc, activity) => {
+      acc[activity.content.activityCode] = activity;
+      return acc;
+    }, {});
+    // console.log(JSON.stringify(activitiesDataObj));
+    console.log('total activities content return hotelbeds:', activitiesData.length);
+    const halalActivitiesData = await halalActivityCollection.find().toArray();
+    const halalActivitiesDataObj = halalActivitiesData.reduce((obj, hotel) => {
+      obj[hotel.code] = {
+        code: hotel.code,
+        halalRating: hotel.star_rating,
+      };
+      return obj;
+    }, {});
+    const halalActivitiesDataCodes = Object.keys(halalActivitiesDataObj);
+    console.log(JSON.stringify(halalActivitiesDataCodes, null, 2));
+
+    // Filter activity codes to include only those present in activitiesDataMapping and halalActivitiesDataCodes
+    const finalActivityCodes = halalActivitiesDataCodes.filter((code) =>
+      activitiesDataObj.hasOwnProperty(code)
+    );
+
+    const page = parseInt(req.page, 10) || 1;
+    const pageSize = parseInt(req.pageSize, 10) || 10;
+
+    const totalActivities = finalActivityCodes.length;
+
+    // Validate page number
+    const maxPageNumber = Math.ceil(totalActivities / pageSize);
+    if (page > maxPageNumber) {
+      return {
+        success: false,
+        error: 'Invalid page number',
+      };
+    }
+
+    // Calculate the offset and limit
+    const offset = (page - 1) * pageSize;
+    const limit = pageSize;
+    const paginatedData = finalActivityCodes.slice(offset, offset + limit);
+
+    // Retrieve paginated activities data with halalRating
+    const paginatedActivitiesData = paginatedData.map((code) => {
+      const activityData = activitiesDataObj[code];
+      if (halalActivitiesDataObj[code] && halalActivitiesDataObj[code].halalRating) {
+        activityData.halalRating = halalActivitiesDataObj[code].halalRating;
+      }
+      return activityData;
+    });
+
+    return {
+      success: true,
+      totalActivities,
+      data: paginatedActivitiesData,
+    };
+  } catch (error) {
+    console.error(error);
+    return {
+      success: false,
+      error: 'An error occurred while searching activities.',
+    };
+  }
+};
+
 
 const processActivityData = async (activitiesData, activityCodeObject, collection) => {
   const bulkOperations = [];
@@ -157,110 +338,32 @@ const getActivitiesDataMapping = async (activitiesDataCursor) => {
   return activitiesDataMapping;
 };
 
-const searchActivities = async (req) => {
+const searchActivitiesDetails = async (code, adult, child, departure, arrival, req) => {
   try {
-    const keyword = req.city;
+
     const client = getClient();
     const db = client.db(process.env.DB_NAME);
-    const activityCollection = db.collection('activityInfo');
     const halalActivityCollection = db.collection('halalActivities');
+    const halalActivity = await halalActivityCollection.findOne({ code });
+    const url = `${process.env.HOTELBEDS_API_ENDPOINT}activity-api/3.0/activities/details/full`;
 
-    // Create a text index on the 'address' column if it's not already created
-    const indexes = await activityCollection.indexes();
-    const addressIndexExists = indexes.some((index) => index.key.address);
-    if (!addressIndexExists) {
-      await activityCollection.createIndex({ address: 'text' });
-    }
+    const successMessage = 'Fetched activities information successfully';
+    const errorMessage = 'Failed to fetch activities';
 
-    // Search for activities using a regex pattern match on the 'address' field
-    const regexPattern = new RegExp(keyword, 'i');
-    const activitiesDataCursor = activityCollection.find({ address: regexPattern });
+    const data = activityData(code, adult, child, departure, arrival);
+    const response = await postData(url, data, successMessage, errorMessage);
 
-    // Check if activitiesDataCursor is empty
-    if ((await activitiesDataCursor.count()) === 0) {
-      return {
-        success: true,
-        message: 'No activities found for the given search criteria.',
-        totalActivities: 0,
-        data: [],
-      };
-    }
-
-    // Retrieve the mapping of activity IDs to data
-    const activitiesDataMapping = await getActivitiesDataMapping(activitiesDataCursor);
-
-    const halalActivitiesData = await halalActivityCollection.find().toArray();
-    const halalActivitiesDataObj = halalActivitiesData.reduce((obj, hotel) => {
-      obj[hotel.code] = {
-        code: hotel.code,
-        halalRating: hotel.star_rating,
-      };
-      return obj;
-    }, {});
-    const halalActivitiesDataCodes = Object.keys(halalActivitiesDataObj);
-
-    // Filter activity codes to include only those present in activitiesDataMapping and halalActivitiesDataCodes
-    const finalActivityCodes = halalActivitiesDataCodes.filter((code) =>
-      activitiesDataMapping.hasOwnProperty(code)
-    );
-
-    const page = parseInt(req.page, 10) || 1;
-    const pageSize = parseInt(req.pageSize, 10) || 10;
-
-    const totalActivities = finalActivityCodes.length;
-
-    // Validate page number
-    const maxPageNumber = Math.ceil(totalActivities / pageSize);
-    if (page > maxPageNumber) {
+    if (!response.success) {
       return {
         success: false,
-        error: 'Invalid page number',
+        error: 'An error occurred while searching activities.',
       };
     }
-
-    // Calculate the offset and limit
-    const offset = (page - 1) * pageSize;
-    const limit = pageSize;
-    const paginatedData = finalActivityCodes.slice(offset, offset + limit);
-
-    // Retrieve paginated activities data with halalRating
-    const paginatedActivitiesData = paginatedData.map((code) => {
-      const activityData = activitiesDataMapping[code];
-      if (halalActivitiesDataObj[code] && halalActivitiesDataObj[code].halalRating) {
-        activityData.halalRating = halalActivitiesDataObj[code].halalRating;
-      }
-      return activityData;
-    });
-
-    return {
-      success: true,
-      totalActivities,
-      data: paginatedActivitiesData,
-    };
-  } catch (err) {
-    console.error(err);
-    return {
-      success: false,
-      error: 'An error occurred while searching activities.',
-    };
-  }
-};
-const searchActivitiesDetails = async (code) => {
-  try {
-   
-    const client = getClient();
-    const db = client.db(process.env.DB_NAME);
-    const activityCollection = db.collection('activityInfo');
-    const halalActivityCollection = db.collection('halalActivities');
-
-    const activitiesDataCursor = await activityCollection.findOne({ activityCode: code });
-    const halalActivity = await halalActivityCollection.findOne({ code });
-
-    if (halalActivity && activitiesDataCursor ) {
+    if (halalActivity && response.data) {
       return {
         success: true,
         message: 'Activity information retrieved successfully',
-        data: activitiesDataCursor,
+        data: response.data.activity,
         halalData: halalActivity,
       };
     }
@@ -277,9 +380,6 @@ const searchActivitiesDetails = async (code) => {
     };
   }
 };
-
-
-
 
 const getAllCountriesInfo = async () => {
   const url = `${process.env.HOTELBEDS_API_ENDPOINT}/activity-content-api/3.0/countries/en`;

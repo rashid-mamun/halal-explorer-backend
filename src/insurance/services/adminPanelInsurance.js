@@ -148,7 +148,7 @@ const addInsurance = async (insurance) => {
             productName,
             ageGroup,
             duration,
-            packageName
+            packageName,
         } = insurance;
         const invalidFields = [];
 
@@ -243,6 +243,7 @@ const addInsurance = async (insurance) => {
         };
     }
 };
+
 const getAllInsurances = async () => {
     try {
         const client = getClient();
@@ -307,9 +308,9 @@ const searchInsurance = async (
         const ageGroupCollection = db.collection(process.env.INSURANCE_AGE_GROUPS_COLLECTION);
 
         const tripDuration = calculateTripDuration(departureDate, arrivalDate);
-        console.log('-------tripDuration---------', tripDuration);
+
         const travelerAge = calculateTravelerAge(travelerDOB);
-        console.log('--------travelerAge--------', travelerAge);
+        console.log(`\ntravelerAge:${travelerAge} tripDuration:${tripDuration} restType:${restType}  area:${country}\n`);
 
         if (!tripDuration || tripDuration <= 0) {
             return {
@@ -328,7 +329,7 @@ const searchInsurance = async (
             .toArray();
 
         const durationNames = allDurations.map((duration) => duration.name);
-        console.log(durationNames);
+        console.log('-----------durationNames------------------', durationNames);
 
         const ageGroups = await ageGroupCollection
             .find({
@@ -341,8 +342,7 @@ const searchInsurance = async (
             .toArray();
 
         const ageGroupNames = ageGroups.map((ageGroup) => ageGroup.name);
-        console.log(ageGroupNames);
-
+        console.log('--------------ageGroupNames-------------', ageGroupNames);
 
         const matchedInsurancePolicies = await insuranceCollection.find({
             restType,
@@ -350,7 +350,7 @@ const searchInsurance = async (
             ageGroup: { $in: ageGroupNames },
             duration: { $in: durationNames },
         }).toArray();
-
+        console.log('----matchedInsurancePolicies----', JSON.stringify(matchedInsurancePolicies, null, 2));
         if (matchedInsurancePolicies.length > 0) {
             return {
                 success: true,
