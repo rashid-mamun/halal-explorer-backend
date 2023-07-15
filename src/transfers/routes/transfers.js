@@ -8,6 +8,7 @@ const availabilityTransfersController = require('../controller/availability');
 router.get('/locations/countries', transfersController.getCountriesController);
 router.get('/locations/destinations', transfersController.getDestinationsController);
 router.get('/locations/terminals', transfersController.getTerminalsController);
+router.get('/locations/terminals-search', transfersController.getTerminalsSearchController);
 router.get('/locations/destination-hotels', transfersController.getHotelsController);
 
 

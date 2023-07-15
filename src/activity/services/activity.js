@@ -390,13 +390,115 @@ const getAllCountriesInfo = async () => {
 };
 
 const getAllDestinationsInfo = async (country) => {
+  const client = getClient();
+  const db = client.db(process.env.DB_NAME);
+  const activityCollection = db.collection('activityDestination');
+
   const url = `${process.env.HOTELBEDS_API_ENDPOINT}/activity-content-api/3.0/destinations/en/${country}`;
   const successMessage = 'Fetch destinations information successfully';
   const errorMessage = 'Failed to fetch destinations';
 
-  return fetchData(url, successMessage, errorMessage);
+  const response = await fetchData(url, successMessage, errorMessage);
+
+  if (!response.success) {
+    return response;
+  }
+
+  const modifiedData = response.data.country.destinations.map(item => ({
+    code: item.code,
+    name: item.name,
+
+  }));
+  try {
+    const insertedData = [];
+    const existingItems = await activityCollection.find({ code: { $in: modifiedData.map(item => item.code) } }).toArray();
+
+    for (const item of modifiedData) {
+      const existingItem = existingItems.find(existing => existing.code === item.code);
+
+      if (existingItem) {
+        insertedData.push(existingItem);
+      } else {
+        await activityCollection.insertOne(item);
+        insertedData.push(item);
+      }
+    }
+
+    return {
+      success: true,
+      message: successMessage,
+      data: insertedData,
+    };
+  } catch (error) {
+    console.error('Failed to connect to MongoDB:', error);
+    return {
+      success: false,
+      message: errorMessage,
+      data: [],
+    };
+  }
+};
+const createNameIndexIfNotExists = async (collection) => {
+  const indexExists = await collection.indexExists('name_text');
+  if (!indexExists) {
+    await collection.createIndex({ name: 'text' },
+      { default_language: 'english', language_override: 'english' }
+
+    );
+  }
+};
+const searchDestination = async (keyword, offset = 0, limit = 10) => {
+  try {
+    const client = getClient();
+    const db = client.db(process.env.DB_NAME);
+    const terminalsCollection = db.collection('activityDestination');
+
+    const query = { name: { $regex: keyword, $options: 'i' } };
+    const projection = { _id: 0, code: 1, name: 1 };
+    const cursor = await terminalsCollection.find(query, { projection }).skip(offset).limit(limit).toArray();
+
+    return {
+      success: true,
+      message: 'Search successful',
+      data: cursor,
+    };
+  } catch (error) {
+    console.error('Failed to perform search:', error);
+    return {
+      success: false,
+      message: 'Internal server error',
+      data: [],
+    };
+  }
 };
 
+
+// const searchDestination = async (keyword, offset = 0, limit = 10) => {
+//   try {
+//     const client = getClient();
+//     const db = client.db(process.env.DB_NAME);
+//     const terminalsCollection = db.collection('activityDestination');
+
+//     await createNameIndexIfNotExists(terminalsCollection);
+
+//     const query = { $text: { $search: keyword } };
+//     const projection = { _id: 0, code: 1, name: 1 };
+//     const cursor = await terminalsCollection.find(query, { projection }).skip(offset).limit(limit).toArray();
+
+//     return {
+//       success: true,
+//       message: 'Search successful',
+//       data: cursor,
+//     };
+//   } catch (error) {
+//     console.error('Failed to perform search:', error);
+//     return {
+//       success: false,
+//       message: 'Internal server error',
+//       data: [],
+//     };
+//   }
+// };
 const getPortfolioAvailInfo = async (destination, offset = 1, limit = 1000) => {
   const url = `${process.env.HOTELBEDS_API_ENDPOINT}activity-cache-api/1.0/avail?destination=${destination}&offset=${offset}&limit=${limit}`;
   const successMessage = 'Fetch portfolio information successfully';
@@ -527,5 +629,6 @@ module.exports = {
   getAllLanguagesInfo,
   getAllDestinationHotelsInfo,
   searchActivities,
-  searchActivitiesDetails
+  searchActivitiesDetails,
+  searchDestination,
 };

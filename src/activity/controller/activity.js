@@ -13,6 +13,7 @@ const {
   getAllDestinationHotelsInfo,
   searchActivities,
   searchActivitiesDetails,
+  searchDestination,
 } = require('../services/activity');
 
 // Input validation schemas
@@ -76,6 +77,26 @@ const getAllDestinations = async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Failed to fetch destinations' });
+  }
+};
+const searchSchema = Joi.object({
+  keyword: Joi.string().required(),
+  offset: Joi.number().integer().min(0).default(0),
+  limit: Joi.number().integer().min(1).max(100).default(10),
+});
+
+const getDestinationSearchController = async (req, res) => {
+  try {
+    const { error, value } = searchSchema.validate(req.query);
+    if (error) {
+      return res.status(400).json({ error });
+    }
+    const { keyword, offset, limit } = value;
+    const terminals = await searchDestination(keyword, offset, limit);
+    res.json(terminals);
+  } catch (error) {
+    console.error(`Error retrieving terminals: ${error.message}`);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 };
 
@@ -304,5 +325,7 @@ module.exports = {
   getAllActivity,
   getActivity,
   activitySearch,
-  activitySearchDetails
+  activitySearchDetails,
+  getDestinationSearchController,
+
 };

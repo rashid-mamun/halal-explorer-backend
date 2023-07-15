@@ -1,5 +1,6 @@
 const axios = require('axios');
 const crypto = require('crypto');
+const { getClient } = require("../../config/database");
 
 const createHeaders = () => {
   const apiKey = process.env.HOTELBEDS_TRANSFERS_API_KEY;
@@ -44,7 +45,7 @@ const fetchData = async (url, successMessage, errorMessage) => {
         error: "Unable to fetch the requested data. Please try again later.",
       };
     }
-
+    
     return {
       success: true,
       message: successMessage,
@@ -88,10 +89,92 @@ const getDestinations = async ({ fields = 'ALL', language = 'en', countryCode = 
 };
 
 const getTerminals = async ({ fields = 'ALL', language = 'en', countryCode = '', codes = '', offset = 0, limit = 10 }) => {
+  const client = getClient();
+  const db = client.db(process.env.DB_NAME);
+  const terminalsCollection = db.collection('transferTerminals');
+
   const url = `${process.env.HOTELBEDS_API_ENDPOINT}/transfer-cache-api/1.0/locations/terminals?fields=${fields}&language=${language}&countryCode=${countryCode}&codes=${codes}&offset=${offset}&limit=${limit}`;
   const successMessage = 'Fetch terminals information successfully';
   const errorMessage = 'Failed to fetch terminals';
-  return fetchData(url, successMessage, errorMessage);
+  const response = await fetchData(url, successMessage, errorMessage);
+
+  if (!response.success) {
+    return response;
+  }
+
+  const modifiedData = response.data.map(item => ({
+    code: item.code,
+    name: item.content.description,
+    content: item.content,
+    countryCode: item.countryCode,
+    coordinates: item.coordinates,
+    language: item.language
+  }));
+
+  try {
+    const insertedData = [];
+    const existingItems = await terminalsCollection.find({ code: { $in: modifiedData.map(item => item.code) } }).toArray();
+
+    for (const item of modifiedData) {
+      const existingItem = existingItems.find(existing => existing.code === item.code);
+
+      if (existingItem) {
+        insertedData.push(existingItem);
+      } else {
+        await terminalsCollection.insertOne(item);
+        insertedData.push(item);
+      }
+    }
+
+    return {
+      success: true,
+      message: successMessage,
+      data: insertedData,
+    };
+  } catch (error) {
+    console.error('Failed to connect to MongoDB:', error);
+    return {
+      success: false,
+      message: errorMessage,
+      data: [],
+    };
+  }
+};
+const createNameIndexIfNotExists = async (collection) => {
+  const indexExists = await collection.indexExists('name_text');
+  if (!indexExists) {
+    await collection.createIndex({ name: 'text' },
+      { default_language: 'english', language_override: 'english' }
+
+    );
+  }
+};
+
+const searchTerminals = async (keyword, offset = 0, limit = 10) => {
+  try {
+    const client = getClient();
+    const db = client.db(process.env.DB_NAME);
+    const terminalsCollection = db.collection('transferTerminals');
+
+    await createNameIndexIfNotExists(terminalsCollection);
+
+    const query = { $text: { $search: keyword } };
+    const projection = { _id: 0, code: 1, name: 1 };
+    const cursor = await terminalsCollection.find(query, { projection }).skip(offset).limit(limit).toArray();
+
+    return {
+      success: true,
+      message: 'Search successful',
+      data: cursor,
+    };
+  } catch (error) {
+    console.error('Failed to perform search:', error);
+    return {
+      success: false,
+      message: 'Internal server error',
+      data: [],
+    };
+  }
 };
 
 const getMasterCategories = async ({ fields = 'ALL', language = 'en', codes = '', offset = 0, limit = 10 }) => {
@@ -135,6 +218,7 @@ module.exports = {
   getCountries,
   getDestinations,
   getTerminals,
+  searchTerminals,
   getMasterCategories,
   getMasterVehicles,
   getMasterTransferTypes,

@@ -6,6 +6,7 @@ const halalActivityController = require('../controller/halalRating');
 
 router.get('/countries', activityController.getAllCountries);
 router.get('/destinations', activityController.getAllDestinations);
+router.get('/destinations-search', activityController.getDestinationSearchController);
 router.post('/info', activityController.saveOrUpdateActivity);
 router.get('/all', activityController.getAllActivity);
 router.get('/one', activityController.getActivity);

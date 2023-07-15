@@ -4,6 +4,7 @@ const {
   getCountries,
   getDestinations,
   getTerminals,
+  searchTerminals,
   getMasterCategories,
   getMasterVehicles,
   getMasterTransferTypes,
@@ -252,6 +253,27 @@ const getDestinationsController = async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };
+const searchSchema = Joi.object({
+  keyword: Joi.string().required(),
+  offset: Joi.number().integer().min(0).default(0),
+  limit: Joi.number().integer().min(1).max(100).default(10),
+});
+
+const getTerminalsSearchController = async (req, res) => {
+  try {
+    const { error, value } = searchSchema.validate(req.query);
+    if (error) {
+      return res.status(400).json({ error });
+    }
+    const { keyword, offset, limit } = value;
+    const terminals = await searchTerminals(keyword, offset, limit);
+    res.json(terminals);
+  } catch (error) {
+    console.error(`Error retrieving terminals: ${error.message}`);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
+
 
 const getTerminalsController = async (req, res) => {
   try {
@@ -421,6 +443,7 @@ module.exports = {
   getCountriesController,
   getDestinationsController,
   getTerminalsController,
+  getTerminalsSearchController,
   getMasterCategoriesController,
   getMasterVehiclesController,
   getMasterTransferTypesController,
