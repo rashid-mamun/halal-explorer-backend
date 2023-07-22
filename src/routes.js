@@ -4,6 +4,7 @@ const hotelRoutes = require('./hotel/routes');
 const activityRoutes = require('./activity/routes/activity');
 const transfersRoutes = require('./transfers/routes/transfers');
 const insuranceRoutes = require('./insurance/routes/insurance');
+const holidayRoutes = require('./holiday/routes/holiday');
 
 router.get('/', (req, res) => {
   res.status(200).send('<h1 style="text-align: center">App Online, 2023!</h1>');
@@ -13,5 +14,6 @@ router.use('/hotel', hotelRoutes);
 router.use('/activity', activityRoutes);
 router.use('/transfers', transfersRoutes);
 router.use('/insurance', insuranceRoutes);
+router.use('/holiday', holidayRoutes);
 
 module.exports = router;
