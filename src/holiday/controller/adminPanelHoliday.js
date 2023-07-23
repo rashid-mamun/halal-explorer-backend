@@ -1,28 +1,8 @@
 const { v4: uuidv4 } = require('uuid');
 const holidayPackageService = require('../services/adminPanelHoliday');
-const multer = require('multer');
+const Joi = require('joi');
 
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, ''); // Make sure the "uploads" directory exists
-  },
-  filename: function (req, file, cb) {
-    const uniqueFilename = `${Date.now()}-${file.originalname}`;
-    cb(null, uniqueFilename);
-  },
-});
-
-const upload = multer({ storage: storage });
-
-// const upload = multer({
-//   storage: storage,
-// }).fields([
-//   { name: 'coverImage', maxCount: 1 },
-//   { name: 'durationDescription[0][image]', maxCount: 1 }, // Add this line for the specific field
-// ]);
 const validateHolidayPackage = (data) => {
-  const Joi = require('joi');
-
   const schema = Joi.object({
     id: Joi.string(),
     packageName: Joi.string().required(),
@@ -39,16 +19,17 @@ const validateHolidayPackage = (data) => {
       lng: Joi.number().required(),
     }).required(),
     coverImage: Joi.string(),
+    gallery: Joi.string(),
     durationDescription: Joi.array().items(Joi.object({
       titles: Joi.string().required(),
       food: Joi.string().required(),
       des: Joi.string().required(),
-      image: Joi.string(), // Assuming 'image' is a file path
     })).required(),
     paxWisePrice: Joi.object({
       adult: Joi.number().integer().min(0).required(),
       child: Joi.number().integer().min(0).required(),
       infant: Joi.number().integer().min(0).required(),
+      single: Joi.number().integer().min(0).required(),
     }).required(),
     departureDates: Joi.array().items(Joi.date().iso()).required(),
     seats: Joi.number().integer().min(0).required(),
@@ -59,23 +40,15 @@ const validateHolidayPackage = (data) => {
   });
 
   return schema.validate(data);
-
 };
-
 
 const createOrUpdateHolidayPackage = async (req, res) => {
   try {
-    const coverImageFiles = req.files['coverImage'];
-    const galleryFiles = req.files['gallery'];
-    console.log(req.files);
-
-    // Handle the files for each field separately
-    if (!coverImageFiles || coverImageFiles.length === 0 || !galleryFiles || galleryFiles.length === 0) {
-      return res.status(400).send('Please upload files for both fields.');
+    if (!req.files || !req.files['coverImage'] || !req.files['gallery']) {
+      return res.status(400).json({ error: 'Please upload files for both fields.' });
     }
-    const { id } = req.params;
+    const { id } = req.body;
     const packageData = req.body;
-    console.log(req.file);
 
     if (!id) {
       packageData.id = uuidv4();
@@ -85,17 +58,9 @@ const createOrUpdateHolidayPackage = async (req, res) => {
       return res.status(400).json({ error: error.details[0].message });
     }
 
-    if (!req.files) {
-      return res.status(400).json({ error: 'Cover image is missing.' });
-    }
     packageData.coverImage = req.files.coverImage[0].path;
-    if (req.files) {
-      packageData.durationDescription.forEach((item, index) => {
-        if (req.files[index]) {
-          item.image = req.files[index].path;
-        }
-      });
-    }
+    packageData.gallery = req.files.gallery.map((file) => file.path);
+    packageData.currency = 'AED';
 
     if (id) {
       const updatedPackage = await holidayPackageService.updateHolidayPackage(id, packageData);
@@ -105,16 +70,44 @@ const createOrUpdateHolidayPackage = async (req, res) => {
       return res.status(201).json(createdPackage);
     }
   } catch (error) {
-    console.log(error);
+    console.error(error);
     return res.status(500).json({ error: 'Something went wrong.' });
   }
 };
+const getAllHolidayPackages = async (req, res) => {
+  try {
+    const holidayPackages = await holidayPackageService.getAllHolidayPackages();
+    return res.status(200).json(holidayPackages);
+  } catch (error) {
+    console.error('Failed to get holiday packages:', error);
+    return res.status(500).json({ error: 'Failed to get holiday packages.' });
+  }
+};
+const deleteHolidayPackage = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const deleteResult = await holidayPackageService.deleteHolidayPackage(id);
+    return res.status(200).json(deleteResult);
+  } catch (error) {
+    console.error('Failed to delete holiday package:', error);
+    return res.status(500).json({ error: 'Failed to delete holiday package.' });
+  }
+};
 
+const searchHolidayPackageById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const holidayPackage = await holidayPackageService.searchHolidayPackageById(id);
+    return res.status(404).json(holidayPackage);
+  } catch (error) {
+    console.error('Failed to search for holiday package:', error);
+    return res.status(500).json({ error: 'Failed to search for holiday package.' });
+  }
+};
 
 module.exports = {
   createOrUpdateHolidayPackage,
-  upload,
+  getAllHolidayPackages,
+  deleteHolidayPackage,
+  searchHolidayPackageById
 };
-
-
-

@@ -1,18 +1,24 @@
-const { getClient } = require("../../config/database");
+const { getClient } = require('../../config/database');
 
 const createHolidayPackage = async (data) => {
   try {
     const client = await getClient();
     const db = client.db(process.env.DB_NAME);
     const collection = db.collection('holiday_packages');
+    const result = await collection.insertOne(data);
 
-    // Save the new holiday package to MongoDB
-    await collection.insertOne(data);
-
-
-    return data;
+    return {
+      success: true,
+      message: 'Holiday package created successfully.',
+      data: result.ops[0],
+    };
   } catch (error) {
-    throw new Error('Failed to create holiday package.');
+    console.error('Failed to create holiday package:', error);
+    return {
+      success: false,
+      message: 'Failed to create holiday package.',
+      error: error.message || 'Unknown error',
+    };
   }
 };
 
@@ -22,26 +28,113 @@ const updateHolidayPackage = async (id, updatedData) => {
     const db = client.db(process.env.DB_NAME);
     const collection = db.collection('holiday_packages');
 
-    // Convert the id to ObjectId (required for querying by _id in MongoDB)
-    const objectId = new ObjectId(id);
-
-    // Update the holiday package in MongoDB
     const result = await collection.updateOne(
-      { _id: objectId },
-      { $set: updatedData }
+      { id: id },
+      { $set: updatedData },
+      { returnOriginal: false }
     );
-
-    if (result.modifiedCount === 0) {
-      throw new Error('Holiday package not found or no changes applied.');
+    if (result.matchedCount === 0) {
+      console.error('Holiday package not found or no changes applied.');
+      return {
+        success: false,
+        message: 'Holiday package not found or no changes applied.',
+      };
     }
-
-    return updatedData;
+    return {
+      success: true,
+      message: 'Holiday package updated successfully.',
+      data: result,
+    };
   } catch (error) {
-    throw new Error('Failed to update holiday package.');
+    console.error('Failed to update holiday package:', error);
+    return {
+      success: false,
+      message: 'Failed to update holiday package.',
+      error: error.message || 'Unknown error',
+    };
+  }
+};
+
+const getAllHolidayPackages = async () => {
+  try {
+    const client = await getClient();
+    const db = client.db(process.env.DB_NAME);
+    const collection = db.collection('holiday_packages');
+
+    const holidayPackages = await collection.find({}).toArray();
+    return {
+      success: true,
+      message: 'Successfully fetched all holiday packages.',
+      data: holidayPackages,
+    };
+  } catch (error) {
+    console.error('Failed to get holiday packages:', error);
+    return {
+      success: false,
+      message: 'Failed to get holiday packages.',
+      error: error.message || 'Unknown error',
+    };
+  }
+};
+
+const deleteHolidayPackage = async (id) => {
+  try {
+    const client = await getClient();
+    const db = client.db(process.env.DB_NAME);
+    const collection = db.collection('holiday_packages');
+    const deleteResult = await collection.deleteOne({ id });
+    if (deleteResult.deletedCount === 0) {
+      return {
+        success: false,
+        message: 'Holiday package not found for deletion.',
+      };
+    }
+    return {
+      success: true,
+      message: 'Holiday package deleted successfully.',
+      data: deleteResult,
+    };
+  } catch (error) {
+    console.error('Failed to delete holiday package:', error);
+    return {
+      success: false,
+      message: 'Failed to delete holiday package.',
+      error: error.message || 'Unknown error',
+    };
+  }
+};
+
+const searchHolidayPackageById = async (id) => {
+  try {
+    const client = await getClient();
+    const db = client.db(process.env.DB_NAME);
+    const collection = db.collection('holiday_packages');
+    const holidayPackage = await collection.findOne({ id });
+    if (!holidayPackage) {
+      return {
+        success: false,
+        message: 'Holiday package not found.',
+      };
+    }
+    return {
+      success: true,
+      message: 'Holiday package found successfully.',
+      data: holidayPackage,
+    };
+  } catch (error) {
+    console.error('Failed to search for holiday package:', error);
+    return {
+      success: false,
+      message: 'Failed to search for holiday package.',
+      error: error.message || 'Unknown error',
+    };
   }
 };
 
 module.exports = {
   createHolidayPackage,
   updateHolidayPackage,
+  getAllHolidayPackages,
+  deleteHolidayPackage,
+  searchHolidayPackageById,
 };

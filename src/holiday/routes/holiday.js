@@ -1,27 +1,26 @@
 const express = require('express');
 const router = express.Router();
+const upload = require('./multerConfig');
 const adminHolidayController = require('../controller/adminPanelHoliday');
-const multer = require('multer');
-const path = require('path');
+const holidayController = require('../controller/holiday');
+const { handleMulterError, handleServerError } = require('../middleware/errorHandler');
 
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-
-        cb(null, path.join(__dirname, ''));
-    },
-    filename: (req, file, cb) => {
-
-        cb(null, file.originalname);
-    },
+router.post('/admin', (req, res, next) => {
+    upload.fields([{ name: 'coverImage', maxCount: 1 }, { name: 'gallery', maxCount: 8 }])(req, res, (err) => {
+        if (err) {
+            handleMulterError(err, req, res, next);
+        } else {
+            adminHolidayController.createOrUpdateHolidayPackage(req, res);
+        }
+    });
 });
+router.get('/packages', adminHolidayController.getAllHolidayPackages);
+router.delete('/packages/:id', adminHolidayController.deleteHolidayPackage);
+router.get('/packages/search/:id', adminHolidayController.searchHolidayPackageById);
+router.post('/book', holidayController.createBooking);
+router.get('/book/all', holidayController.getAllBookings);
+router.get('/book', holidayController.getBookingById);
 
-
-const upload = multer({ storage });
-
-// Handle the image upload route for multiple images for each field
-router.post('/admin', upload.fields([
-    { name: 'coverImage', maxCount: 1 },
-    { name: 'gallery', maxCount: 8 },
-]), adminHolidayController.createOrUpdateHolidayPackage);
+router.use(handleServerError);
 
 module.exports = router;
