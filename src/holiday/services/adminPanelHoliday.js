@@ -10,7 +10,7 @@ const createHolidayPackage = async (data) => {
     return {
       success: true,
       message: 'Holiday package created successfully.',
-      data: result.ops[0],
+      data: result,
     };
   } catch (error) {
     console.error('Failed to create holiday package:', error);
