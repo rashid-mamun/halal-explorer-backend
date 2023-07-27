@@ -57,6 +57,7 @@ const createOrUpdateHolidayPackage = async (req, res) => {
     if (error) {
       return res.status(400).json({ error: error.details[0].message });
     }
+    console.log(JSON.stringify(req.files,null,2));
 
     packageData.coverImage = req.files.coverImage[0].path;
     packageData.gallery = req.files.gallery.map((file) => file.path);
@@ -109,7 +110,7 @@ const searchHolidayPackageById = async (req, res) => {
   try {
     const { id } = req.params;
     const holidayPackage = await holidayPackageService.searchHolidayPackageById(id);
-    return res.status(404).json(holidayPackage);
+    return res.status(200).json(holidayPackage);
   } catch (error) {
     console.error('Failed to search for holiday package:', error);
     return res.status(500).json({ error: 'Failed to search for holiday package.' });
