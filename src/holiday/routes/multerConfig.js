@@ -5,13 +5,12 @@ const path = require('path');
 File upload folder 
 */
 
-const UPLOADS_FOLDER = 'src/holiday/uploads/images'
-
+const UPLOADS_FOLDER = 'static/images'
 const imagePath = path.join(process.cwd(), UPLOADS_FOLDER);
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, imagePath);
+        cb(null, UPLOADS_FOLDER);
     },
     filename: (req, file, cb) => {
         const fileExt = path.extname(file.originalname);

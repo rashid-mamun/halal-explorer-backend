@@ -7,6 +7,7 @@ const app = express();
 
 // Middleware
 app.use(cors());
+app.use(express.static('static'));
 app.use(bodyParser.json({ limit: '500mb' }));
 app.use(bodyParser.urlencoded({ limit: '500mb', extended: true }));
 // app.use(multer().any());
