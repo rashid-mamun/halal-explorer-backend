@@ -60,6 +60,17 @@ const createOrUpdateHolidayPackage = async (req, res) => {
 
     packageData.coverImage = req.files.coverImage[0].path;
     packageData.gallery = req.files.gallery.map((file) => file.path);
+
+     // Ensure the uploaded files have buffers before converting to base64
+    // const coverImageFile = req.files['coverImage'][0];
+    // const galleryFiles = req.files['gallery'];
+
+    // if (!coverImageFile.buffer || galleryFiles.some((file) => !file.buffer)) {
+    //   return res.status(400).json({ error: 'Uploaded files are not valid.' });
+    // }
+
+    // packageData.coverImage = coverImageFile.buffer.toString('base64');
+    // packageData.gallery = galleryFiles.map((file) => file.buffer.toString('base64'));
     packageData.currency = 'AED';
 
     if (id) {
