@@ -4,6 +4,7 @@ const bookingService = require('../services/holiday');
 // Define the Joi schema for the request body
 const bookingSchema = Joi.object({
     packageId: Joi.string().required(),
+    packageName: Joi.string(),
     departureDetails: Joi.object({
         departureDate: Joi.date().iso().required(),
     }).required(),
@@ -18,7 +19,7 @@ const bookingSchema = Joi.object({
         lastName: Joi.string().required(),
         email: Joi.string().email().required(),
         nationality: Joi.string().required(),
-        emirates: Joi.string().required(),
+        emirates: Joi.string(),
         address: Joi.string().required(),
     }).required(),
     consultantName: Joi.string(),
@@ -38,6 +39,7 @@ const createBooking = async (req, res) => {
         }
         const {
             packageId,
+            packageName,
             departureDetails,
             passengersDetails,
             contractDetails,
@@ -48,6 +50,7 @@ const createBooking = async (req, res) => {
         // Create the booking using the booking service
         const booking = await bookingService.createBooking({
             packageId,
+            packageName,
             departureDetails,
             passengersDetails,
             contractDetails,

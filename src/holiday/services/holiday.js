@@ -29,6 +29,12 @@ const createBooking = async (bookingData) => {
 
         const holidayPackageCollection = db.collection('holiday_packages');
         const holidayPackage = await holidayPackageCollection.findOne({ id: packageId });
+        if (!holidayPackage) {
+            return {
+                success: false,
+                message: 'Booking failed because the requested package not available.',
+            };
+        }
         const requestedSeats = passengersDetails.single + passengersDetails.adults + passengersDetails.child + passengersDetails.infant;
         if (holidayPackage.seats < requestedSeats) {
             return {
