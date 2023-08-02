@@ -5,19 +5,51 @@ const { createCruisePackage, getAllCruisePackages } = require('../services/admin
 const cruisePackageSchema = Joi.object({
     destination: Joi.string().required(),
     cruiseLine: Joi.string().required(),
-    ship: Joi.string().required(),
-    sailingDates: Joi.array().items(Joi.string()).required(),
+    ship: Joi.array().items(
+        Joi.object().keys({
+            amaWaterways: Joi.string().allow(''),
+            azamara: Joi.string().allow(''),
+            carnivalCruiseLines: Joi.string().allow(''),
+            celebrityCruises: Joi.string().allow(''),
+            costaCruises: Joi.string().allow(''),
+            crystal: Joi.string().allow(''),
+            disneyCruiseLine: Joi.string().allow(''),
+            hollandAmerica: Joi.string().allow(''),
+            hurtigrutenExpeditions: Joi.string().allow(''),
+            hurtigrutenNorwegianCoastalExpress: Joi.string().allow(''),
+            mscCruises: Joi.string().allow(''),
+            norwegianCruiseLine: Joi.string().allow(''),
+            regentSevenSeas: Joi.string().allow(''),
+            royalCaribbean: Joi.string().allow(''),
+            seabourn: Joi.string().allow(''),
+            uniworldBoutiqueRiverCruises: Joi.string().allow(''),
+            vikingOcean: Joi.string().allow(''),
+            vikingRiver: Joi.string().allow(''),
+            windstar: Joi.string().allow('')
+        })
+    ),
+    sailingDates: Joi.array().items(Joi.string().required()).required(),
     length: Joi.string().required(),
-    commentForLength: Joi.string().allow('').required(),
-    itinerary: Joi.object().pattern(Joi.string(), Joi.string()).required(),
-    gallery: Joi.array().items(Joi.string()).optional(),
-    shipFacts: Joi.object().pattern(Joi.string(), Joi.string()).required(),
-    shipInfo: Joi.object().pattern(Joi.string(), Joi.string()).required(),
-    policies: Joi.object().pattern(Joi.string(), Joi.string()).required(),
-    roomTypes: Joi.object().pattern(Joi.string(), Joi.string()).required(),
-    price: Joi.object({
-        startsFrom: Joi.string().required(),
-    }).required(),
+    commentForLength: Joi.string(),
+    itinerary: Joi.array().items(
+        Joi.object().required()
+    ),
+    gallery: Joi.array().items(Joi.string().required()),
+    shipFacts: Joi.array().items(
+        Joi.object().required()
+    ),
+    shipInfo: Joi.array().items(
+        Joi.object().required()
+    ),
+    policies: Joi.array().items(
+        Joi.object().required()
+    ),
+    roomTypes: Joi.array().items(
+        Joi.object().required()
+    ),
+    price: Joi.array().items(
+        Joi.object().required()
+    )
 });
 
 async function createCruisePackageController(req, res) {

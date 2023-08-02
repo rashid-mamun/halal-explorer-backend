@@ -4,6 +4,7 @@ const { saveCruiseEnquiry, getAllCruiseEnquiries } = require('../services/cruise
 // Joi schema for validation
 const cruiseEnquirySchema = Joi.object({
     name: Joi.string().required(),
+    cruiseId: Joi.string().required(),
     email: Joi.string().email().required(),
     contactNumber: Joi.string().required(),
     guest: Joi.object({
