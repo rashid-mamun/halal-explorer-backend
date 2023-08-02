@@ -1,5 +1,13 @@
 const Joi = require('joi');
-const { createCruisePackage, getAllCruisePackages } = require('../services/adminPanelCruise');
+const {
+    createCruisePackage,
+    getAllCruisePackages,
+    getAllCruiseLines,
+    getAllShipsByCruiseLine,
+    addCruiseLine,
+    addShip
+
+} = require('../services/adminPanelCruise');
 
 // Define Joi schema for validation
 // const cruisePackageSchema = Joi.object({
@@ -162,7 +170,97 @@ async function getAllCruisePackagesController(req, res) {
         res.status(500).json({ error: 'Failed to fetch cruise packages.' });
     }
 }
+const cruiseLineSchema = Joi.object({
+  cruiseLine: Joi.string().required(),
+});
+
+const shipSchema = Joi.object({
+  cruiseLine: Joi.string().required(),
+  ship: Joi.string().required(),
+});
+
+async function getAllCruiseLinesController(req, res) {
+  try {
+    const cruiseLines = await getAllCruiseLines();
+    res.status(200).json(cruiseLines);
+  } catch (err) {
+    console.error('Error fetching cruise lines:', err);
+    res.status(500).json({ error: 'Failed to fetch cruise lines.' });
+  }
+}
+
+async function addCruiseLineController(req, res) {
+  try {
+    const { error } = cruiseLineSchema.validate(req.body, { abortEarly: false });
+
+    if (error) {
+      const validationErrorMessage = error.details.map((err) => err.message);
+      return res.status(400).json({ error: validationErrorMessage });
+    }
+
+    const { cruiseLine } = req.body;
+    const cruiseLineData = { cruiseLine };
+
+    const result = await addCruiseLine(cruiseLineData);
+
+    if (result.success) {
+      return res.status(201).json(result);
+    } else {
+      return res.status(400).json(result);
+    }
+  } catch (err) {
+    console.error('Error adding cruise line:', err);
+    return res.status(500).json({ error: 'Failed to add cruise line.' });
+  }
+}
+
+async function getAllShipsController(req, res) {
+  try {
+    const { cruiseLine } = req.query;
+    const { error } = Joi.string().required().validate(cruiseLine);
+
+    if (error) {
+      return res.status(400).json({ error: 'Missing cruiseLine parameter in query.' });
+    }
+
+    const ships = await getAllShipsByCruiseLine(cruiseLine);
+    res.status(200).json(ships);
+  } catch (err) {
+    console.error('Error fetching ships:', err);
+    res.status(500).json({ error: 'Failed to fetch ships.' });
+  }
+}
+
+async function addShipController(req, res) {
+  try {
+    const { error } = shipSchema.validate(req.body, { abortEarly: false });
+
+    if (error) {
+      const validationErrorMessage = error.details.map((err) => err.message);
+      return res.status(400).json({ error: validationErrorMessage });
+    }
+
+    const { cruiseLine, ship } = req.body;
+    const shipData = { cruiseLine, ship };
+
+    const result = await addShip(shipData);
+
+    if (result.success) {
+      return res.status(201).json(result);
+    } else {
+      return res.status(400).json(result);
+    }
+  } catch (err) {
+    console.error('Error adding ship:', err);
+    return res.status(500).json({ error: 'Failed to add ship.' });
+  }
+}
+
 module.exports = {
     createCruisePackageController,
     getAllCruisePackagesController,
+    getAllCruiseLinesController,
+    addCruiseLineController,
+    getAllShipsController,
+    addShipController,
 };

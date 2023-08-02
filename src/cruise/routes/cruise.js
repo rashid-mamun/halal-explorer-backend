@@ -11,6 +11,11 @@ router.get('/enquiry', cruiseController.getCruiseEnquiries);
 router.post('/admin', adminPanelcruiseController.createCruisePackageController);
 router.get('/admin', adminPanelcruiseController.getAllCruisePackagesController);
 
+router.get('/cruiselines', adminPanelcruiseController.getAllCruiseLinesController);
+router.post('/cruiselines', adminPanelcruiseController.addCruiseLineController);
+router.get('/ships', adminPanelcruiseController.getAllShipsController);
+router.post('/ships', adminPanelcruiseController.addShipController);
+
 router.use(handleServerError);
 
 module.exports = router;
