@@ -9,6 +9,9 @@ const { handleMulterError, handleServerError } = require('../middleware/errorHan
 router.post('/enquiry', cruiseController.createCruiseEnquiry);
 router.get('/enquiry', cruiseController.getCruiseEnquiries);
 router.post('/admin', adminPanelcruiseController.createCruisePackageController);
+router.put('/admin/:id', adminPanelcruiseController.updateCruisePackageController);
+router.get('/admin/:id', adminPanelcruiseController.getCruisePackageByIdController);
+router.delete('/admin/:id', adminPanelcruiseController.deleteCruisePackageByIdController);
 router.get('/admin', adminPanelcruiseController.getAllCruisePackagesController);
 
 router.get('/cruiselines', adminPanelcruiseController.getAllCruiseLinesController);

@@ -1,5 +1,52 @@
 const { getClient } = require('../../config/database');
+const { ObjectId } = require('mongodb');
 
+async function updateCruisePackage(id, cruisePackageData) {
+  try {
+    if (!ObjectId.isValid(id)) {
+      return {
+        success: false,
+        message: 'Invalid cruise package ID. Please provide a valid ID.'
+      };
+    }
+    const client = await getClient();
+    const db = client.db(process.env.DB_NAME);
+    const collection = db.collection('cruise_packages');
+    const objectId = new ObjectId(id);
+
+
+    const existingPackage = await collection.findOne({ _id: objectId });
+    if (!existingPackage) {
+      return {
+        success: false,
+        message: 'Cruise package not found.',
+      };
+    }
+
+
+    const updateResult = await collection.updateOne({ _id: objectId }, { $set: cruisePackageData });
+
+    if (updateResult.modifiedCount === 0) {
+      return {
+        success: false,
+        message: 'No changes made. Cruise package update failed.',
+      };
+    }
+
+
+    return {
+      success: true,
+      message: 'Cruise package updated successfully.',
+      data: cruisePackageData,
+    };
+  } catch (err) {
+    console.error('Failed to update cruise package:', err);
+    return {
+      success: false,
+      message: 'Failed to update cruise package. Please try again later.'
+    }
+  }
+}
 async function createCruisePackage(cruisePackageData) {
   try {
     const client = await getClient();
@@ -58,7 +105,74 @@ async function getAllCruisePackages() {
     }
   }
 }
+async function getCruisePackageById(id) {
+  try {
+    if (!ObjectId.isValid(id)) {
+      return {
+        success: false,
+        message: 'Invalid cruise package ID. Please provide a valid ID.'
+      };
+    }
+    const client = await getClient();
+    const db = client.db(process.env.DB_NAME);
+    const collection = db.collection('cruise_packages');
+    const objectId = new ObjectId(id);
 
+    const cruisePackage = await collection.findOne({ _id: objectId });
+
+    if (!cruisePackage) {
+      return {
+        success: false,
+        error: 'Cruise package not found or has been deleted.'
+      }
+    }
+
+    return {
+      success: true,
+      data: cruisePackage
+    }
+  } catch (err) {
+    console.error('Failed to get cruise package:', err);
+    return {
+      success: false,
+      error: 'Failed to fetch cruise package. Please try again later.'
+    }
+  }
+}
+async function deleteCruisePackageById(id) {
+  try {
+    if (!ObjectId.isValid(id)) {
+      return {
+        success: false,
+        message: 'Invalid cruise package ID. Please provide a valid ID.'
+      };
+    }
+    const client = await getClient();
+    const db = client.db(process.env.DB_NAME);
+    const collection = db.collection('cruise_packages');
+    const objectId = new ObjectId(id);
+
+    const deleteResult = await collection.deleteOne({ _id: objectId });
+    if (deleteResult.deletedCount === 1) {
+      return {
+        success: true,
+        message: 'Cruise package deleted successfully.'
+      };
+    }
+    return {
+      success: false,
+      message: 'Cruise package not found or has already been deleted.'
+    };
+  }
+  catch (err) {
+    console.error('Failed to delete cruise package:', err);
+    return {
+      success: false,
+      message: 'Failed to delete cruise package. Please try again later.'
+    };
+
+  }
+}
 async function getAllCruiseLines() {
   try {
     const client = await getClient();
@@ -176,6 +290,9 @@ async function addShip(shipData) {
 }
 module.exports = {
   createCruisePackage,
+  updateCruisePackage,
+  getCruisePackageById,
+  deleteCruisePackageById,
   getAllCruisePackages,
   getAllCruiseLines,
   addCruiseLine,
