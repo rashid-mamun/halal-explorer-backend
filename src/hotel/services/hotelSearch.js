@@ -122,7 +122,7 @@ const searchHotels = async (req) => {
         const hotels = Object.values(updatedHotelsDataMapping);
         const page = req.page;
         const pageNumber = parseInt(page, 10) || 1;
-        const pageSize = parseInt(req.pageSize, 10) || 10;
+        const pageSize = parseInt(req.pageSize, 10) || 100;
         const totalHotels = hotels.length;
 
         // Validate page number

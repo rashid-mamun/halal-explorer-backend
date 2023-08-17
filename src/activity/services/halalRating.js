@@ -90,7 +90,7 @@ const getAllHalalActivityInfo = async (req) => {
     const halalActivitysData = await collection.find().toArray();
     const page = req.page;
     const pageNumber = parseInt(page, 10) || 1;
-    const pageSize = parseInt(req.pageSize, 10) || 20;
+    const pageSize = parseInt(req.pageSize, 10) || 100;
     const totalActivitys = halalActivitysData.length;
 
     // Validate page number

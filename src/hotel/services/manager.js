@@ -38,7 +38,7 @@ const getAllManagerInfo = async (req) => {
     const managersData = await collection.find().toArray();
     const page = req.page;
     const pageNumber = parseInt(page, 10) || 1;
-    const pageSize = parseInt(req.pageSize, 10) || 20;
+    const pageSize = parseInt(req.pageSize, 10) || 100;
     const totalManagers = managersData.length;
 
     // Validate page number

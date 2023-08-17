@@ -210,9 +210,16 @@ const searchActivities = async (destination, adult, child, departure, arrival, r
     );
 
     const page = parseInt(req.page, 10) || 1;
-    const pageSize = parseInt(req.pageSize, 10) || 10;
+    const pageSize = parseInt(req.pageSize, 10) || 100;
 
     const totalActivities = finalActivityCodes.length;
+  
+    if(totalActivities==0){
+      return {
+        success: false,
+        error: 'Activities not found',
+      };
+    }
 
     // Validate page number
     const maxPageNumber = Math.ceil(totalActivities / pageSize);
@@ -523,7 +530,7 @@ const getAllActivityInfo = async (req) => {
     const activityData = await collection.find().toArray();
     const page = req.page;
     const pageNumber = parseInt(page, 10) || 1;
-    const pageSize = parseInt(req.pageSize, 10) || 20;
+    const pageSize = parseInt(req.pageSize, 10) || 100;
     const totalActivity = activityData.length;
 
     // Validate page number
