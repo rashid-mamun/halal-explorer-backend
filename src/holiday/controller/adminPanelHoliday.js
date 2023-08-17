@@ -19,7 +19,7 @@ const validateHolidayPackage = (data) => {
       lng: Joi.number().required(),
     }).required(),
     coverImage: Joi.string(),
-    gallery: Joi.string(),
+    gallery: Joi.array().items(Joi.string()),
     durationDescription: Joi.array().items(Joi.object({
       titles: Joi.string().required(),
       food: Joi.string().required(),
@@ -44,9 +44,12 @@ const validateHolidayPackage = (data) => {
 
 const createOrUpdateHolidayPackage = async (req, res) => {
   try {
-    if (!req.files || !req.files['coverImage'] || !req.files['gallery']) {
+
+    /*
+     if (!req.files || !req.files['coverImage'] || !req.files['gallery']) {
       return res.status(400).json({ error: 'Please upload files for both fields.' });
-    }
+    } 
+    */
     const { id } = req.body;
     const packageData = req.body;
 
@@ -57,21 +60,13 @@ const createOrUpdateHolidayPackage = async (req, res) => {
     if (error) {
       return res.status(400).json({ error: error.details[0].message });
     }
-    console.log(JSON.stringify(req.files,null,2));
+    console.log(JSON.stringify(req.files, null, 2));
 
-    packageData.coverImage = req.files.coverImage[0].path;
-    packageData.gallery = req.files.gallery.map((file) => file.path);
+    /*  packageData.coverImage = req.files.coverImage[0].path;
+     packageData.gallery = req.files.gallery.map((file) => file.path); 
+     */
 
-     // Ensure the uploaded files have buffers before converting to base64
-    // const coverImageFile = req.files['coverImage'][0];
-    // const galleryFiles = req.files['gallery'];
 
-    // if (!coverImageFile.buffer || galleryFiles.some((file) => !file.buffer)) {
-    //   return res.status(400).json({ error: 'Uploaded files are not valid.' });
-    // }
-
-    // packageData.coverImage = coverImageFile.buffer.toString('base64');
-    // packageData.gallery = galleryFiles.map((file) => file.buffer.toString('base64'));
     packageData.currency = 'AED';
 
     if (id) {
