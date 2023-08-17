@@ -10,7 +10,13 @@ const searchHalalHotels = async (req) => {
     const client = getClient();
     const db = client.db(process.env.DB_NAME);
     const collection = db.collection(process.env.DUMB_HOTEL_COLLECTION);
-
+    const halalHotelcollection = db.collection(process.env.HALAL_HOTELS_COLLECTION);
+    const halalHotelsData = await halalHotelcollection.find().toArray();
+    const halalHotelsDataObj = halalHotelsData.reduce((acc, item) => {
+      acc[item.id] = item;
+      return acc;
+    }, {});
+   
     await createAddressIndexIfNotExists(collection);
     const query = { $text: { $search: keyword } };
     const projection = { id: 1 };
@@ -24,10 +30,23 @@ const searchHalalHotels = async (req) => {
     let hotels = Object.values(hotelsDataMapping);
     // console.log(JSON.stringify(hotels));
 
+    hotels.forEach(data => {
+      if (halalHotelsDataObj[data.id]) {
+        data.halalRatingInfo = halalHotelsDataObj[data.id];
+      }
+    });
+
     const page = req.page;
     const pageNumber = parseInt(page, 10) || 1;
     const pageSize = parseInt(req.pageSize, 10) || 100;
     const totalHotels = hotels.length;
+
+    if (totalHotels == 0) {
+      return {
+        success: false,
+        message: 'Hotel Not Found'
+      }
+    }
 
     // Validate page number
     const maxPageNumber = Math.ceil(totalHotels / pageSize);
