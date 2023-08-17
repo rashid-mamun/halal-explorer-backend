@@ -213,8 +213,8 @@ const searchActivities = async (destination, adult, child, departure, arrival, r
     const pageSize = parseInt(req.pageSize, 10) || 100;
 
     const totalActivities = finalActivityCodes.length;
-  
-    if(totalActivities==0){
+
+    if (totalActivities == 0) {
       return {
         success: false,
         error: 'Activities not found',
@@ -528,11 +528,32 @@ const getAllActivityInfo = async (req) => {
     const db = client.db(process.env.DB_NAME);
     const collection = db.collection('activityInfo');
     const activityData = await collection.find().toArray();
+    const halalCollection = db.collection(process.env.HALAL_ACTIVITIES_COLLECTION);
+    const halalActivitiesData = await halalCollection.find().toArray();
+    const halalActivitiesDataObj = halalActivitiesData.reduce((acc, item) => {
+      acc[item.code] = item;
+      return acc;
+    }, {});
+   
+
+    activityData.forEach(data => {
+      if (halalActivitiesDataObj[data.activityCode]) {
+        data.halalRatingInfo = halalActivitiesDataObj[data.activityCode];
+      }
+    });
+    // console.log(JSON.stringify(activityData));
+
     const page = req.page;
     const pageNumber = parseInt(page, 10) || 1;
     const pageSize = parseInt(req.pageSize, 10) || 100;
     const totalActivity = activityData.length;
 
+    if (totalActivity == 0) {
+      return {
+        success: false,
+        error: 'Activities not found',
+      };
+    }
     // Validate page number
     const maxPageNumber = Math.ceil(totalActivity / pageSize);
     if (pageNumber > maxPageNumber) {

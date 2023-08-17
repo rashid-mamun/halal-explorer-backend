@@ -93,6 +93,12 @@ const getAllHalalActivityInfo = async (req) => {
     const pageSize = parseInt(req.pageSize, 10) || 100;
     const totalActivitys = halalActivitysData.length;
 
+    if (totalActivitys == 0) {
+      return {
+        success: false,
+        error: 'Halal Activities not found',
+      };
+    }
     // Validate page number
     const maxPageNumber = Math.ceil(totalActivitys / pageSize);
     if (pageNumber > maxPageNumber) {
