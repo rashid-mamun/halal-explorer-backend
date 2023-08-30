@@ -8,7 +8,7 @@ router.get('/api', async (req, res) => {
   });
 });
 
-router.get('/search', apiController.halalSearch);
+router.get('/search', apiController.managerSearch);
 router.post('/info', apiController.managerInfo);
 router.get('/all', apiController.getAllManagerInfo);
 router.get('/one', apiController.getManagerInfo);

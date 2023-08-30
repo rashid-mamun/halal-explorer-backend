@@ -1,5 +1,5 @@
 const Joi = require('joi');
-const { saveOrUpdateManagerInfo, getAllManagerInfo, getManagerInfo } = require("../services/manager");
+const { saveOrUpdateManagerInfo, getAllManagerInfo, getManagerInfo, searchHalalManagerHotels } = require("../services/manager");
 
 const managerInfoSchema = Joi.object({
   managerName: Joi.string().required(),
@@ -62,6 +62,24 @@ exports.getManagerInfo = async (req, res) => {
       success: false,
       error: err.message || 'Internal server error',
     });
+  }
+};
+exports.managerSearch = async (req, res) => {
+  const { city, hotelName } = req.query;
+
+  try {
+    if (!city && !hotelName) {
+      return res.status(400).json({
+        success: false,
+        error: 'Please provide the city or hotelName parameter.'
+      });
+    }
+
+    const hotels = await searchHalalManagerHotels(req.query);
+    return res.json(hotels);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: 'Internal server error' });
   }
 };
 
