@@ -105,8 +105,21 @@ const transformImageUrl = (imageUrl, size) => {
 };
 
 const createAddressIndexIfNotExists = async (collection) => {
+  
+  const nameIndexExists = await collection.indexExists('name_text');
+  if (nameIndexExists) {
+    console.log("name_text drop index");
+    await collection.dropIndex('name_text');
+  }
+
   const indexExists = await collection.indexExists('address_text');
+  
   if (!indexExists) {
+    const addressIndexExists = await collection.indexExists('address_1');
+    if (addressIndexExists) {
+      console.log("address_1 drop index");
+      await collection.dropIndex('address_1');
+    }
     await collection.createIndex({ address: "text" });
   }
 };
