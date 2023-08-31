@@ -1,6 +1,6 @@
 const hotelService = require("../services/index");
 const Joi = require('joi');
-
+const { getCacheData } = require('../../utils/nodeCache')
 const hotelSearchSchema = Joi.object({
     city: Joi.string().required(),
     checkin: Joi.string().required(),
@@ -8,6 +8,13 @@ const hotelSearchSchema = Joi.object({
     guests: Joi.string().required(),
     currency: Joi.string().required(),
     residency: Joi.string().required()
+});
+const hotelSearchFilterSchema = Joi.object({
+    searchId: Joi.string().required(),
+    travellerRating: Joi.string(),
+    amenities: Joi.array().items(Joi.string()),
+    deals: Joi.array().items(Joi.string()),
+    halalRating: Joi.string()
 });
 
 const hotelSearchDetailsSchema = Joi.object({
@@ -42,6 +49,25 @@ exports.hotelSearch = async (req, res) => {
     try {
         console.log("---- hotel search calling ----------", queryParams);
         const hotels = await hotelService.searchHotels(queryParams);
+        return res.json(hotels);
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ error: 'Internal server error' });
+    }
+};
+exports.hotelSearchFilter = async (req, res) => {
+    const queryParams = req.query;
+    const validationError = validateRequest(queryParams, hotelSearchFilterSchema);
+    if (validationError) {
+        return res.status(400).json({
+            success: false,
+            error: validationError
+        });
+    }
+
+    try {
+        console.log("---- hotel  filter search calling ----------", queryParams);
+        const hotels = await hotelService.searchFilterHotels(queryParams);
         return res.json(hotels);
     } catch (error) {
         console.error(error);

@@ -1,11 +1,16 @@
 const { getClient } = require("../../config/database");
 const axios = require('axios');
 const btoa = require('btoa');
+const { v4: uuidv4 } = require('uuid');
+const { setCacheData } = require('../../utils/nodeCache')
 
+function generateUniqueSearchId() {
+    return uuidv4();
+}
 
 const searchHotels = async (req) => {
     try {
-
+        const uniqueSearchId = generateUniqueSearchId();
         const keyword = req.city;
         const client = getClient();
         const db = client.db(process.env.DB_NAME);
@@ -145,10 +150,11 @@ const searchHotels = async (req) => {
         // //         message: 'no hotel found! please change the search parameters'
         // //     }
         // // }
-
+        const setResult = await setCacheData(uniqueSearchId, paginatedData);
         return {
             success: true,
             totalHotels,
+            searchId: uniqueSearchId,
             data: paginatedData,
         }
 

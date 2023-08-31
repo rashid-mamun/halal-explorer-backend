@@ -5,4 +5,5 @@ module.exports = {
     ...require('./halalRating'),
     ...require('./manager'),
     ...require('./dumbHotelById'),
+    ...require('./hotelSearchFilter'),
 }

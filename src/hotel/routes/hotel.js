@@ -9,6 +9,7 @@ router.get('/api', async (req, res) => {
 });
 
 router.get('/search', apiController.hotelSearch);
+router.get('/search/filter', apiController.hotelSearchFilter);
 router.get('/search-details', apiController.hotelSearchDetails);
 router.get('/dumb', apiController.dumbHotelById);
 
