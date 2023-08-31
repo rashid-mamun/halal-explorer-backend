@@ -275,7 +275,7 @@ const activitySearch = async (req, res) => {
     if (activities.success) {
       return res.json(activities);
     } else {
-      return res.status(400).json({ error: activities.error });
+      return res.status(400).json(activities );
     }
   } catch (error) {
     console.error(error);
@@ -304,7 +304,7 @@ const activitySearchDetails = async (req, res) => {
     if (activities.success) {
       return res.json(activities);
     } else {
-      return res.status(400).json({ error: activities.error });
+      return res.status(400).json( activities);
     }
   } catch (error) {
     console.error(error);
