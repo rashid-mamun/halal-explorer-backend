@@ -29,9 +29,9 @@ router.get('/halal/activity', halalActivityController.getHalalActivity);
 router.post('/halal/structure', halalActivityController.halalRatingStructure);
 router.get('/halal/structure', halalActivityController.getHalalRatingStructure);
 
-router.get('manager/search', managerController.managerSearch);
-router.post('manager/info', managerController.managerInfo);
-router.get('manager/all', managerController.getAllManagerInfo);
-router.get('manager/one', managerController.getManagerInfo);
+router.get('/manager/search', managerController.managerSearch);
+router.post('/manager/info', managerController.managerInfo);
+router.get('/manager/all', managerController.getAllManagerInfo);
+router.get('/manager/one', managerController.getManagerInfo);
 
 module.exports = router;
