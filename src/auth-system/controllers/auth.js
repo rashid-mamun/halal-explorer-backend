@@ -1,0 +1,195 @@
+const jwt = require('jsonwebtoken');
+const { createUser, getUserByEmail, updateUser } = require('../models/user');
+const Joi = require('joi');
+const bcrypt = require('bcrypt');
+const { isEmail } = require('validator');
+
+const signupSchema = Joi.object({
+    email: Joi.string().email().required(),
+    password: Joi.string().min(6).required(),
+    role: Joi.string().valid('employee', 'manager', 'admin').required(),
+});
+const loginSchema = Joi.object({
+    email: Joi.string().email().required(),
+    password: Joi.string().min(6).required(),
+});
+
+const adminAddSchema = Joi.object({
+    email: Joi.string().email().required(),
+    role: Joi.string().valid('admin', 'employee', 'manager').required(),
+});
+const employeeAddSchema = Joi.object({
+    email: Joi.string().email().required(),
+    role: Joi.string().valid('employee', 'manager').required(),
+});
+// Authenticate user and generate JWT token
+async function login(req, res) {
+    try {
+        const { error } = loginSchema.validate(req.body);
+        if (error) throw new Error(error.details[0].message);
+
+        const { email, password } = req.body;
+        const user = await getUserByEmail(email);
+
+        if (user) {
+            const isValidPassword = await bcrypt.compare(
+                password,
+                user.password
+            );
+
+            if (isValidPassword) {
+                /* 
+                        generate token
+                    */
+                const token = jwt.sign(
+                    {
+                        email: user.email,
+                        role: user.role,
+                    },
+                    process.env.JWT_SECRET,
+                    {
+                        expiresIn: process.env.JWT_SECRET_TIME_LIMIT,
+                    }
+                );
+
+                res.status(200).json({
+                    success: true,
+                    access_token: token,
+                    message: 'login  successful!',
+                });
+            } else {
+                res.status(401).json({
+                    success: false,
+                    error: 'Authetication failed!',
+                });
+            }
+        }
+        else {
+            res.status(401).json({
+                success: false,
+                error: 'Authetication failed!',
+            });
+        }
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+}
+
+async function register(req, res) {
+    try {
+        const { error } = signupSchema.validate(req.body);
+        if (error) throw new Error(error.details[0].message);
+
+        const { email, password } = req.body;
+        const role = 'client';
+
+        if (!isEmail(email)) {
+            return res.status(400).json({ message: 'Invalid email format' });
+        }
+
+        const existingUser = await getUserByEmail(email);
+        if (existingUser) {
+            return res.status(400).json({
+                success: false,
+                message: 'Email already registered'
+            }); // Update the user's role to "admin"
+        }
+        const user = await createUser(email, password, role);
+        if (!user.success) {
+            res.status(201).json({
+                success: false,
+                message: 'User creation failed'
+            });
+        }
+        res.status(201).json({
+            success: true,
+            message: 'User created successfully'
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            success: false,
+            message: 'Internal server error'
+        });
+    }
+}
+async function addAdmin(req, res) {
+    try {
+        const { error } = adminAddSchema.validate(req.body);
+        if (error) throw new Error(error.details[0].message);
+
+        const { email, role } = req.body;
+
+        const existingUser = await getUserByEmail(email);
+        if (!existingUser) {
+            return res.status(400).json({
+                success: false,
+                message: 'No valid user found'
+            });
+        }
+        const updatedUser = await updateUser(email, role);
+
+        if (!updatedUser.success) {
+            return res.status(400).json({
+                success: false,
+                message: 'User role update failed'
+            });
+        }
+
+        res.status(201).json({
+            success: true,
+            message: 'User role updated successfully'
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            success: false,
+            message: 'Internal server error'
+        });
+    }
+}
+async function addEmployee(req, res) {
+    try {
+        const { error } = employeeAddSchema.validate(req.body);
+        if (error) throw new Error(error.details[0].message);
+
+        const { email, role } = req.body;
+
+        const existingUser = await getUserByEmail(email);
+        if (!existingUser) {
+            return res.status(400).json({
+                success: false,
+                message: 'No valid user found'
+            });
+        }
+        const updatedUser = await updateUser(email, role);
+
+        if (!updatedUser.success) {
+            return res.status(400).json({
+                success: false,
+                message: 'User role update failed'
+            });
+        }
+
+        res.status(201).json({
+            success: true,
+            message: 'User role updated successfully'
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            success: false,
+            message: 'Internal server error'
+        });
+    }
+}
+
+
+
+module.exports = {
+    login,
+    register,
+    addAdmin,
+    addEmployee,
+};
