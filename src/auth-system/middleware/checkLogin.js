@@ -7,7 +7,7 @@ const checkLogin = (req, res, next) => {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
         const { email, role } = decoded;
         req.userEmail = email;
-        req.UserRole = role;
+        req.userRole = role;
         console.log(email);
         console.log(role);
         next();

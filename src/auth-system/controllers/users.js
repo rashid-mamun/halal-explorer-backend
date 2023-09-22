@@ -106,7 +106,7 @@ exports.updateOneUser = async (req, res) => {
     const { email, password, role, managerInfo } = req.body;
     const profileData = {};
 
-    if (newEmail) {
+    if (email) {
         profileData.email = email;
     }
     if (password) {
@@ -137,6 +137,7 @@ exports.updateOneUser = async (req, res) => {
         const client = getClient();
         const db = client.db(process.env.DB_NAME);
         const usersCollection = db.collection(COLLECTION_NAME);
+        console.log(profileData);
         const result = await usersCollection.updateOne(
             { email },
             { $set: profileData }

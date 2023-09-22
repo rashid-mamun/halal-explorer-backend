@@ -1,7 +1,7 @@
 function authorizeRoles(allowedRoles) {
     return (req, res, next) => {
-        console.log(req);
-        const userRole = req.role;
+        console.log(req.userRole);
+        const userRole = req.userRole;
         if (!allowedRoles.includes(userRole)) {
             return res.status(403).json({
                 success: false,
