@@ -55,9 +55,9 @@ async function login(req, res) {
 
                 res.status(200).json({
                     success: true,
-                    access_token: token,
-                    data:user,
                     message: 'login  successful!',
+                    access_token: token,
+                    data: user,
                 });
             } else {
                 res.status(401).json({
@@ -82,9 +82,8 @@ async function register(req, res) {
     try {
         const { error } = signupSchema.validate(req.body);
         if (error) throw new Error(error.details[0].message);
+        const { email, password, role, managerInfo } = req.body;
 
-        const { email, password,role,managerInfo } = req.body;
-      
         if (!isEmail(email)) {
             return res.status(400).json({ message: 'Invalid email format' });
         }
@@ -96,7 +95,7 @@ async function register(req, res) {
                 message: 'Email already registered'
             }); // Update the user's role to "admin"
         }
-        const user = await createUser(email, password, role,managerInfo);
+        const user = await createUser(email, password, role, managerInfo);
         if (!user.success) {
             res.status(201).json({
                 success: false,
@@ -115,76 +114,63 @@ async function register(req, res) {
         });
     }
 }
+async function updateUserRole(req, res, allowedRole, schema) {
+    try {
+        if (req.userRole !== allowedRole) {
+            return res.status(403).json({
+                success: false,
+                message: `User is not authorized to update ${allowedRole} roles`
+            });
+        }
+
+        const { error } = schema.validate(req.body);
+        if (error) {
+            return res.status(400).json({
+                success: false,
+                message: error.details[0].message
+            });
+        }
+
+        const { email, role } = req.body;
+        const existingUser = await getUserByEmail(email);
+
+        if (!existingUser) {
+            return res.status(400).json({
+                success: false,
+                message: 'No valid user found'
+            });
+        }
+
+        const updatedUser = await updateUser(email, role);
+
+        if (!updatedUser.success) {
+            return res.status(400).json({
+                success: false,
+                message: 'User role update failed'
+            });
+        }
+
+        res.status(201).json({
+            success: true,
+            message: 'User role updated successfully'
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            success: false,
+            message: 'Internal server error'
+        });
+    }
+}
+
 async function addAdmin(req, res) {
-    try {
-        const { error } = adminAddSchema.validate(req.body);
-        if (error) throw new Error(error.details[0].message);
-
-        const { email, role } = req.body;
-
-        const existingUser = await getUserByEmail(email);
-        if (!existingUser) {
-            return res.status(400).json({
-                success: false,
-                message: 'No valid user found'
-            });
-        }
-        const updatedUser = await updateUser(email, role);
-
-        if (!updatedUser.success) {
-            return res.status(400).json({
-                success: false,
-                message: 'User role update failed'
-            });
-        }
-
-        res.status(201).json({
-            success: true,
-            message: 'User role updated successfully'
-        });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({
-            success: false,
-            message: 'Internal server error'
-        });
-    }
+    await updateUserRole(req, res, 'admin', adminAddSchema);
 }
+
 async function addEmployee(req, res) {
-    try {
-        const { error } = employeeAddSchema.validate(req.body);
-        if (error) throw new Error(error.details[0].message);
-
-        const { email, role } = req.body;
-
-        const existingUser = await getUserByEmail(email);
-        if (!existingUser) {
-            return res.status(400).json({
-                success: false,
-                message: 'No valid user found'
-            });
-        }
-        const updatedUser = await updateUser(email, role);
-
-        if (!updatedUser.success) {
-            return res.status(400).json({
-                success: false,
-                message: 'User role update failed'
-            });
-        }
-
-        res.status(201).json({
-            success: true,
-            message: 'User role updated successfully'
-        });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({
-            success: false,
-            message: 'Internal server error'
-        });
-    }
+    await updateUserRole(req, res, 'employee', employeeAddSchema);
 }
+
 
 
 

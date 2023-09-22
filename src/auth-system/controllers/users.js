@@ -6,12 +6,6 @@ const COLLECTION_NAME = 'users';
 
 exports.getOneUser = async (req, res) => {
     try {
-        if (req.userEmail !== req.params.email) {
-            return res.status(400).json({
-                success: false,
-                message: 'User is not valid'
-            });
-        }
         const email = req.params.email;
         const client = getClient();
         const db = client.db(process.env.DB_NAME);
@@ -29,8 +23,8 @@ exports.getOneUser = async (req, res) => {
             success: true,
             data: user
         });
-    } catch (err) {
-        console.error(err);
+    } catch (error) {
+        console.error('Error getting user:', error);
         return res.status(500).json({
             success: false,
             message: 'Internal Server Error'
@@ -38,54 +32,31 @@ exports.getOneUser = async (req, res) => {
     }
 };
 
-exports.updateOneUser = async (req, res) => {
-    const profileData = {
-        email: req.body.newEmail,
-        password: req.body.password,
-        role: req.body.role
-    };
+exports.getAllUser = async (req, res) => {
     try {
-        if (req.userRole !== 'admin') {
-            return res.status(400).json({
-                success: false,
-                message: 'User is not valid'
-            });
-        }
-        const email = req.params.email;
         const client = getClient();
         const db = client.db(process.env.DB_NAME);
         const usersCollection = db.collection(COLLECTION_NAME);
-        const result = await usersCollection.updateOne(
-            { email },
-            { $set: profileData }
-        );
-
-        if (result.modifiedCount === 0) {
-            return res.status(404).json({
-                success: false,
-                message: 'User not found or profile not updated',
-            });
-        }
+        const result = await usersCollection.find().toArray();
 
         return res.status(200).json({
             success: true,
-            message: 'Profile updated successfully',
+            data: result
         });
-    } catch (e) {
-        console.error('Error updating user:', e);
+    } catch (error) {
+        console.error('Error getting all users:', error);
         return res.status(500).json({
             success: false,
             message: 'Internal Server Error'
         });
     }
 };
-
 exports.updateOneUserPassword = async (req, res) => {
     try {
         if (req.userEmail !== req.params.email) {
             return res.status(400).json({
                 success: false,
-                message: 'User is not valid'
+                message: 'User is not authorized to update password'
             });
         }
         const email = req.params.email;
@@ -131,7 +102,65 @@ exports.updateOneUserPassword = async (req, res) => {
         });
     }
 };
+exports.updateOneUser = async (req, res) => {
+    const { email, password, role, managerInfo } = req.body;
+    const profileData = {};
 
+    if (newEmail) {
+        profileData.email = email;
+    }
+    if (password) {
+        profileData.password = password;
+    }
+    if (role) {
+        profileData.role = role;
+    }
+    if (managerInfo) {
+        profileData.managerInfo = managerInfo;
+    }
+    if (Object.keys(profileData).length === 0) {
+        return res.status(400).json({
+            success: false,
+            message: 'No fields provided for updating',
+        });
+    }
+
+    try {
+        // Authorization check - you can uncomment this if needed
+        // if (req.userRole !== 'admin') {
+        //     return res.status(403).json({
+        //         success: false,
+        //         message: 'User is not authorized to update users'
+        //     });
+        // }
+        const email = req.params.email;
+        const client = getClient();
+        const db = client.db(process.env.DB_NAME);
+        const usersCollection = db.collection(COLLECTION_NAME);
+        const result = await usersCollection.updateOne(
+            { email },
+            { $set: profileData }
+        );
+
+        if (result.modifiedCount === 0) {
+            return res.status(404).json({
+                success: false,
+                message: 'User not found or profile not updated',
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: 'Profile updated successfully',
+        });
+    } catch (error) {
+        console.error('Error updating user:', error);
+        return res.status(500).json({
+            success: false,
+            message: 'Internal Server Error'
+        });
+    }
+};
 exports.deleteOneUser = async (req, res) => {
     try {
         if (req.userRole !== 'admin') {
@@ -176,22 +205,3 @@ exports.deleteOneUser = async (req, res) => {
     }
 };
 
-exports.getAllUser = async (req, res) => {
-    try {
-        const client = getClient();
-        const db = client.db(process.env.DB_NAME);
-        const usersCollection = db.collection(COLLECTION_NAME);
-        const result = await usersCollection.find().toArray();
-
-        return res.status(200).json({
-            success: false,
-            data: result
-        });
-    } catch (err) {
-        console.error(err);
-        return res.status(500).json({
-            success: false,
-            message: 'Internal Server Error'
-        });
-    }
-};
