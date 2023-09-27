@@ -4,6 +4,7 @@ const router = express.Router();
 const activityController = require('../controller/activity');
 const halalActivityController = require('../controller/halalRating');
 const managerController = require('../controller/manager');
+const activityBookController = require('../controller/book');
 
 router.get('/countries', activityController.getAllCountries);
 router.get('/destinations', activityController.getAllDestinations);
@@ -20,6 +21,7 @@ router.get('/destination-hotels', activityController.getAllDestinationHotels);
 router.get('/search', activityController.activitySearch);
 router.get('/search/filter', activityController.activitySearchFilter);
 router.get('/search-details', activityController.activitySearchDetails);
+router.post('/book', activityBookController.activityBook);
 
 
 router.get('/halal/search', activityController.getAllActivity);

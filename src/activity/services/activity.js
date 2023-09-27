@@ -414,6 +414,7 @@ const searchActivitiesDetails = async (code, adult, child, departure, arrival, r
     const errorMessage = 'Failed to fetch activities';
 
     const data = activityData(code, adult, child, departure, arrival);
+    console.log(data);
     const response = await postData(url, data, successMessage, errorMessage);
 
     if (!response.success) {

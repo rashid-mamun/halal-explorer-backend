@@ -319,7 +319,7 @@ const activitySearchDetails = async (req, res) => {
     }
 
     const queryParams = value;
-    console.log("---- Activity search calling ----------", queryParams);
+    console.log("---- Activity search details calling ----------", queryParams);
     const activities = await searchActivitiesDetails(
       queryParams.code,
       queryParams.adult,
