@@ -29,9 +29,13 @@ router.post('/product-name', insuranceController.createProductName);
 router.get('/duration', insuranceController.getDurations);
 router.post('/duration', insuranceController.createDuration);
 
-router.post('/admin', adminInsuranceController.createInsurance);
-router.get('/admin', adminInsuranceController.getInsurances);
+router.post('/admin', adminInsuranceController.createInsurance); 
+router.get('/admin', adminInsuranceController.getInsurances); 
 router.get('/admin/search', adminInsuranceController.getAllInformationController);
+
+router.get('/admin/:id', adminInsuranceController.getInsuranceByIdController); 
+router.put('/admin/:id', adminInsuranceController.updateInsuranceByIdController); 
+router.delete('/admin/:id', adminInsuranceController.deleteInsuranceByIdController); 
 
 
 
