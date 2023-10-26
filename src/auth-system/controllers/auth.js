@@ -6,7 +6,7 @@ const { isEmail } = require('validator');
 const nodemailer = require('nodemailer');
 require('dotenv').config();
 const transporter = nodemailer.createTransport({
-    service: 'Gmail',
+    service: 'Zoho',
     auth: {
         user: process.env.SENDER_EMAIL,
         pass: process.env.SENDER_PASSWORD
