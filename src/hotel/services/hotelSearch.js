@@ -104,7 +104,7 @@ const searchHotels = async (req) => {
 
 
         const response = await makeHotelSearchRequest(requestBody);
-        // console.log(JSON.stringify(response.data.data));
+        console.log("a",JSON.stringify(response.data.data));
         if (response.data.status === "error") {
             return {
                 success: false,
@@ -286,7 +286,7 @@ const makeHotelSearchRequest = async (data) => {
 
     const authHeader = `Basic ${btoa(`${process.env.RATEHAWK_USERNAME}:${process.env.RATEHAWK_PASSWORD}`)}`;
     const apiUrl = 'https://api.worldota.net/api/b2b/v3/search/serp/hotels/';
-    // console.log(JSON.stringify(data));
+    console.log(JSON.stringify(data));
     try {
         const response = await axios.post(apiUrl, data, {
             headers: {
@@ -294,7 +294,7 @@ const makeHotelSearchRequest = async (data) => {
                 'Authorization': authHeader
             },
         });
-        // console.log(response);
+        console.log(response);
         return response;
     } catch (error) {
         // console.error(error);
