@@ -35,8 +35,8 @@ const bookHotel = async (data) => {
                 };
 
                 console.log('DbEntry:\n', JSON.stringify(dbEntry));
-                // const collection = db.collection('hotelBookingHistory');
-                // const result = await collection.insertOne(dbEntry);
+                const collection = db.collection('hotelBookingHistory');
+                const result = await collection.insertOne(dbEntry);
                 // console.log(`Inserted ${result.insertedCount} document into the database`);
 
                 return {
