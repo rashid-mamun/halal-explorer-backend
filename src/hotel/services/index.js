@@ -6,4 +6,5 @@ module.exports = {
     ...require('./manager'),
     ...require('./dumbHotelById'),
     ...require('./hotelSearchFilter'),
+    ...require('./hotelBook'),
 }
