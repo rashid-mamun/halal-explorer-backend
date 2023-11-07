@@ -36,7 +36,9 @@ const bookHotel = async (data) => {
 
                 console.log('DbEntry:\n', JSON.stringify(dbEntry));
                 const collection = db.collection('hotelBookingHistory');
+                const bookingCollection = db.collection('bookingHistory');
                 const result = await collection.insertOne(dbEntry);
+                const result2 = await bookingCollection.insertOne(dbEntry);
                 // console.log(`Inserted ${result.insertedCount} document into the database`);
 
                 return {
@@ -69,9 +71,18 @@ const getAllBookings = async () => {
         const db = client.db(process.env.DB_NAME);
         const collection = db.collection('hotelBookingHistory');
         const allBookings = await collection.find({}).toArray();
+
+        if (allBookings.length === 0) {
+            return {
+                success: true,
+                data: [],
+                message: 'No bookings found.',
+            };
+        }
+
         return {
             success: true,
-            data: allBookings
+            data: allBookings,
         };
     } catch (error) {
         console.error('Error fetching all bookings:', error);
@@ -88,9 +99,18 @@ const getBookingsByEmail = async (email) => {
         const db = client.db(process.env.DB_NAME);
         const collection = db.collection('hotelBookingHistory');
         const matchingBookings = await collection.find({ email }).toArray();
+
+        if (matchingBookings.length === 0) {
+            return {
+                success: true,
+                data: [],
+                message: 'No bookings found for the provided email.',
+            };
+        }
+
         return {
             success: true,
-            data: matchingBookings
+            data: matchingBookings,
         };
     } catch (error) {
         console.error('Error fetching bookings by email:', error);

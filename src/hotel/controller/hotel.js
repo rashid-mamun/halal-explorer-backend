@@ -88,6 +88,7 @@ exports.hotelBook = async (req, res) => {
 };
 exports.getAllBookings = async (req, res) => {
     try {
+        console.log("---- Get book calling ----------");
         const allBookings = await hotelService.getAllBookings();
         res.json(allBookings);
     } catch (error) {
@@ -100,6 +101,7 @@ exports.getBookingsByEmail = async (req, res) => {
     const { email } = req.params;
 
     try {
+        console.log("---- Get email book calling ----------", email);
         const matchingBookings = await hotelService.getBookingsByEmail(email);
         res.json(matchingBookings);
     } catch (error) {
