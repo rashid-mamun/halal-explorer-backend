@@ -40,6 +40,9 @@ router.delete('/admin/:id', adminInsuranceController.deleteInsuranceByIdControll
 
 
 router.post('/search', adminInsuranceController.searchInsuranceController);
+router.post('/book', adminInsuranceController.insuranceBook);
+router.get('/book/all', adminInsuranceController.getAllBookings);
+router.get('/book/:email', adminInsuranceController.getBookingsByEmail);
 
 
 

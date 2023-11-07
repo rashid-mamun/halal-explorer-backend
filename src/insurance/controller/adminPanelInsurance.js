@@ -7,6 +7,7 @@ const {
     getInsuranceById,
     deleteInsuranceById
 } = require('../services/adminPanelInsurance');
+const insuranceService = require('../services/index')
 const Joi = require('joi');
 
 const insuranceSchema = Joi.object({
@@ -202,12 +203,56 @@ const deleteInsuranceByIdController = async (req, res) => {
         }
     } catch (error) {
         console.error(error);
-        return res.status(500).json({ 
+        return res.status(500).json({
             success: false,
-            error: 'Failed to delete insurance information' });
+            error: 'Failed to delete insurance information'
+        });
+    }
+};
+const insuranceBookSchema = Joi.object({
+    priceDetails: Joi.object().required(),
+    paymentDetails: Joi.object().required(),
+    orderInfo: Joi.object().required(),
+    userInfo: Joi.object().required(),
+});
+const insuranceBook = async (req, res) => {
+    const { error } = insuranceBookSchema.validate(req.body);
+    if (error) {
+        return res.status(400).json({ error: error.details[0].message });
+    }
+
+    try {
+        console.log("---- insurance book calling ----------");
+        const insurances = await insuranceService.bookInsurance(req.body);
+        return res.json(insurances);
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ error: 'Internal server error' });
+    }
+};
+const getAllBookings = async (req, res) => {
+    try {
+        console.log("---- Get book calling ----------");
+        const allBookings = await insuranceService.getAllBookings();
+        res.json(allBookings);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal server error' });
     }
 };
 
+const getBookingsByEmail = async (req, res) => {
+    const { email } = req.params;
+
+    try {
+        console.log("---- Get email book calling ----------", email);
+        const matchingBookings = await insuranceService.getBookingsByEmail(email);
+        res.json(matchingBookings);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+};
 module.exports = {
     createInsurance,
     getInsurances,
@@ -215,5 +260,8 @@ module.exports = {
     searchInsuranceController,
     updateInsuranceByIdController,
     getInsuranceByIdController,
-    deleteInsuranceByIdController
+    deleteInsuranceByIdController,
+    insuranceBook,
+    getAllBookings,
+    getBookingsByEmail,
 };
