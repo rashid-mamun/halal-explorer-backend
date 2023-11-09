@@ -14,6 +14,7 @@ const {
   searchActivities,
   searchActivitiesDetails,
   searchDestination,
+  searchFilterActivities
 } = require('../services/activity');
 
 // Input validation schemas
@@ -245,6 +246,7 @@ const activitySearchSchema = Joi.object({
   departure: Joi.string().required(),
   arrival: Joi.string().required(),
 });
+
 const activitySearchDetailsSchema = Joi.object({
   code: Joi.string().required(),
   adult: Joi.number().integer().positive().required(),
@@ -252,7 +254,33 @@ const activitySearchDetailsSchema = Joi.object({
   departure: Joi.string().required(),
   arrival: Joi.string().required(),
 });
+const activitySearchFilterSchema = Joi.object({
+  searchId: Joi.string().required(),
+  halalRating: Joi.string(),
 
+});
+const activitySearchFilter = async (req, res) => {
+  try {
+    const { error, value } = activitySearchFilterSchema.validate(req.query);
+
+    if (error) {
+      return res.status(400).json({ error: error.details[0].message });
+    }
+
+    const queryParams = value;
+    console.log("---- Activity search filter calling ----------\n", queryParams);
+    const activities = await searchFilterActivities(queryParams);
+
+    if (activities.success) {
+      return res.json(activities);
+    } else {
+      return res.status(400).json(activities);
+    }
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+};
 const activitySearch = async (req, res) => {
   try {
     const { error, value } = activitySearchSchema.validate(req.query);
@@ -275,7 +303,7 @@ const activitySearch = async (req, res) => {
     if (activities.success) {
       return res.json(activities);
     } else {
-      return res.status(400).json({ error: activities.error });
+      return res.status(400).json(activities);
     }
   } catch (error) {
     console.error(error);
@@ -291,7 +319,7 @@ const activitySearchDetails = async (req, res) => {
     }
 
     const queryParams = value;
-    console.log("---- Activity search calling ----------", queryParams);
+    console.log("---- Activity search details calling ----------", queryParams);
     const activities = await searchActivitiesDetails(
       queryParams.code,
       queryParams.adult,
@@ -304,7 +332,7 @@ const activitySearchDetails = async (req, res) => {
     if (activities.success) {
       return res.json(activities);
     } else {
-      return res.status(400).json({ error: activities.error });
+      return res.status(400).json(activities);
     }
   } catch (error) {
     console.error(error);
@@ -327,5 +355,6 @@ module.exports = {
   activitySearch,
   activitySearchDetails,
   getDestinationSearchController,
+  activitySearchFilter
 
 };

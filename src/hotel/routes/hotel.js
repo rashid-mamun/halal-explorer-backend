@@ -9,7 +9,11 @@ router.get('/api', async (req, res) => {
 });
 
 router.get('/search', apiController.hotelSearch);
+router.get('/search/filter', apiController.hotelSearchFilter);
 router.get('/search-details', apiController.hotelSearchDetails);
+router.post('/book', apiController.hotelBook);
+router.get('/book/all', apiController.getAllBookings);
+router.get('/book/:email', apiController.getBookingsByEmail);
 router.get('/dumb', apiController.dumbHotelById);
 
 module.exports = router;

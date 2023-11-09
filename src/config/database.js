@@ -5,7 +5,7 @@ let client = null;
 
 const connectWithDb = async () => {
   try {
-    client = new MongoClient("mongodb://localhost:27017", {
+    client = new MongoClient(process.env.DB_LOCAL, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     });

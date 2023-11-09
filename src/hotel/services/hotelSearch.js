@@ -1,11 +1,16 @@
 const { getClient } = require("../../config/database");
 const axios = require('axios');
 const btoa = require('btoa');
+const { v4: uuidv4 } = require('uuid');
+const { setCacheData } = require('../../utils/nodeCache')
 
+function generateUniqueSearchId() {
+    return uuidv4();
+}
 
 const searchHotels = async (req) => {
     try {
-
+        const uniqueSearchId = generateUniqueSearchId();
         const keyword = req.city;
         const client = getClient();
         const db = client.db(process.env.DB_NAME);
@@ -99,7 +104,7 @@ const searchHotels = async (req) => {
 
 
         const response = await makeHotelSearchRequest(requestBody);
-        // console.log(JSON.stringify(response.data.data));
+        console.log("a",JSON.stringify(response.data.data));
         if (response.data.status === "error") {
             return {
                 success: false,
@@ -122,7 +127,7 @@ const searchHotels = async (req) => {
         const hotels = Object.values(updatedHotelsDataMapping);
         const page = req.page;
         const pageNumber = parseInt(page, 10) || 1;
-        const pageSize = parseInt(req.pageSize, 10) || 10;
+        const pageSize = parseInt(req.pageSize, 10) || 100;
         const totalHotels = hotels.length;
 
         // Validate page number
@@ -145,10 +150,11 @@ const searchHotels = async (req) => {
         // //         message: 'no hotel found! please change the search parameters'
         // //     }
         // // }
-
+        const setResult = await setCacheData(uniqueSearchId, paginatedData);
         return {
             success: true,
             totalHotels,
+            searchId: uniqueSearchId,
             data: paginatedData,
         }
 
@@ -168,8 +174,18 @@ const createIdIndexIfNotExists = async (collection) => {
     }
 };
 const createAddressIndexIfNotExists = async (collection) => {
+    const nameIndexExists = await collection.indexExists('name_text');
+    if (nameIndexExists) {
+        console.log("name_text drop index");
+        await collection.dropIndex('name_text');
+    }
     const indexExists = await collection.indexExists('address_text');
     if (!indexExists) {
+        const addressIndexExists = await collection.indexExists('address_1');
+        if (addressIndexExists) {
+            console.log("address_1 drop index");
+            await collection.dropIndex('address_1');
+        }
         await collection.createIndex({ address: "text" });
     }
 };
@@ -270,7 +286,7 @@ const makeHotelSearchRequest = async (data) => {
 
     const authHeader = `Basic ${btoa(`${process.env.RATEHAWK_USERNAME}:${process.env.RATEHAWK_PASSWORD}`)}`;
     const apiUrl = 'https://api.worldota.net/api/b2b/v3/search/serp/hotels/';
-    // console.log(JSON.stringify(data));
+    console.log(JSON.stringify(data));
     try {
         const response = await axios.post(apiUrl, data, {
             headers: {
@@ -278,7 +294,7 @@ const makeHotelSearchRequest = async (data) => {
                 'Authorization': authHeader
             },
         });
-        // console.log(response);
+        console.log(response);
         return response;
     } catch (error) {
         // console.error(error);

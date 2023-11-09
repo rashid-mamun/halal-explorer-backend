@@ -1,6 +1,6 @@
 const hotelService = require("../services/index");
 const Joi = require('joi');
-
+const { getCacheData } = require('../../utils/nodeCache')
 const hotelSearchSchema = Joi.object({
     city: Joi.string().required(),
     checkin: Joi.string().required(),
@@ -8,6 +8,13 @@ const hotelSearchSchema = Joi.object({
     guests: Joi.string().required(),
     currency: Joi.string().required(),
     residency: Joi.string().required()
+});
+const hotelSearchFilterSchema = Joi.object({
+    searchId: Joi.string().required(),
+    travellerRating: Joi.string(),
+    amenities: Joi.array().items(Joi.string()),
+    deals: Joi.array().items(Joi.string()),
+    halalRating: Joi.string()
 });
 
 const hotelSearchDetailsSchema = Joi.object({
@@ -18,7 +25,19 @@ const hotelSearchDetailsSchema = Joi.object({
     residency: Joi.string().required(),
     id: Joi.string().required()
 });
-
+const hotelBookSchema = Joi.object({
+    book_hash: Joi.string().required(),
+    guests: Joi.array().items(
+        Joi.object({
+            first_name: Joi.string().required(),
+            last_name: Joi.string().required(),
+        })
+    ).required(),
+    priceDetails: Joi.object().required(),
+    paymentDetails: Joi.object().required(),
+    orderInfo: Joi.object().required(),
+    userInfo: Joi.object().required(),
+});
 const dumbHotelByIdSchema = Joi.object({
     id: Joi.string().required()
 });
@@ -42,6 +61,68 @@ exports.hotelSearch = async (req, res) => {
     try {
         console.log("---- hotel search calling ----------", queryParams);
         const hotels = await hotelService.searchHotels(queryParams);
+        return res.json(hotels);
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ error: 'Internal server error' });
+    }
+};
+
+exports.hotelBook = async (req, res) => {
+    const validationError = validateRequest(req.body, hotelBookSchema);
+    if (validationError) {
+        return res.status(400).json({
+            success: false,
+            error: validationError
+        });
+    }
+
+    try {
+        console.log("---- hotel book calling ----------");
+        const hotels = await hotelService.bookHotel(req.body);
+        return res.json(hotels);
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ error: 'Internal server error' });
+    }
+};
+exports.getAllBookings = async (req, res) => {
+    try {
+        console.log("---- Get book calling ----------");
+        const allBookings = await hotelService.getAllBookings();
+        res.json(allBookings);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+};
+
+exports.getBookingsByEmail = async (req, res) => {
+    const { email } = req.params;
+
+    try {
+        console.log("---- Get email book calling ----------", email);
+        const matchingBookings = await hotelService.getBookingsByEmail(email);
+        res.json(matchingBookings);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+};
+
+exports.hotelSearchFilter = async (req, res) => {
+    const queryParams = req.query;
+    const validationError = validateRequest(queryParams, hotelSearchFilterSchema);
+    if (validationError) {
+        return res.status(400).json({
+            success: false,
+            error: validationError
+        });
+    }
+
+    try {
+        console.log("---- hotel  filter search calling ----------", queryParams);
+        const hotels = await hotelService.searchFilterHotels(queryParams);
         return res.json(hotels);
     } catch (error) {
         console.error(error);

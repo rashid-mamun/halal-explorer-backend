@@ -6,7 +6,7 @@ const saveOrUpdateManagerInfo = async (managerInfo) => {
   try {
     const client = getClient();
     const db = client.db(process.env.DB_NAME);
-    const collection = db.collection(process.env.MANAGER_INFO_COLLECTION);
+    const collection = db.collection('activityManagerInfo');
 
     const existingManager = await collection.findOne({ id: managerInfo.id });
 
@@ -36,7 +36,7 @@ const getAllManagerInfo = async (req) => {
   try {
     const client = getClient();
     const db = client.db(process.env.DB_NAME);
-    const collection = db.collection(process.env.MANAGER_INFO_COLLECTION);
+    const collection = db.collection('activityManagerInfo');
     const managersData = await collection.find().toArray();
     const page = req.page;
     const pageNumber = parseInt(page, 10) || 1;
@@ -74,7 +74,7 @@ const getManagerInfo = async (req) => {
   try {
     const client = getClient();
     const db = client.db(process.env.DB_NAME);
-    const collection = db.collection(process.env.MANAGER_INFO_COLLECTION);
+    const collection = db.collection('activityManagerInfo');
     const manager = await collection.findOne({ id: req.id });
 
     if (manager) {
@@ -99,15 +99,15 @@ const getManagerInfo = async (req) => {
     };
   }
 };
-const searchHalalManagerHotels = async (req) => {
+const searchHalalManagerActivities = async (req) => {
   try {
 
     const keyword = req.city || req.hotelName
-   
+
     const client = getClient();
     const db = client.db(process.env.DB_NAME);
-    const collection = db.collection(process.env.DUMB_HOTEL_COLLECTION);
-    const halalHotelcollection = db.collection(process.env.HALAL_HOTELS_COLLECTION);
+    const collection = db.collection('activityInfo');
+    const halalHotelcollection = db.collection(process.env.HALAL_ACTIVITIES_COLLECTION);
     const halalHotelsData = await halalHotelcollection.find().toArray();
     const halalHotelsDataObj = halalHotelsData.reduce((acc, item) => {
       acc[item.id] = item;
@@ -183,38 +183,31 @@ const getHotelsDataMapping = async (cursor) => {
 
   await cursor.forEach((doc) => {
     const hotelData = mapHotelData(doc);
-    if (hotelData.images.length > 0) {
-      hotelsDataMapping[doc.id] = hotelData;
-    }
+
+    hotelsDataMapping[doc.activityCode] = hotelData;
+
   });
 
   return hotelsDataMapping;
 };
 const mapHotelData = (doc) => ({
-  hotelName: doc.name,
+  activityCode: doc.activityCode,
   address: doc.address,
-  id: doc.id,
-  latitude: doc.latitude,
-  longitude: doc.longitude,
-  region: doc.region,
-  images: doc.images.length > 0 ? transformImageUrl(doc.images[0], '1024x768') : [],
+  name: doc.name,
+  contentId: doc.contentId,
+  location: doc.location,
 });
-const transformImageUrl = (imageUrl, size) => {
-  if (imageUrl) {
-    return imageUrl.replace('{size}', size);
-  }
-  return null;
-};
+
 const createAddressIndexIfNotExists = async (collection) => {
-  
-  const nameIndexExists = await collection.indexExists('name_text');
+
+  const nameIndexExists = await collection.indexExists('activityCode_text');
   if (nameIndexExists) {
     console.log("name_text drop index");
-    await collection.dropIndex('name_text');
+    await collection.dropIndex('activityCode_text');
   }
 
   const indexExists = await collection.indexExists('address_text');
-  
+
   if (!indexExists) {
     const addressIndexExists = await collection.indexExists('address_1');
     if (addressIndexExists) {
@@ -225,24 +218,24 @@ const createAddressIndexIfNotExists = async (collection) => {
   }
 };
 const createNameIndexIfNotExists = async (collection) => {
- 
+
   const addressIndexExists = await collection.indexExists('address_text');
   if (addressIndexExists) {
     console.log("address_text drop index");
     await collection.dropIndex('address_text');
   }
 
-  const indexExists = await collection.indexExists('name_text');
- 
+  const indexExists = await collection.indexExists('activityCode_text');
+
   if (!indexExists) {
 
-    const nameIndexExists = await collection.indexExists('name_1');
+    const nameIndexExists = await collection.indexExists('activityCode_1');
     if (nameIndexExists) {
-      console.log("name_1 drop index");
-      await collection.dropIndex('name_1');
+      console.log("activityCode_1 drop index");
+      await collection.dropIndex('activityCode_1');
     }
 
-    await collection.createIndex({ name: "text" });
+    await collection.createIndex({ activityCode: "text" });
 
   }
 };
@@ -252,5 +245,5 @@ module.exports = {
   saveOrUpdateManagerInfo,
   getManagerInfo,
   getAllManagerInfo,
-  searchHalalManagerHotels,
+  searchHalalManagerActivities,
 };

@@ -1,6 +1,8 @@
 const { getClient } = require("../../config/database");
 const axios = require('axios');
 const crypto = require('crypto');
+const { v4: uuidv4 } = require('uuid');
+const { setCacheData, getCacheData } = require('../../utils/nodeCache')
 
 const createHeaders = () => {
   const apiKey = process.env.HOTELBEDS_API_KEY;
@@ -164,10 +166,13 @@ const activityData = (code, adult, child, departure, arrival) => {
     order,
   };
 };
+function generateUniqueSearchId() {
+  return uuidv4();
+}
 
 const searchActivities = async (destination, adult, child, departure, arrival, req) => {
   try {
-
+    const uniqueSearchId = generateUniqueSearchId();
     const client = getClient();
     const db = client.db(process.env.DB_NAME);
     const halalActivityCollection = db.collection('halalActivities');
@@ -210,9 +215,16 @@ const searchActivities = async (destination, adult, child, departure, arrival, r
     );
 
     const page = parseInt(req.page, 10) || 1;
-    const pageSize = parseInt(req.pageSize, 10) || 10;
+    const pageSize = parseInt(req.pageSize, 10) || 100;
 
     const totalActivities = finalActivityCodes.length;
+
+    if (totalActivities == 0) {
+      return {
+        success: false,
+        error: 'Activities not found',
+      };
+    }
 
     // Validate page number
     const maxPageNumber = Math.ceil(totalActivities / pageSize);
@@ -236,9 +248,10 @@ const searchActivities = async (destination, adult, child, departure, arrival, r
       }
       return activityData;
     });
-
+    const setResult = await setCacheData(uniqueSearchId, paginatedActivitiesData);
     return {
       success: true,
+      searchId: uniqueSearchId,
       totalActivities,
       data: paginatedActivitiesData,
     };
@@ -248,6 +261,56 @@ const searchActivities = async (destination, adult, child, departure, arrival, r
       success: false,
       error: 'An error occurred while searching activities.',
     };
+  }
+};
+const searchFilterActivities = async (req) => {
+  try {
+
+    const searchId = req.searchId;
+    const minHalalRating = parseInt(req.halalRating) || null;
+    const activityCacheDataRes = await getCacheData(searchId);
+    if (!activityCacheDataRes.success) {
+      return {
+        success: false,
+        error: 'Data not found in cache'
+      }
+    }
+    const activityCacheData = activityCacheDataRes.cache;
+
+    const filteredActivities = activityCacheData.filter(hotel => {
+      const meetsHalalRating = minHalalRating === null || hotel.halalRating >= minHalalRating;
+      console.log(`meetsHalalRating=${meetsHalalRating}`);
+      return meetsHalalRating;
+    });
+
+    const totalActivities = filteredActivities.length;
+    if (totalActivities == 0) {
+      return {
+        success: false,
+        message: 'Please change the filter parameter'
+      }
+    }
+    const page = req.page;
+    const pageNumber = parseInt(page, 10) || 1;
+    const pageSize = parseInt(req.pageSize, 10) || 100;
+    const offset = (pageNumber - 1) * pageSize;
+    const limit = pageSize;
+
+    const paginatedData = filteredActivities.slice(offset, offset + limit);
+
+    return {
+      success: true,
+      searchId,
+      totalActivities,
+      data: paginatedData,
+    }
+
+  } catch (err) {
+    console.error(err);
+    return {
+      success: false,
+      error: 'Internal server error'
+    }
   }
 };
 
@@ -351,6 +414,7 @@ const searchActivitiesDetails = async (code, adult, child, departure, arrival, r
     const errorMessage = 'Failed to fetch activities';
 
     const data = activityData(code, adult, child, departure, arrival);
+    console.log(data);
     const response = await postData(url, data, successMessage, errorMessage);
 
     if (!response.success) {
@@ -521,11 +585,32 @@ const getAllActivityInfo = async (req) => {
     const db = client.db(process.env.DB_NAME);
     const collection = db.collection('activityInfo');
     const activityData = await collection.find().toArray();
+    const halalCollection = db.collection(process.env.HALAL_ACTIVITIES_COLLECTION);
+    const halalActivitiesData = await halalCollection.find().toArray();
+    const halalActivitiesDataObj = halalActivitiesData.reduce((acc, item) => {
+      acc[item.code] = item;
+      return acc;
+    }, {});
+
+
+    activityData.forEach(data => {
+      if (halalActivitiesDataObj[data.activityCode]) {
+        data.halalRatingInfo = halalActivitiesDataObj[data.activityCode];
+      }
+    });
+    // console.log(JSON.stringify(activityData));
+
     const page = req.page;
     const pageNumber = parseInt(page, 10) || 1;
-    const pageSize = parseInt(req.pageSize, 10) || 20;
+    const pageSize = parseInt(req.pageSize, 10) || 100;
     const totalActivity = activityData.length;
 
+    if (totalActivity == 0) {
+      return {
+        success: false,
+        error: 'Activities not found',
+      };
+    }
     // Validate page number
     const maxPageNumber = Math.ceil(totalActivity / pageSize);
     if (pageNumber > maxPageNumber) {
@@ -631,4 +716,5 @@ module.exports = {
   searchActivities,
   searchActivitiesDetails,
   searchDestination,
+  searchFilterActivities,
 };
