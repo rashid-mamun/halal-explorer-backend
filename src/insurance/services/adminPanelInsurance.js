@@ -1,4 +1,5 @@
 const { getClient } = require("../../config/database");
+const { ObjectId } = require("mongodb");
 const {
     getAllTravellerTypes,
     getAllPolicyTypes,
@@ -376,10 +377,115 @@ const searchInsurance = async (
 };
 
 
+// Update an existing insurance record by its ID
+const updateInsuranceById = async (insuranceId, insuranceData) => {
+    try {
+        const client = getClient();
+        const db = client.db(process.env.DB_NAME);
+        const collection = db.collection(process.env.INSURANCE_INSURANCES_COLLECTION);
+
+        const existingInsurance = await collection.findOne({ _id: new ObjectId(insuranceId) });
+
+        if (existingInsurance) {
+            // Update the existing insurance record
+            await collection.updateOne(
+                { _id: new ObjectId(insuranceId) },
+                { $set: insuranceData }
+            );
+
+            const updatedInsurance = await collection.findOne({ _id: new ObjectId(insuranceId) });
+
+            return {
+                success: true,
+                data: updatedInsurance,
+                message: 'Insurance record updated successfully'
+            };
+        } else {
+            return {
+                success: false,
+                error: 'Insurance record not found'
+            };
+        }
+    } catch (error) {
+        console.error(error);
+        return {
+            success: false,
+            error: 'Failed to update insurance record'
+        };
+    }
+};
+
+const getInsuranceById = async (insuranceId) => {
+    try {
+        // Create an instance of ObjectId using the provided insuranceId
+        const objectId = new ObjectId(insuranceId);
+
+        const client = getClient();
+        const db = client.db(process.env.DB_NAME);
+        const collection = db.collection(process.env.INSURANCE_INSURANCES_COLLECTION);
+
+        // Use the objectId in your query
+        const insuranceRecord = await collection.findOne({ _id: objectId });
+
+        if (insuranceRecord) {
+            return {
+                success: true,
+                data: insuranceRecord
+            };
+        } else {
+            return {
+                success: false,
+                error: 'Insurance record not found'
+            };
+        }
+    } catch (error) {
+        console.error(error);
+        return {
+            success: false,
+            error: 'Failed to retrieve insurance record'
+        };
+    }
+};
+
+// Delete an insurance record by its ID
+
+const deleteInsuranceById = async (insuranceId) => {
+    try {
+        const client = getClient();
+        const db = client.db(process.env.DB_NAME);
+        const collection = db.collection(process.env.INSURANCE_INSURANCES_COLLECTION);
+
+        // Check if the insurance record with the given ID exists
+        const existingInsurance = await collection.findOne({ _id: new ObjectId(insuranceId) });
+
+        if (existingInsurance) {
+            // Delete the insurance record
+            await collection.deleteOne({ _id: new ObjectId(insuranceId) });
+            return {
+                success: true,
+                message: 'Insurance record deleted successfully'
+            };
+        } else {
+            return {
+                success: false,
+                error: 'Insurance record not found'
+            };
+        }
+    } catch (error) {
+        console.error(error);
+        return {
+            success: false,
+            error: 'Failed to delete insurance record'
+        };
+    }
+};
 
 module.exports = {
     addInsurance,
     getAllInsurances,
     getAllInformation,
-    searchInsurance
+    searchInsurance,
+    updateInsuranceById,
+    getInsuranceById,
+    deleteInsuranceById
 }

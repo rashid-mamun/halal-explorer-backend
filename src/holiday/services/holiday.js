@@ -19,11 +19,13 @@ const createBooking = async (bookingData) => {
         const collection = db.collection('holiday_packages_booking');
         const bookingId = uuidv4();
         const bookingCode = generateBookingCode();
+        const email = bookingData.contractDetails.email;
         const { passengersDetails, packageId } = bookingData;
         const bookingWithIds = {
             ...bookingData,
             bookingId,
             bookingCode,
+            email
         };
 
 
@@ -43,7 +45,8 @@ const createBooking = async (bookingData) => {
             };
         }
 
-
+        const bookingCollection = db.collection('bookingHistory');
+        const result2 = await bookingCollection.insertOne(bookingWithIds);
         const result = await collection.insertOne(bookingWithIds);
         if (result.insertedId) {
             const updatedSeats = holidayPackage.seats - requestedSeats;
