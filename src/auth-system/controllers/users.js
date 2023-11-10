@@ -205,4 +205,32 @@ exports.deleteOneUser = async (req, res) => {
         });
     }
 };
+exports.bookingHistory = async (req, res) => {
+    const { email } = req.params;
+
+    try {
+        console.log("---- Get email book calling ----------", email);
+
+        const client = getClient();
+        const db = client.db(process.env.DB_NAME);
+        const collection = db.collection('custom_holiday_packages_booking');
+        const matchingBookings = await collection.find({ email }).toArray();
+
+        if (matchingBookings.length === 0) {
+            return res.json({
+                success: true,
+                data: [],
+                message: 'No bookings found for the provided email.',
+            });
+        }
+
+        return res.json({
+            success: true,
+            data: matchingBookings,
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+};
 
