@@ -1,7 +1,7 @@
 const { getClient } = require('../../config/database');
 const bcrypt = require('bcrypt');
 const COLLECTION_NAME = 'users';
-async function createUser(email, password, role,managerInfo) {
+async function createUser(email, password, role, managerInfo, allowedServices) {
     const client = getClient();
     const db = client.db(process.env.DB_NAME);
     const users = db.collection(COLLECTION_NAME);
@@ -12,7 +12,8 @@ async function createUser(email, password, role,managerInfo) {
         email,
         password: hashedPassword,
         role,
-        managerInfo
+        managerInfo,
+        allowedServices
     };
     const result = await users.insertOne(user);
     if (!result.acknowledged) {

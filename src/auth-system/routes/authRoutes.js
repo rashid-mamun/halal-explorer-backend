@@ -8,6 +8,7 @@ const usersController = require('../controllers/users');
 
 router.post('/login', authController.login);
 router.post('/signup', authController.register);
+router.get('/book/history/:email', usersController.bookingHistory);
 router.post('/users/admin/add', checkLogin, authorizeRoles(['admin']), authController.addAdmin);
 router.post('/users/employee/add', checkLogin, authorizeRoles(['employee']), authController.addEmployee);
 

@@ -24,6 +24,12 @@ router.get('/packages/search/:id', adminHolidayController.searchHolidayPackageBy
 router.post('/book', holidayController.createBooking);
 router.get('/book/all', holidayController.getAllBookings);
 router.get('/book', holidayController.getBookingById);
+router.get('/book/:email', holidayController.getBookingsByEmail);
+
+router.post('/custom/book', holidayController.createCustomBooking);
+router.get('/custom/book/all', holidayController.getCustomAllBookings);
+router.get('/custom/book', holidayController.getCustomBookingById);
+router.get('/custom/book/:email', holidayController.getCustomBookingsByEmail);
 
 router.use(handleServerError);
 

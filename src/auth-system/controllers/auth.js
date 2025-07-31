@@ -17,6 +17,7 @@ const signupSchema = Joi.object({
     email: Joi.string().email().required(),
     password: Joi.string().min(6).required(),
     role: Joi.string().valid('employee', 'manager', 'admin').required(),
+    allowedServices: Joi.array(),
     managerInfo: Joi.object()
 });
 const loginSchema = Joi.object({
@@ -27,10 +28,12 @@ const loginSchema = Joi.object({
 const adminAddSchema = Joi.object({
     email: Joi.string().email().required(),
     role: Joi.string().valid('admin', 'employee', 'manager').required(),
+    allowedServices: Joi.array(),
 });
 const employeeAddSchema = Joi.object({
     email: Joi.string().email().required(),
     role: Joi.string().valid('employee', 'manager').required(),
+    allowedServices: Joi.array(),
 });
 
 function generateToken(user) {
@@ -92,7 +95,7 @@ async function register(req, res) {
     try {
         const { error } = signupSchema.validate(req.body);
         if (error) throw new Error(error.details[0].message);
-        const { email, password, role, managerInfo } = req.body;
+        const { email, password, role, managerInfo, allowedServices } = req.body;
 
         if (!isEmail(email)) {
             return res.status(400).json({ message: 'Invalid email format' });
@@ -108,9 +111,9 @@ async function register(req, res) {
             return res.status(400).json({
                 success: false,
                 message: 'Email already registered'
-            }); 
+            });
         }
-        const user = await createUser(email, password, role, managerInfo);
+        const user = await createUser(email, password, role, managerInfo, allowedServices);
         if (!user.success) {
             res.status(201).json({
                 success: false,
