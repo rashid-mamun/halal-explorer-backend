@@ -1,28 +1,36 @@
-const { MongoClient } = require("mongodb");
-const createIndexes = require("./createIndexes");
+const mongoose = require('mongoose');
+const logger = require('../utils/logger');
 
-let client = null;
-
-const connectWithDb = async () => {
+const connectDB = async () => {
   try {
-    client = new MongoClient(process.env.DB_LOCAL, {
+    const conn = await mongoose.connect(process.env.MONGO_URI, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
+      maxPoolSize: 10,
+      serverSelectionTimeoutMS: 5000,
+      socketTimeoutMS: 45000,
     });
 
-    await client.connect();
-    console.log("Database connected successfully");
+    logger.info(`MongoDB Connected: ${conn.connection.host}`);
 
-    // Create indexes on startup
-    await createIndexes(client);
-  } catch (err) {
-    console.log(err);
+    mongoose.connection.on('error', (err) => {
+      logger.error('MongoDB connection error:', err);
+    });
+
+    mongoose.connection.on('disconnected', () => {
+      logger.warn('MongoDB disconnected');
+    });
+
+    process.on('SIGINT', async () => {
+      await mongoose.connection.close();
+      logger.info('MongoDB connection closed due to app termination');
+      process.exit(0);
+    });
+
+  } catch (error) {
+    logger.error('MongoDB connection failed:', error);
+    process.exit(1);
   }
 };
 
-const getClient = () => client;
-
-module.exports = {
-  connectWithDb,
-  getClient,
-};
+module.exports = connectDB;
