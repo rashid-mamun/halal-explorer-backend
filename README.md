@@ -6,49 +6,59 @@ A comprehensive travel and tourism backend API system designed specifically for 
 
 ```
 halal-explorer-backend/
-├── 📁 **Root Configuration**
-│   ├── package.json                 # Dependencies and scripts
-│   ├── server.js                    # Main server entry point
-│   ├── .env.example                 # Environment variables template
-│   └── README.md                    # Project documentation
+├── package.json                 # Dependencies and scripts
+├── server.js                    # Main server entry point
+├── .env.example                 # Environment variables template
+├── README.md                    # Project documentation
 │
-├── 📁 **Source Code (`src/`)**
-│   ├── 📁 **Core**
-│   │   ├── app.js                   # Express app configuration
-│   │   ├── routes.js                # Main route aggregator
-│   │   └── middleware/              # Global middleware
-│   │
-│   ├── 📁 **Authentication (`auth/`)**
-│   │   ├── controllers/             # Auth controllers
-│   │   ├── services/                # Auth business logic
-│   │   ├── middleware/              # Auth middleware
-│   │   └── routes.js                # Auth routes
-│   │
-│   ├── 📁 **Services**
-│   │   ├── 📁 **Cruise**            # Cruise service module
-│   │   ├── 📁 **Insurance**         # Insurance service module
-│   │   ├── 📁 **Hotel**             # Hotel service module (planned)
-│   │   ├── 📁 **Activity**          # Activity service module (planned)
-│   │   ├── 📁 **Holiday**           # Holiday service module (planned)
-│   │   └── 📁 **Transfers**         # Transfers service module (planned)
-│   │
-│   ├── 📁 **Models**                # Mongoose models
-│   ├── 📁 **Config**                # Configuration files
-│   └── 📁 **Utils**                 # Utility functions
+├── src/
+│   ├── app.js                   # Express app configuration
+│   ├── routes.js                # Main route aggregator
+│   ├── config/                  # Configuration files (DB, Redis, etc.)
+│   ├── utils/                   # Utility functions
+│   ├── middlewares/             # Shared/global middlewares (e.g., authGuard.js)
+│   └── modules/                 # All business logic modules
+│       ├── auth/
+│       │   ├── controllers/
+│       │   ├── services/
+│       │   ├── routes.js
+│       ├── activity/
+│       │   ├── controllers/
+│       │   ├── models/
+│       │   ├── routes/
+│       │   ├── services/
+│       │   ├── validators/
+│       ├── cruise/
+│       │   ├── controllers/
+│       │   ├── models/
+│       │   ├── routes/
+│       │   ├── services/
+│       ├── holiday/
+│       │   ├── controllers/
+│       │   ├── models/
+│       │   ├── routes/
+│       │   ├── services/
+│       ├── hotel/
+│       │   ├── controllers/
+│       │   ├── models/
+│       │   ├── routes/
+│       │   ├── services/
+│       │   ├── validators/
+│       ├── insurance/
+│       │   ├── controllers/
+│       │   ├── models/
+│       │   ├── routes/
+│       │   ├── services/
+│       ├── transfers/
+│           ├── controllers/
+│           ├── models/
+│           ├── routes/
+│           ├── services/
+│           ├── validators/
 │
-├── 📁 **Tests**
-│   ├── setup.js                     # Test configuration
-│   ├── 📁 **Unit Tests**
-│   │   ├── 📁 **auth**              # Authentication unit tests
-│   │   └── 📁 **services**          # Service unit tests
-│   └── 📁 **Integration Tests**
-│       ├── 📁 **auth**              # Authentication integration tests
-│       └── 📁 **services**          # Service integration tests
+├── tests/                       # Unit and integration tests
 │
-└── 📁 **Documentation**
-    ├── API_DOCUMENTATION.md         # API endpoints documentation
-    ├── DEPLOYMENT_GUIDE.md          # Deployment instructions
-    └── DEVELOPMENT_GUIDE.md         # Development setup guide
+├── logs/                        # Log files
 ```
 
 ## 🚀 Features

@@ -2,11 +2,11 @@ const express = require('express');
 const router = express.Router();
 
 // Import service routes
-const authRoutes = require('./auth/routes');
-const cruiseRoutes = require('./services/cruise/routes');
-const insuranceRoutes = require('./services/insurance/routes');
-const holidayRoutes = require('./services/holiday/routes');
-const adminHolidayRoutes = require('./services/holiday/adminRoutes');
+const authRoutes = require('./modules/auth/routes.js');
+const cruiseRoutes = require('./modules/cruise/routes/cruiseRoutes.js');
+const insuranceRoutes = require('./modules/insurance/routes/insuranceRoutes.js');
+const holidayRoutes = require('./modules/holiday/routes/holidayRoutes.js');
+// const adminHolidayRoutes = require('./modules/holiday/routes/adminRoutes.js'); // Uncomment if exists
 
 /**
  * Health check endpoint
@@ -44,7 +44,7 @@ router.use('/auth', authRoutes);
 // Mount service routes
 router.use('/cruise', cruiseRoutes);
 router.use('/insurance', insuranceRoutes);
-router.use('/holiday/admin', adminHolidayRoutes);
+// router.use('/holiday/admin', adminHolidayRoutes); // Uncomment if exists
 router.use('/holiday', holidayRoutes);
 
 module.exports = router;
