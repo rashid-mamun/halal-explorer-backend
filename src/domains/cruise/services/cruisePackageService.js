@@ -49,13 +49,13 @@ const getAllCruisePackages = async () => {
  */
 const getCruisePackageById = async (id) => {
   try {
-    const package = await CruisePackage.findById(id);
+    const cruisePackage = await CruisePackage.findOne({ id: id });
     
-    if (!package) {
+    if (!cruisePackage) {
       throw new Error('Cruise package not found');
     }
     
-    return package;
+    return cruisePackage;
   } catch (error) {
     throw new Error(`Failed to retrieve cruise package: ${error.message}`);
   }
@@ -66,17 +66,17 @@ const getCruisePackageById = async (id) => {
  */
 const updateCruisePackage = async (id, updateData) => {
   try {
-    const package = await CruisePackage.findByIdAndUpdate(
-      id,
+    const cruisePackage = await CruisePackage.findOneAndUpdate(
+      { id: id },
       updateData,
       { new: true, runValidators: true }
     );
     
-    if (!package) {
+    if (!cruisePackage) {
       throw new Error('Cruise package not found');
     }
     
-    return package;
+    return cruisePackage;
   } catch (error) {
     throw new Error(`Failed to update cruise package: ${error.message}`);
   }
@@ -87,13 +87,13 @@ const updateCruisePackage = async (id, updateData) => {
  */
 const deleteCruisePackage = async (id) => {
   try {
-    const package = await CruisePackage.findByIdAndDelete(id);
+    const cruisePackage = await CruisePackage.findOneAndDelete({ id: id });
     
-    if (!package) {
+    if (!cruisePackage) {
       throw new Error('Cruise package not found');
     }
     
-    return package;
+    return cruisePackage;
   } catch (error) {
     throw new Error(`Failed to delete cruise package: ${error.message}`);
   }

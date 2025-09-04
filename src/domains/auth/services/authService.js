@@ -121,12 +121,12 @@ const hasRole = (user, roles) => {
  */
 const hasServiceAccess = (user, service) => {
   // Admin has access to all services
-  if (user.role.name === 'admin') {
+  if (user.role && user.role.name === 'admin') {
     return true;
   }
 
   // Check if user has access to the specific service
-  return user.allowedServices && user.allowedServices.includes(service);
+  return user.allowedServices ? user.allowedServices.includes(service) : false;
 };
 
 /**

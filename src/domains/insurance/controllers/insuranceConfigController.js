@@ -7,7 +7,7 @@ const { sendSuccessResponse, sendErrorResponse } = require('../../../shared/util
 const getAllConfig = async (req, res) => {
   try {
     const config = await insuranceConfigService.getAllConfig();
-    sendSuccessResponse(res, 'Configuration retrieved successfully', config);
+    sendSuccessResponse(res, config, 'Configuration retrieved successfully');
   } catch (error) {
     sendErrorResponse(res, error.message);
   }
@@ -20,7 +20,7 @@ const getConfigSection = async (req, res) => {
   try {
     const { section } = req.params;
     const data = await insuranceConfigService.getConfigSection(section);
-    sendSuccessResponse(res, `${section} retrieved successfully`, data);
+    sendSuccessResponse(res, data, `${section} retrieved successfully`);
   } catch (error) {
     sendErrorResponse(res, error.message);
   }
@@ -33,7 +33,7 @@ const addTravellerType = async (req, res) => {
   try {
     const { name, description } = req.body;
     const result = await insuranceConfigService.addTravellerType({ name, description });
-    sendSuccessResponse(res, 'Traveller type added successfully', result);
+    sendSuccessResponse(res, result, 'Traveller type added successfully');
   } catch (error) {
     sendErrorResponse(res, error.message);
   }
@@ -46,7 +46,7 @@ const addPolicyType = async (req, res) => {
   try {
     const { name, description } = req.body;
     const result = await insuranceConfigService.addPolicyType({ name, description });
-    sendSuccessResponse(res, 'Policy type added successfully', result);
+    sendSuccessResponse(res, result, 'Policy type added successfully');
   } catch (error) {
     sendErrorResponse(res, error.message);
   }
@@ -59,7 +59,7 @@ const addArea = async (req, res) => {
   try {
     const { name, description } = req.body;
     const result = await insuranceConfigService.addArea({ name, description });
-    sendSuccessResponse(res, 'Area added successfully', result);
+    sendSuccessResponse(res, result, 'Area added successfully');
   } catch (error) {
     sendErrorResponse(res, error.message);
   }
@@ -72,7 +72,7 @@ const addRestType = async (req, res) => {
   try {
     const { name, description } = req.body;
     const result = await insuranceConfigService.addRestType({ name, description });
-    sendSuccessResponse(res, 'Rest type added successfully', result);
+    sendSuccessResponse(res, result, 'Rest type added successfully');
   } catch (error) {
     sendErrorResponse(res, error.message);
   }
@@ -85,7 +85,7 @@ const addProductName = async (req, res) => {
   try {
     const { name, description } = req.body;
     const result = await insuranceConfigService.addProductName({ name, description });
-    sendSuccessResponse(res, 'Product name added successfully', result);
+    sendSuccessResponse(res, result, 'Product name added successfully');
   } catch (error) {
     sendErrorResponse(res, error.message);
   }
@@ -98,7 +98,7 @@ const addAgeGroup = async (req, res) => {
   try {
     const { name, minAge, maxAge } = req.body;
     const result = await insuranceConfigService.addAgeGroup({ name, minAge, maxAge });
-    sendSuccessResponse(res, 'Age group added successfully', result);
+    sendSuccessResponse(res, result, 'Age group added successfully');
   } catch (error) {
     sendErrorResponse(res, error.message);
   }
@@ -111,7 +111,7 @@ const addCountry = async (req, res) => {
   try {
     const { name, code } = req.body;
     const result = await insuranceConfigService.addCountry({ name, code });
-    sendSuccessResponse(res, 'Country added successfully', result);
+    sendSuccessResponse(res, result, 'Country added successfully');
   } catch (error) {
     sendErrorResponse(res, error.message);
   }
@@ -124,7 +124,7 @@ const addDuration = async (req, res) => {
   try {
     const { name, days } = req.body;
     const result = await insuranceConfigService.addDuration({ name, days });
-    sendSuccessResponse(res, 'Duration added successfully', result);
+    sendSuccessResponse(res, result, 'Duration added successfully');
   } catch (error) {
     sendErrorResponse(res, error.message);
   }

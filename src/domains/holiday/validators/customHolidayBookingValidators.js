@@ -2,11 +2,17 @@ const Joi = require('joi');
 
 // Validator for creating custom holiday booking
 const createCustomHolidayBookingValidator = Joi.object({
+  bookingId: Joi.string().optional().trim().max(100),
+  partnerOrderId: Joi.string().optional().trim().max(100),
+  email: Joi.string().email().optional().trim().max(100),
   idInfo: Joi.object().required(),
   departureDetails: Joi.object().required(),
   passengersDetails: Joi.object().required(),
   contractDetails: Joi.object({
-    email: Joi.string().email().required().trim().max(100)
+    email: Joi.string().email().required().trim().max(100),
+    contactNumber: Joi.string().optional().trim().max(20),
+    address: Joi.string().optional().trim().max(500),
+    emergencyContact: Joi.string().optional().trim().max(20)
   }).required(),
   consultantName: Joi.string().optional().trim().max(100),
   bookingSummary: Joi.object().required(),

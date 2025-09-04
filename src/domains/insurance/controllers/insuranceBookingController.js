@@ -7,7 +7,7 @@ const { sendSuccessResponse, sendErrorResponse } = require('../../../shared/util
 const createBooking = async (req, res) => {
   try {
     const booking = await insuranceBookingService.createBooking(req.body);
-    sendSuccessResponse(res, 'Insurance booking created successfully', booking);
+    sendSuccessResponse(res, booking, 'Insurance booking created successfully');
   } catch (error) {
     sendErrorResponse(res, error.message);
   }
@@ -19,7 +19,7 @@ const createBooking = async (req, res) => {
 const getAllBookings = async (req, res) => {
   try {
     const bookings = await insuranceBookingService.getAllBookings();
-    sendSuccessResponse(res, 'Bookings retrieved successfully', bookings);
+    sendSuccessResponse(res, bookings, 'Bookings retrieved successfully');
   } catch (error) {
     sendErrorResponse(res, error.message);
   }
@@ -32,7 +32,7 @@ const getBookingById = async (req, res) => {
   try {
     const { id } = req.params;
     const booking = await insuranceBookingService.getBookingById(id);
-    sendSuccessResponse(res, 'Booking retrieved successfully', booking);
+    sendSuccessResponse(res, booking, 'Booking retrieved successfully');
   } catch (error) {
     sendErrorResponse(res, error.message);
   }
@@ -45,7 +45,7 @@ const getBookingsByEmail = async (req, res) => {
   try {
     const { email } = req.params;
     const bookings = await insuranceBookingService.getBookingsByEmail(email);
-    sendSuccessResponse(res, 'Bookings retrieved successfully', bookings);
+    sendSuccessResponse(res, bookings, 'Bookings retrieved successfully');
   } catch (error) {
     sendErrorResponse(res, error.message);
   }
@@ -58,7 +58,7 @@ const getBookingByPartnerOrderId = async (req, res) => {
   try {
     const { partnerOrderId } = req.params;
     const booking = await insuranceBookingService.getBookingByPartnerOrderId(partnerOrderId);
-    sendSuccessResponse(res, 'Booking retrieved successfully', booking);
+    sendSuccessResponse(res, booking, 'Booking retrieved successfully');
   } catch (error) {
     sendErrorResponse(res, error.message);
   }
@@ -71,7 +71,7 @@ const updateBooking = async (req, res) => {
   try {
     const { id } = req.params;
     const booking = await insuranceBookingService.updateBooking(id, req.body);
-    sendSuccessResponse(res, 'Booking updated successfully', booking);
+    sendSuccessResponse(res, booking, 'Booking updated successfully');
   } catch (error) {
     sendErrorResponse(res, error.message);
   }
@@ -84,7 +84,7 @@ const deleteBooking = async (req, res) => {
   try {
     const { id } = req.params;
     const booking = await insuranceBookingService.deleteBooking(id);
-    sendSuccessResponse(res, 'Booking deleted successfully', booking);
+    sendSuccessResponse(res, booking, 'Booking deleted successfully');
   } catch (error) {
     sendErrorResponse(res, error.message);
   }
@@ -97,7 +97,7 @@ const searchBookings = async (req, res) => {
   try {
     const criteria = req.query;
     const bookings = await insuranceBookingService.searchBookings(criteria);
-    sendSuccessResponse(res, 'Bookings search completed', bookings);
+    sendSuccessResponse(res, bookings, 'Bookings search completed');
   } catch (error) {
     sendErrorResponse(res, error.message);
   }

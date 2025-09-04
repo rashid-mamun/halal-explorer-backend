@@ -4,8 +4,8 @@ const axios = require('axios');
 const crypto = require('crypto');
 
 const createHeaders = () => {
-  const apiKey = process.env.HOTELBEDS_API_KEY;
-  const secret = process.env.HOTELBEDS_SECRET;
+  const apiKey = process.env.HOTELBEDS_ACTIVITY_API_KEY;
+  const secret = process.env.HOTELBEDS_ACTIVITY_SECRET;
   const timestamp = Math.floor(Date.now() / 1000).toString();
   const signature = crypto
     .createHash('sha256')
@@ -72,9 +72,9 @@ const getAllActivityContent = async (page = 1, pageSize = 100) => {
       .skip(skip)
       .limit(pageSize)
       .sort({ lastUpdated: -1 });
-    
+
     const total = await ActivityContent.countDocuments();
-    
+
     return {
       data: activityContents,
       pagination: {
@@ -115,31 +115,31 @@ const searchActivityContent = async (searchParams) => {
   try {
     const { keyword, category, segment, page = 1, pageSize = 100 } = searchParams;
     const skip = (page - 1) * pageSize;
-    
+
     let query = {};
-    
+
     if (keyword) {
       query.$or = [
         { name: { $regex: keyword, $options: 'i' } },
         { address: { $regex: keyword, $options: 'i' } }
       ];
     }
-    
+
     if (category) {
       query['categories.code'] = category;
     }
-    
+
     if (segment) {
       query['segments.code'] = segment;
     }
-    
+
     const activityContents = await ActivityContent.find(query)
       .skip(skip)
       .limit(pageSize)
       .sort({ lastUpdated: -1 });
-    
+
     const total = await ActivityContent.countDocuments(query);
-    
+
     return {
       data: activityContents,
       pagination: {
@@ -163,9 +163,9 @@ const fetchActivityContentFromHotelBeds = async (activityCodes, address) => {
     };
 
     const response = await postData(
-      url, 
-      data, 
-      'Activity content fetched successfully', 
+      url,
+      data,
+      'Activity content fetched successfully',
       'Failed to fetch activity content'
     );
 
@@ -210,9 +210,9 @@ const getPortfolioData = async (destination, offset = 1, limit = 1000) => {
   try {
     const url = `${process.env.HOTELBEDS_API_ENDPOINT}activity-cache-api/1.0/portfolio?destination=${destination}&offset=${offset}&limit=${limit}`;
     const headers = createHeaders();
-    
+
     const response = await axios.get(url, { headers });
-    
+
     if (!response.data) {
       return {
         success: false,
@@ -238,9 +238,9 @@ const getPortfolioAvailability = async (destination, offset = 1, limit = 1000) =
   try {
     const url = `${process.env.HOTELBEDS_API_ENDPOINT}activity-cache-api/1.0/avail?destination=${destination}&offset=${offset}&limit=${limit}`;
     const headers = createHeaders();
-    
+
     const response = await axios.get(url, { headers });
-    
+
     if (!response.data) {
       return {
         success: false,

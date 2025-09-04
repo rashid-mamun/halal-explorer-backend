@@ -180,10 +180,18 @@ const refreshToken = async (req, res) => {
  */
 const logout = async (req, res) => {
   try {
-    const { accessToken, refreshToken } = req.body;
+    // Extract access token from Authorization header
+    const authHeader = req.headers.authorization;
+    const accessToken = authHeader ? authHeader.substring(7) : null; // Remove 'Bearer ' prefix
     
-    if (!accessToken || !refreshToken) {
-      return sendErrorResponse(res, 'Access token and refresh token are required');
+    // Try to get refresh token from body, or use the same token if not provided
+    let { refreshToken } = req.body;
+    if (!refreshToken) {
+      refreshToken = accessToken; // Use access token as fallback
+    }
+    
+    if (!accessToken) {
+      return sendErrorResponse(res, 'Access token is required');
     }
 
     // Blacklist tokens

@@ -5,6 +5,7 @@ const CruiseMasterData = require('../models/CruiseMasterData');
  */
 const getOrCreateMasterData = async () => {
   try {
+    // Get the first document or create a new one
     let masterData = await CruiseMasterData.findOne();
     
     if (!masterData) {
@@ -14,6 +15,8 @@ const getOrCreateMasterData = async () => {
       });
       await masterData.save();
     }
+    
+
     
     return masterData;
   } catch (error) {
@@ -49,10 +52,16 @@ const addCruiseLine = async (cruiseLineData) => {
       throw new Error('Cruise line already exists');
     }
     
-    masterData.cruiseLines.push(cruiseLineData);
+    // Ensure the cruise line data has the correct structure
+    const cruiseLineToAdd = {
+      name: cruiseLineData.name,
+      description: cruiseLineData.description || ''
+    };
+    
+    masterData.cruiseLines.push(cruiseLineToAdd);
     await masterData.save();
     
-    return cruiseLineData;
+    return cruiseLineToAdd;
   } catch (error) {
     throw new Error(`Failed to add cruise line: ${error.message}`);
   }
@@ -73,10 +82,16 @@ const updateCruiseLine = async (cruiseLineName, updateData) => {
       throw new Error('Cruise line not found');
     }
     
-    masterData.cruiseLines[cruiseLineIndex] = {
+    // Preserve required fields and only update allowed fields
+    const updatedCruiseLine = {
       ...masterData.cruiseLines[cruiseLineIndex],
       ...updateData
     };
+    
+    // Ensure required fields are preserved
+    updatedCruiseLine.name = masterData.cruiseLines[cruiseLineIndex].name;
+    
+    masterData.cruiseLines[cruiseLineIndex] = updatedCruiseLine;
     
     await masterData.save();
     return masterData.cruiseLines[cruiseLineIndex];
@@ -149,6 +164,8 @@ const addShip = async (shipData) => {
   try {
     const masterData = await getOrCreateMasterData();
     
+
+    
     // Check if ship already exists for this cruise line
     const existingShip = masterData.ships.find(
       ship => ship.name.toLowerCase() === shipData.name.toLowerCase() &&
@@ -164,14 +181,23 @@ const addShip = async (shipData) => {
       line => line.name.toLowerCase() === shipData.cruiseLine.toLowerCase()
     );
     
+
+    
     if (!cruiseLineExists) {
       throw new Error('Cruise line does not exist');
     }
     
-    masterData.ships.push(shipData);
+    // Ensure the ship data has the correct structure
+    const shipToAdd = {
+      cruiseLine: shipData.cruiseLine,
+      name: shipData.name,
+      description: shipData.description || ''
+    };
+    
+    masterData.ships.push(shipToAdd);
     await masterData.save();
     
-    return shipData;
+    return shipToAdd;
   } catch (error) {
     throw new Error(`Failed to add ship: ${error.message}`);
   }
@@ -193,10 +219,17 @@ const updateShip = async (shipName, cruiseLine, updateData) => {
       throw new Error('Ship not found');
     }
     
-    masterData.ships[shipIndex] = {
+    // Preserve required fields and only update allowed fields
+    const updatedShip = {
       ...masterData.ships[shipIndex],
       ...updateData
     };
+    
+    // Ensure required fields are preserved
+    updatedShip.name = masterData.ships[shipIndex].name;
+    updatedShip.cruiseLine = masterData.ships[shipIndex].cruiseLine;
+    
+    masterData.ships[shipIndex] = updatedShip;
     
     await masterData.save();
     return masterData.ships[shipIndex];

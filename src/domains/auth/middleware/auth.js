@@ -12,13 +12,13 @@ const authenticate = async (req, res) => {
     const authHeader = req.headers.authorization;
     
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return sendUnauthorizedResponse(res, MESSAGES.ERROR.TOKEN_INVALID);
+      return sendUnauthorizedResponse(res, 'No token provided');
     }
 
     const token = authHeader.substring(7); // Remove 'Bearer ' prefix
     
     if (!token) {
-      return sendUnauthorizedResponse(res, MESSAGES.ERROR.TOKEN_INVALID);
+      return sendUnauthorizedResponse(res, 'No token provided');
     }
 
     // Validate token and check blacklist

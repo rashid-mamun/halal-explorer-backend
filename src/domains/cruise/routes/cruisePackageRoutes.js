@@ -12,14 +12,14 @@ const {
 
 // Get all cruise packages
 router.get('/', 
-  requireAuth, 
+  requireAuth,
   requirePermissionMiddleware('cruise:read'),
   cruisePackageController.getAllCruisePackages
 );
 
 // Search cruise packages
 router.get('/search', 
-  requireAuth, 
+  requireAuth,
   requirePermissionMiddleware('cruise:read'),
   validateRequestQuery(searchCruisePackageValidator),
   cruisePackageController.searchCruisePackages
@@ -27,14 +27,14 @@ router.get('/search',
 
 // Get cruise package by ID
 router.get('/:id', 
-  requireAuth, 
+  requireAuth,
   requirePermissionMiddleware('cruise:read'),
   cruisePackageController.getCruisePackageById
 );
 
 // Create new cruise package (Admin only)
 router.post('/', 
-  requireAuth, 
+  requireAuth,
   requirePermissionMiddleware('cruise:create'),
   validateRequestBody(createCruisePackageValidator),
   cruisePackageController.createCruisePackage
@@ -42,7 +42,7 @@ router.post('/',
 
 // Update cruise package (Admin only)
 router.put('/:id', 
-  requireAuth, 
+  requireAuth,
   requirePermissionMiddleware('cruise:update'),
   validateRequestBody(updateCruisePackageValidator),
   cruisePackageController.updateCruisePackage
@@ -50,7 +50,7 @@ router.put('/:id',
 
 // Delete cruise package (Admin only)
 router.delete('/:id', 
-  requireAuth, 
+  requireAuth,
   requirePermissionMiddleware('cruise:delete'),
   cruisePackageController.deleteCruisePackage
 );

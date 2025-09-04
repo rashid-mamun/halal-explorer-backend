@@ -28,8 +28,18 @@ const createDefaultPermissions = async () => {
   }
 
   if (permissions.length > 0) {
-    await Permission.insertMany(permissions);
-    console.log(`Created ${permissions.length} default permissions`);
+    try {
+      await Permission.insertMany(permissions, { ordered: false });
+      console.log(`Created ${permissions.length} default permissions`);
+    } catch (error) {
+      // Ignore duplicate key errors
+      if (error.code === 11000) {
+        console.log('Some permissions already exist, continuing...');
+      } else {
+        console.error('Error creating permissions:', error);
+        // Don't throw error, just log it
+      }
+    }
   }
 
   return await Permission.find({ isActive: true });
@@ -88,10 +98,15 @@ const createDefaultRoles = async () => {
   ];
 
   for (const roleData of roles) {
-    const existingRole = await Role.findOne({ name: roleData.name });
-    if (!existingRole) {
-      await Role.create(roleData);
-      console.log(`Created role: ${roleData.name}`);
+    try {
+      const existingRole = await Role.findOne({ name: roleData.name });
+      if (!existingRole) {
+        await Role.create(roleData);
+        console.log(`Created role: ${roleData.name}`);
+      }
+    } catch (error) {
+      console.error(`Error creating role ${roleData.name}:`, error);
+      // Don't throw error, just log it
     }
   }
 

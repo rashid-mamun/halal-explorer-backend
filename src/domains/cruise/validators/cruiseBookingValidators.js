@@ -13,7 +13,8 @@ const updateCruiseBookingValidator = Joi.object({
   userInfo: Joi.object().optional(),
   priceDetails: Joi.object().optional(),
   paymentDetails: Joi.object().optional(),
-  orderInfo: Joi.object().optional()
+  orderInfo: Joi.object().optional(),
+  status: Joi.string().optional()
 });
 
 // Validator for searching cruise bookings

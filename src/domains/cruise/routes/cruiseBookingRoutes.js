@@ -12,7 +12,7 @@ const {
 
 // Create new cruise booking
 router.post('/', 
-  requireAuth, 
+  requireAuth,
   requirePermissionMiddleware('cruise:create'),
   validateRequestBody(createCruiseBookingValidator),
   cruiseBookingController.createBooking
@@ -20,14 +20,14 @@ router.post('/',
 
 // Get all bookings (Admin/Manager only)
 router.get('/all', 
-  requireAuth, 
+  requireAuth,
   requirePermissionMiddleware('cruise:read'),
   cruiseBookingController.getAllBookings
 );
 
 // Search bookings
 router.get('/search', 
-  requireAuth, 
+  requireAuth,
   requirePermissionMiddleware('cruise:read'),
   validateRequestQuery(searchCruiseBookingValidator),
   cruiseBookingController.searchBookings
@@ -35,28 +35,28 @@ router.get('/search',
 
 // Get booking by ID
 router.get('/id/:bookingId', 
-  requireAuth, 
+  requireAuth,
   requirePermissionMiddleware('cruise:read'),
   cruiseBookingController.getBookingById
 );
 
 // Get booking by partner order ID
 router.get('/order/:partnerOrderId', 
-  requireAuth, 
+  requireAuth,
   requirePermissionMiddleware('cruise:read'),
   cruiseBookingController.getBookingByPartnerOrderId
 );
 
 // Get bookings by email
 router.get('/email/:email', 
-  requireAuth, 
+  requireAuth,
   requirePermissionMiddleware('cruise:read'),
   cruiseBookingController.getBookingsByEmail
 );
 
 // Update booking
 router.put('/:bookingId', 
-  requireAuth, 
+  requireAuth,
   requirePermissionMiddleware('cruise:update'),
   validateRequestBody(updateCruiseBookingValidator),
   cruiseBookingController.updateBooking
@@ -64,7 +64,7 @@ router.put('/:bookingId',
 
 // Delete booking (Admin only)
 router.delete('/:bookingId', 
-  requireAuth, 
+  requireAuth,
   requirePermissionMiddleware('cruise:delete'),
   cruiseBookingController.deleteBooking
 );

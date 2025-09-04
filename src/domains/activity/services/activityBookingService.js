@@ -4,8 +4,8 @@ const axios = require('axios');
 const crypto = require('crypto');
 
 const createHeaders = () => {
-  const apiKey = process.env.HOTELBEDS_API_KEY;
-  const secret = process.env.HOTELBEDS_SECRET;
+  const apiKey = process.env.HOTELBEDS_ACTIVITY_API_KEY;
+  const secret = process.env.HOTELBEDS_ACTIVITY_SECRET;
   const timestamp = Math.floor(Date.now() / 1000).toString();
   const signature = crypto
     .createHash('sha256')
@@ -55,9 +55,9 @@ const getAllActivityBookings = async (page = 1, pageSize = 100) => {
       .skip(skip)
       .limit(pageSize)
       .sort({ createdAt: -1 });
-    
+
     const total = await ActivityBooking.countDocuments();
-    
+
     return {
       data: activityBookings,
       pagination: {
@@ -96,31 +96,31 @@ const deleteActivityBooking = async (bookingId) => {
 
 const searchActivityBookings = async (searchParams) => {
   try {
-    const { 
-      activityCode, 
-      status, 
-      email, 
-      dateFrom, 
-      dateTo, 
-      page = 1, 
-      pageSize = 100 
+    const {
+      activityCode,
+      status,
+      email,
+      dateFrom,
+      dateTo,
+      page = 1,
+      pageSize = 100
     } = searchParams;
     const skip = (page - 1) * pageSize;
-    
+
     let query = {};
-    
+
     if (activityCode) {
       query.activityCode = activityCode;
     }
-    
+
     if (status) {
       query.status = status;
     }
-    
+
     if (email) {
       query['holder.email'] = { $regex: email, $options: 'i' };
     }
-    
+
     if (dateFrom || dateTo) {
       query.createdAt = {};
       if (dateFrom) {
@@ -130,14 +130,14 @@ const searchActivityBookings = async (searchParams) => {
         query.createdAt.$lte = new Date(dateTo);
       }
     }
-    
+
     const activityBookings = await ActivityBooking.find(query)
       .skip(skip)
       .limit(pageSize)
       .sort({ createdAt: -1 });
-    
+
     const total = await ActivityBooking.countDocuments(query);
-    
+
     return {
       data: activityBookings,
       pagination: {
@@ -156,13 +156,13 @@ const confirmBooking = async (bookingData) => {
   try {
     const confirmUrl = `${process.env.HOTELBEDS_API_ENDPOINT}activity-api/3.0/bookings`;
     const headers = createHeaders();
-    
+
     const response = await axios.put(confirmUrl, bookingData, { headers });
     console.log(response);
-    
+
     if (response.status === 200) {
       const bookingConfirmation = response.data;
-      
+
       // Update booking status in database
       if (bookingData.bookingId) {
         await updateActivityBooking(bookingData.bookingId, {
@@ -171,7 +171,7 @@ const confirmBooking = async (bookingData) => {
           hotelBedsData: bookingConfirmation
         });
       }
-      
+
       return {
         success: true,
         message: 'Booking Confirmed',
@@ -201,19 +201,19 @@ const cancelBooking = async (bookingId, cancellationData) => {
   try {
     const cancelUrl = `${process.env.HOTELBEDS_API_ENDPOINT}activity-api/3.0/bookings/${bookingId}`;
     const headers = createHeaders();
-    
-    const response = await axios.delete(cancelUrl, { 
+
+    const response = await axios.delete(cancelUrl, {
       headers,
-      data: cancellationData 
+      data: cancellationData
     });
-    
+
     if (response.status === 200) {
       // Update booking status in database
       await updateActivityBooking(bookingId, {
         status: 'cancelled',
         hotelBedsData: response.data
       });
-      
+
       return {
         success: true,
         message: 'Booking Cancelled Successfully',
@@ -242,14 +242,14 @@ const getBookingStatistics = async () => {
     const pendingBookings = await ActivityBooking.countDocuments({ status: 'pending' });
     const cancelledBookings = await ActivityBooking.countDocuments({ status: 'cancelled' });
     const completedBookings = await ActivityBooking.countDocuments({ status: 'completed' });
-    
+
     // Get recent bookings (last 30 days)
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
     const recentBookings = await ActivityBooking.countDocuments({
       createdAt: { $gte: thirtyDaysAgo }
     });
-    
+
     return {
       success: true,
       data: {

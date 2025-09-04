@@ -7,7 +7,7 @@ const { sendSuccessResponse, sendErrorResponse } = require('../../../shared/util
 const createInsurance = async (req, res) => {
   try {
     const insurance = await insuranceService.createInsurance(req.body);
-    sendSuccessResponse(res, 'Insurance policy created successfully', insurance);
+    sendSuccessResponse(res, insurance, 'Insurance policy created successfully');
   } catch (error) {
     sendErrorResponse(res, error.message);
   }
@@ -19,7 +19,7 @@ const createInsurance = async (req, res) => {
 const getAllInsurances = async (req, res) => {
   try {
     const insurances = await insuranceService.getAllInsurances();
-    sendSuccessResponse(res, 'Insurance policies retrieved successfully', insurances);
+    sendSuccessResponse(res, insurances, 'Insurance policies retrieved successfully');
   } catch (error) {
     sendErrorResponse(res, error.message);
   }
@@ -32,7 +32,7 @@ const getInsuranceById = async (req, res) => {
   try {
     const { id } = req.params;
     const insurance = await insuranceService.getInsuranceById(id);
-    sendSuccessResponse(res, 'Insurance policy retrieved successfully', insurance);
+    sendSuccessResponse(res, insurance, 'Insurance policy retrieved successfully');
   } catch (error) {
     sendErrorResponse(res, error.message);
   }
@@ -45,7 +45,7 @@ const updateInsurance = async (req, res) => {
   try {
     const { id } = req.params;
     const insurance = await insuranceService.updateInsurance(id, req.body);
-    sendSuccessResponse(res, 'Insurance policy updated successfully', insurance);
+    sendSuccessResponse(res, insurance, 'Insurance policy updated successfully');
   } catch (error) {
     sendErrorResponse(res, error.message);
   }
@@ -58,7 +58,7 @@ const deleteInsurance = async (req, res) => {
   try {
     const { id } = req.params;
     const insurance = await insuranceService.deleteInsurance(id);
-    sendSuccessResponse(res, 'Insurance policy deleted successfully', insurance);
+    sendSuccessResponse(res, insurance, 'Insurance policy deleted successfully');
   } catch (error) {
     sendErrorResponse(res, error.message);
   }
@@ -71,7 +71,7 @@ const searchInsurances = async (req, res) => {
   try {
     const criteria = req.query;
     const insurances = await insuranceService.searchInsurances(criteria);
-    sendSuccessResponse(res, 'Insurance policies search completed', insurances);
+    sendSuccessResponse(res, insurances, 'Insurance policies search completed');
   } catch (error) {
     sendErrorResponse(res, error.message);
   }

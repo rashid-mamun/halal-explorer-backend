@@ -21,7 +21,7 @@ router.get('/cruiselines',
 
 // Add new cruise line (Admin only)
 router.post('/cruiselines', 
-  requireAuth, 
+  requireAuth,
   requirePermissionMiddleware('cruise:create'),
   validateRequestBody(addCruiseLineValidator),
   cruiseMasterDataController.addCruiseLine
@@ -29,7 +29,7 @@ router.post('/cruiselines',
 
 // Update cruise line (Admin only)
 router.put('/cruiselines/:cruiseLineName', 
-  requireAuth, 
+  requireAuth,
   requirePermissionMiddleware('cruise:update'),
   validateRequestBody(updateCruiseLineValidator),
   cruiseMasterDataController.updateCruiseLine
@@ -37,7 +37,7 @@ router.put('/cruiselines/:cruiseLineName',
 
 // Delete cruise line (Admin only)
 router.delete('/cruiselines/:cruiseLineName', 
-  requireAuth, 
+  requireAuth,
   requirePermissionMiddleware('cruise:delete'),
   cruiseMasterDataController.deleteCruiseLine
 );
@@ -45,21 +45,21 @@ router.delete('/cruiselines/:cruiseLineName',
 // Ships Management
 // Get all ships
 router.get('/ships', 
-  requireAuth, 
+  requireAuth,
   requirePermissionMiddleware('cruise:read'),
   cruiseMasterDataController.getAllShips
 );
 
 // Get ships by cruise line
 router.get('/ships/:cruiseLine', 
-  requireAuth, 
+  requireAuth,
   requirePermissionMiddleware('cruise:read'),
   cruiseMasterDataController.getShipsByCruiseLine
 );
 
 // Add new ship (Admin only)
 router.post('/ships', 
-  requireAuth, 
+  requireAuth,
   requirePermissionMiddleware('cruise:create'),
   validateRequestBody(addShipValidator),
   cruiseMasterDataController.addShip
@@ -67,7 +67,7 @@ router.post('/ships',
 
 // Update ship (Admin only)
 router.put('/ships/:shipName/:cruiseLine', 
-  requireAuth, 
+  requireAuth,
   requirePermissionMiddleware('cruise:update'),
   validateRequestBody(updateShipValidator),
   cruiseMasterDataController.updateShip
@@ -75,7 +75,7 @@ router.put('/ships/:shipName/:cruiseLine',
 
 // Delete ship (Admin only)
 router.delete('/ships/:shipName/:cruiseLine', 
-  requireAuth, 
+  requireAuth,
   requirePermissionMiddleware('cruise:delete'),
   cruiseMasterDataController.deleteShip
 );

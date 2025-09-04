@@ -4,8 +4,8 @@ const axios = require('axios');
 const crypto = require('crypto');
 
 const createHeaders = () => {
-  const apiKey = process.env.HOTELBEDS_API_KEY;
-  const secret = process.env.HOTELBEDS_SECRET;
+  const apiKey = process.env.HOTELBEDS_ACTIVITY_API_KEY;
+  const secret = process.env.HOTELBEDS_ACTIVITY_SECRET;
   const timestamp = Math.floor(Date.now() / 1000).toString();
   const signature = crypto
     .createHash('sha256')
@@ -81,21 +81,21 @@ const fetchCountries = async () => {
   try {
     const url = `${process.env.HOTELBEDS_API_ENDPOINT}/activity-content-api/3.0/countries/en`;
     const response = await fetchData(url, 'Countries fetched successfully', 'Failed to fetch countries');
-    
+
     if (response.success) {
       const countries = response.data.countries || [];
       const masterData = await getOrCreateMasterData();
       masterData.countries = countries;
       masterData.lastUpdated = new Date();
       await masterData.save();
-      
+
       return {
         success: true,
         message: 'Countries updated successfully',
         data: countries
       };
     }
-    
+
     return response;
   } catch (error) {
     throw new Error(`Failed to fetch countries: ${error.message}`);
@@ -106,11 +106,11 @@ const fetchDestinations = async (countryCode) => {
   try {
     const url = `${process.env.HOTELBEDS_API_ENDPOINT}/activity-content-api/3.0/destinations/en/${countryCode}`;
     const response = await fetchData(url, 'Destinations fetched successfully', 'Failed to fetch destinations');
-    
+
     if (response.success) {
       const destinations = response.data.country?.destinations || [];
       const masterData = await getOrCreateMasterData();
-      
+
       // Update destinations for the specific country
       const existingDestinations = masterData.destinations.filter(d => d.countryCode !== countryCode);
       const newDestinations = destinations.map(dest => ({
@@ -118,18 +118,18 @@ const fetchDestinations = async (countryCode) => {
         name: dest.name,
         countryCode: countryCode
       }));
-      
+
       masterData.destinations = [...existingDestinations, ...newDestinations];
       masterData.lastUpdated = new Date();
       await masterData.save();
-      
+
       return {
         success: true,
         message: 'Destinations updated successfully',
         data: newDestinations
       };
     }
-    
+
     return response;
   } catch (error) {
     throw new Error(`Failed to fetch destinations: ${error.message}`);
@@ -140,21 +140,21 @@ const fetchCurrencies = async () => {
   try {
     const url = `${process.env.HOTELBEDS_API_ENDPOINT}/activity-content-api/3.0/currencies/en`;
     const response = await fetchData(url, 'Currencies fetched successfully', 'Failed to fetch currencies');
-    
+
     if (response.success) {
       const currencies = response.data.currencies || [];
       const masterData = await getOrCreateMasterData();
       masterData.currencies = currencies;
       masterData.lastUpdated = new Date();
       await masterData.save();
-      
+
       return {
         success: true,
         message: 'Currencies updated successfully',
         data: currencies
       };
     }
-    
+
     return response;
   } catch (error) {
     throw new Error(`Failed to fetch currencies: ${error.message}`);
@@ -165,21 +165,21 @@ const fetchSegments = async () => {
   try {
     const url = `${process.env.HOTELBEDS_API_ENDPOINT}/activity-content-api/3.0/segments/en`;
     const response = await fetchData(url, 'Segments fetched successfully', 'Failed to fetch segments');
-    
+
     if (response.success) {
       const segments = response.data.segments || [];
       const masterData = await getOrCreateMasterData();
       masterData.segments = segments;
       masterData.lastUpdated = new Date();
       await masterData.save();
-      
+
       return {
         success: true,
         message: 'Segments updated successfully',
         data: segments
       };
     }
-    
+
     return response;
   } catch (error) {
     throw new Error(`Failed to fetch segments: ${error.message}`);
@@ -190,21 +190,21 @@ const fetchLanguages = async () => {
   try {
     const url = `${process.env.HOTELBEDS_API_ENDPOINT}/activity-content-api/3.0/languages`;
     const response = await fetchData(url, 'Languages fetched successfully', 'Failed to fetch languages');
-    
+
     if (response.success) {
       const languages = response.data.languages || [];
       const masterData = await getOrCreateMasterData();
       masterData.languages = languages;
       masterData.lastUpdated = new Date();
       await masterData.save();
-      
+
       return {
         success: true,
         message: 'Languages updated successfully',
         data: languages
       };
     }
-    
+
     return response;
   } catch (error) {
     throw new Error(`Failed to fetch languages: ${error.message}`);
@@ -215,29 +215,29 @@ const fetchDestinationHotels = async (destinationCode) => {
   try {
     const url = `${process.env.HOTELBEDS_API_ENDPOINT}/activity-content-api/3.0/hotels/en/${destinationCode}`;
     const response = await fetchData(url, 'Destination hotels fetched successfully', 'Failed to fetch destination hotels');
-    
+
     if (response.success) {
       const hotels = response.data.hotels || [];
       const masterData = await getOrCreateMasterData();
-      
+
       // Update hotels for the specific destination
       const existingHotels = masterData.destinationHotels.filter(dh => dh.destinationCode !== destinationCode);
       const newDestinationHotels = {
         destinationCode,
         hotels: hotels
       };
-      
+
       masterData.destinationHotels = [...existingHotels, newDestinationHotels];
       masterData.lastUpdated = new Date();
       await masterData.save();
-      
+
       return {
         success: true,
         message: 'Destination hotels updated successfully',
         data: hotels
       };
     }
-    
+
     return response;
   } catch (error) {
     throw new Error(`Failed to fetch destination hotels: ${error.message}`);
@@ -248,13 +248,13 @@ const searchDestinations = async (keyword, offset = 0, limit = 10) => {
   try {
     const masterData = await getOrCreateMasterData();
     const query = { name: { $regex: keyword, $options: 'i' } };
-    
-    const destinations = masterData.destinations.filter(dest => 
+
+    const destinations = masterData.destinations.filter(dest =>
       dest.name.toLowerCase().includes(keyword.toLowerCase())
     );
-    
+
     const paginatedDestinations = destinations.slice(offset, offset + limit);
-    
+
     return {
       success: true,
       message: 'Search successful',
@@ -285,7 +285,7 @@ const syncAllMasterData = async () => {
     await fetchCurrencies();
     await fetchSegments();
     await fetchLanguages();
-    
+
     return {
       success: true,
       message: 'All master data synchronized successfully'

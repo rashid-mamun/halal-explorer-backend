@@ -6,8 +6,8 @@ const { sendSuccessResponse, sendErrorResponse } = require('../../../shared/util
  */
 const createHolidayPackage = async (req, res) => {
   try {
-    const package = await holidayPackageService.createHolidayPackage(req.body);
-    sendSuccessResponse(res, 'Holiday package created successfully', package);
+    const holidayPackage = await holidayPackageService.createHolidayPackage(req.body);
+    sendSuccessResponse(res, holidayPackage, 'Holiday package created successfully');
   } catch (error) {
     sendErrorResponse(res, error.message);
   }
@@ -19,7 +19,7 @@ const createHolidayPackage = async (req, res) => {
 const getAllHolidayPackages = async (req, res) => {
   try {
     const packages = await holidayPackageService.getAllHolidayPackages();
-    sendSuccessResponse(res, 'Holiday packages retrieved successfully', packages);
+    sendSuccessResponse(res, packages, 'Holiday packages retrieved successfully');
   } catch (error) {
     sendErrorResponse(res, error.message);
   }
@@ -31,8 +31,8 @@ const getAllHolidayPackages = async (req, res) => {
 const getHolidayPackageById = async (req, res) => {
   try {
     const { id } = req.params;
-    const package = await holidayPackageService.getHolidayPackageById(id);
-    sendSuccessResponse(res, 'Holiday package retrieved successfully', package);
+    const holidayPackage = await holidayPackageService.getHolidayPackageById(id);
+    sendSuccessResponse(res, holidayPackage, 'Holiday package retrieved successfully');
   } catch (error) {
     sendErrorResponse(res, error.message);
   }
@@ -44,8 +44,8 @@ const getHolidayPackageById = async (req, res) => {
 const updateHolidayPackage = async (req, res) => {
   try {
     const { id } = req.params;
-    const package = await holidayPackageService.updateHolidayPackage(id, req.body);
-    sendSuccessResponse(res, 'Holiday package updated successfully', package);
+    const holidayPackage = await holidayPackageService.updateHolidayPackage(id, req.body);
+    sendSuccessResponse(res, holidayPackage, 'Holiday package updated successfully');
   } catch (error) {
     sendErrorResponse(res, error.message);
   }
@@ -57,8 +57,8 @@ const updateHolidayPackage = async (req, res) => {
 const deleteHolidayPackage = async (req, res) => {
   try {
     const { id } = req.params;
-    const package = await holidayPackageService.deleteHolidayPackage(id);
-    sendSuccessResponse(res, 'Holiday package deleted successfully', package);
+    const holidayPackage = await holidayPackageService.deleteHolidayPackage(id);
+    sendSuccessResponse(res, holidayPackage, 'Holiday package deleted successfully');
   } catch (error) {
     sendErrorResponse(res, error.message);
   }
@@ -71,7 +71,7 @@ const searchHolidayPackages = async (req, res) => {
   try {
     const criteria = req.query;
     const packages = await holidayPackageService.searchHolidayPackages(criteria);
-    sendSuccessResponse(res, 'Holiday packages search completed', packages);
+    sendSuccessResponse(res, packages, 'Holiday packages search completed');
   } catch (error) {
     sendErrorResponse(res, error.message);
   }

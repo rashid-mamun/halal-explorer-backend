@@ -7,7 +7,7 @@ const { sendSuccessResponse, sendErrorResponse } = require('../../../shared/util
 const getAllCruiseLines = async (req, res) => {
   try {
     const cruiseLines = await cruiseMasterDataService.getAllCruiseLines();
-    sendSuccessResponse(res, 'Cruise lines retrieved successfully', cruiseLines);
+    sendSuccessResponse(res, cruiseLines, 'Cruise lines retrieved successfully');
   } catch (error) {
     sendErrorResponse(res, error.message);
   }
@@ -19,7 +19,7 @@ const getAllCruiseLines = async (req, res) => {
 const addCruiseLine = async (req, res) => {
   try {
     const cruiseLine = await cruiseMasterDataService.addCruiseLine(req.body);
-    sendSuccessResponse(res, 'Cruise line added successfully', cruiseLine);
+    sendSuccessResponse(res, cruiseLine, 'Cruise line added successfully');
   } catch (error) {
     sendErrorResponse(res, error.message);
   }
@@ -32,7 +32,7 @@ const updateCruiseLine = async (req, res) => {
   try {
     const { cruiseLineName } = req.params;
     const cruiseLine = await cruiseMasterDataService.updateCruiseLine(cruiseLineName, req.body);
-    sendSuccessResponse(res, 'Cruise line updated successfully', cruiseLine);
+    sendSuccessResponse(res, cruiseLine, 'Cruise line updated successfully');
   } catch (error) {
     sendErrorResponse(res, error.message);
   }
@@ -45,7 +45,7 @@ const deleteCruiseLine = async (req, res) => {
   try {
     const { cruiseLineName } = req.params;
     const result = await cruiseMasterDataService.deleteCruiseLine(cruiseLineName);
-    sendSuccessResponse(res, result.message);
+    sendSuccessResponse(res, null, result.message);
   } catch (error) {
     sendErrorResponse(res, error.message);
   }
@@ -57,7 +57,7 @@ const deleteCruiseLine = async (req, res) => {
 const getAllShips = async (req, res) => {
   try {
     const ships = await cruiseMasterDataService.getAllShips();
-    sendSuccessResponse(res, 'Ships retrieved successfully', ships);
+    sendSuccessResponse(res, ships, 'Ships retrieved successfully');
   } catch (error) {
     sendErrorResponse(res, error.message);
   }
@@ -70,7 +70,7 @@ const getShipsByCruiseLine = async (req, res) => {
   try {
     const { cruiseLine } = req.params;
     const ships = await cruiseMasterDataService.getShipsByCruiseLine(cruiseLine);
-    sendSuccessResponse(res, 'Ships retrieved successfully', ships);
+    sendSuccessResponse(res, ships, 'Ships retrieved successfully');
   } catch (error) {
     sendErrorResponse(res, error.message);
   }
@@ -82,7 +82,7 @@ const getShipsByCruiseLine = async (req, res) => {
 const addShip = async (req, res) => {
   try {
     const ship = await cruiseMasterDataService.addShip(req.body);
-    sendSuccessResponse(res, 'Ship added successfully', ship);
+    sendSuccessResponse(res, ship, 'Ship added successfully');
   } catch (error) {
     sendErrorResponse(res, error.message);
   }
@@ -95,7 +95,7 @@ const updateShip = async (req, res) => {
   try {
     const { shipName, cruiseLine } = req.params;
     const ship = await cruiseMasterDataService.updateShip(shipName, cruiseLine, req.body);
-    sendSuccessResponse(res, 'Ship updated successfully', ship);
+    sendSuccessResponse(res, ship, 'Ship updated successfully');
   } catch (error) {
     sendErrorResponse(res, error.message);
   }

@@ -49,13 +49,13 @@ const getAllHolidayPackages = async () => {
  */
 const getHolidayPackageById = async (id) => {
   try {
-    const package = await HolidayPackage.findOne({ id });
+    const holidayPackage = await HolidayPackage.findOne({ id });
     
-    if (!package) {
+    if (!holidayPackage) {
       throw new Error('Holiday package not found');
     }
     
-    return package;
+    return holidayPackage;
   } catch (error) {
     throw new Error(`Failed to retrieve holiday package: ${error.message}`);
   }
@@ -66,17 +66,17 @@ const getHolidayPackageById = async (id) => {
  */
 const updateHolidayPackage = async (id, updateData) => {
   try {
-    const package = await HolidayPackage.findOneAndUpdate(
+    const holidayPackage = await HolidayPackage.findOneAndUpdate(
       { id },
       updateData,
       { new: true, runValidators: true }
     );
     
-    if (!package) {
+    if (!holidayPackage) {
       throw new Error('Holiday package not found');
     }
     
-    return package;
+    return holidayPackage;
   } catch (error) {
     throw new Error(`Failed to update holiday package: ${error.message}`);
   }
@@ -87,13 +87,13 @@ const updateHolidayPackage = async (id, updateData) => {
  */
 const deleteHolidayPackage = async (id) => {
   try {
-    const package = await HolidayPackage.findOneAndDelete({ id });
+    const holidayPackage = await HolidayPackage.findOneAndDelete({ id });
     
-    if (!package) {
+    if (!holidayPackage) {
       throw new Error('Holiday package not found');
     }
     
-    return package;
+    return holidayPackage;
   } catch (error) {
     throw new Error(`Failed to delete holiday package: ${error.message}`);
   }
@@ -132,13 +132,13 @@ const searchHolidayPackages = async (criteria) => {
  */
 const updatePackageSeats = async (packageId, requestedSeats) => {
   try {
-    const package = await HolidayPackage.findOne({ id: packageId });
+    const holidayPackage = await HolidayPackage.findOne({ id: packageId });
     
-    if (!package) {
+    if (!holidayPackage) {
       throw new Error('Holiday package not found');
     }
     
-    if (package.seats < requestedSeats) {
+    if (holidayPackage.seats < requestedSeats) {
       throw new Error('Requested seats exceed available seats');
     }
     

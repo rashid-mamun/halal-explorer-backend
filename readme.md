@@ -105,8 +105,8 @@ src/
    JWT_SECRET=your-jwt-secret-key
    JWT_REFRESH_SECRET=your-refresh-secret-key
    RATEHAWK_API_KEY=your-ratehawk-api-key
-   HOTELBEDS_API_KEY=your-hotelbeds-api-key
-   HOTELBEDS_SECRET=your-hotelbeds-secret
+   HOTELBEDS_ACTIVITY_API_KEY=your-hotelbeds-api-key
+   HOTELBEDS_ACTIVITY_SECRET=your-hotelbeds-secret
    ```
 
 4. **Start the server**

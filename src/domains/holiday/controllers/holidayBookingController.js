@@ -10,13 +10,13 @@ const createBooking = async (req, res) => {
     const bookingData = req.body;
     
     // Check if package exists and has enough seats
-    const package = await holidayPackageService.getHolidayPackageById(bookingData.packageId);
+    const holidayPackage = await holidayPackageService.getHolidayPackageById(bookingData.packageId);
     const requestedSeats = bookingData.passengersDetails.single + 
                           bookingData.passengersDetails.adults + 
                           bookingData.passengersDetails.child + 
                           bookingData.passengersDetails.infant;
     
-    if (package.seats < requestedSeats) {
+    if (holidayPackage.seats < requestedSeats) {
       return sendErrorResponse(res, 'Requested seats exceed available seats');
     }
     
@@ -26,7 +26,7 @@ const createBooking = async (req, res) => {
     // Update package seats
     await holidayPackageService.updatePackageSeats(bookingData.packageId, requestedSeats);
     
-    sendSuccessResponse(res, 'Holiday booking created successfully', booking);
+    sendSuccessResponse(res, booking, 'Holiday booking created successfully');
   } catch (error) {
     sendErrorResponse(res, error.message);
   }
@@ -38,7 +38,7 @@ const createBooking = async (req, res) => {
 const getAllBookings = async (req, res) => {
   try {
     const bookings = await holidayBookingService.getAllBookings();
-    sendSuccessResponse(res, 'Bookings retrieved successfully', bookings);
+    sendSuccessResponse(res, bookings, 'Bookings retrieved successfully');
   } catch (error) {
     sendErrorResponse(res, error.message);
   }
@@ -51,7 +51,7 @@ const getBookingById = async (req, res) => {
   try {
     const { bookingId } = req.query;
     const booking = await holidayBookingService.getBookingById(bookingId);
-    sendSuccessResponse(res, 'Booking retrieved successfully', booking);
+    sendSuccessResponse(res, booking, 'Booking retrieved successfully');
   } catch (error) {
     sendErrorResponse(res, error.message);
   }
@@ -64,7 +64,7 @@ const getBookingsByEmail = async (req, res) => {
   try {
     const { email } = req.params;
     const bookings = await holidayBookingService.getBookingsByEmail(email);
-    sendSuccessResponse(res, 'Bookings retrieved successfully', bookings);
+    sendSuccessResponse(res, bookings, 'Bookings retrieved successfully');
   } catch (error) {
     sendErrorResponse(res, error.message);
   }
@@ -77,7 +77,7 @@ const getBookingByPartnerOrderId = async (req, res) => {
   try {
     const { partnerOrderId } = req.params;
     const booking = await holidayBookingService.getBookingByPartnerOrderId(partnerOrderId);
-    sendSuccessResponse(res, 'Booking retrieved successfully', booking);
+    sendSuccessResponse(res, booking, 'Booking retrieved successfully');
   } catch (error) {
     sendErrorResponse(res, error.message);
   }
@@ -90,7 +90,7 @@ const updateBooking = async (req, res) => {
   try {
     const { bookingId } = req.params;
     const booking = await holidayBookingService.updateBooking(bookingId, req.body);
-    sendSuccessResponse(res, 'Booking updated successfully', booking);
+    sendSuccessResponse(res, booking, 'Booking updated successfully');
   } catch (error) {
     sendErrorResponse(res, error.message);
   }
@@ -103,7 +103,7 @@ const deleteBooking = async (req, res) => {
   try {
     const { bookingId } = req.params;
     const booking = await holidayBookingService.deleteBooking(bookingId);
-    sendSuccessResponse(res, 'Booking deleted successfully', booking);
+    sendSuccessResponse(res, booking, 'Booking deleted successfully');
   } catch (error) {
     sendErrorResponse(res, error.message);
   }
@@ -116,7 +116,7 @@ const searchBookings = async (req, res) => {
   try {
     const criteria = req.query;
     const bookings = await holidayBookingService.searchBookings(criteria);
-    sendSuccessResponse(res, 'Bookings search completed', bookings);
+    sendSuccessResponse(res, bookings, 'Bookings search completed');
   } catch (error) {
     sendErrorResponse(res, error.message);
   }

@@ -6,8 +6,8 @@ const { sendSuccessResponse, sendErrorResponse } = require('../../../shared/util
  */
 const createCruisePackage = async (req, res) => {
   try {
-    const package = await cruisePackageService.createCruisePackage(req.body);
-    sendSuccessResponse(res, 'Cruise package created successfully', package);
+    const cruisePackage = await cruisePackageService.createCruisePackage(req.body);
+    sendSuccessResponse(res, cruisePackage, 'Cruise package created successfully');
   } catch (error) {
     sendErrorResponse(res, error.message);
   }
@@ -19,7 +19,7 @@ const createCruisePackage = async (req, res) => {
 const getAllCruisePackages = async (req, res) => {
   try {
     const packages = await cruisePackageService.getAllCruisePackages();
-    sendSuccessResponse(res, 'Cruise packages retrieved successfully', packages);
+    sendSuccessResponse(res, packages, 'Cruise packages retrieved successfully');
   } catch (error) {
     sendErrorResponse(res, error.message);
   }
@@ -31,8 +31,8 @@ const getAllCruisePackages = async (req, res) => {
 const getCruisePackageById = async (req, res) => {
   try {
     const { id } = req.params;
-    const package = await cruisePackageService.getCruisePackageById(id);
-    sendSuccessResponse(res, 'Cruise package retrieved successfully', package);
+    const cruisePackage = await cruisePackageService.getCruisePackageById(id);
+    sendSuccessResponse(res, cruisePackage, 'Cruise package retrieved successfully');
   } catch (error) {
     sendErrorResponse(res, error.message);
   }
@@ -44,8 +44,8 @@ const getCruisePackageById = async (req, res) => {
 const updateCruisePackage = async (req, res) => {
   try {
     const { id } = req.params;
-    const package = await cruisePackageService.updateCruisePackage(id, req.body);
-    sendSuccessResponse(res, 'Cruise package updated successfully', package);
+    const cruisePackage = await cruisePackageService.updateCruisePackage(id, req.body);
+    sendSuccessResponse(res, cruisePackage, 'Cruise package updated successfully');
   } catch (error) {
     sendErrorResponse(res, error.message);
   }
@@ -57,8 +57,8 @@ const updateCruisePackage = async (req, res) => {
 const deleteCruisePackage = async (req, res) => {
   try {
     const { id } = req.params;
-    const package = await cruisePackageService.deleteCruisePackage(id);
-    sendSuccessResponse(res, 'Cruise package deleted successfully', package);
+    const cruisePackage = await cruisePackageService.deleteCruisePackage(id);
+    sendSuccessResponse(res, cruisePackage, 'Cruise package deleted successfully');
   } catch (error) {
     sendErrorResponse(res, error.message);
   }
@@ -71,7 +71,7 @@ const searchCruisePackages = async (req, res) => {
   try {
     const criteria = req.query;
     const packages = await cruisePackageService.searchCruisePackages(criteria);
-    sendSuccessResponse(res, 'Cruise packages search completed', packages);
+    sendSuccessResponse(res, packages, 'Cruise packages search completed');
   } catch (error) {
     sendErrorResponse(res, error.message);
   }

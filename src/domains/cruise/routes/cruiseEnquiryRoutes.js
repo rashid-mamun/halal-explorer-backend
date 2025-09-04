@@ -12,7 +12,7 @@ const {
 
 // Create new cruise enquiry
 router.post('/', 
-  requireAuth, 
+  requireAuth,
   requirePermissionMiddleware('cruise:create'),
   validateRequestBody(createCruiseEnquiryValidator),
   cruiseEnquiryController.createEnquiry
@@ -20,14 +20,14 @@ router.post('/',
 
 // Get all enquiries (Admin/Manager only)
 router.get('/all', 
-  requireAuth, 
+  requireAuth,
   requirePermissionMiddleware('cruise:read'),
   cruiseEnquiryController.getAllEnquiries
 );
 
 // Search enquiries
 router.get('/search', 
-  requireAuth, 
+  requireAuth,
   requirePermissionMiddleware('cruise:read'),
   validateRequestQuery(searchCruiseEnquiryValidator),
   cruiseEnquiryController.searchEnquiries
@@ -35,28 +35,28 @@ router.get('/search',
 
 // Get enquiry by ID
 router.get('/id/:enquiryId', 
-  requireAuth, 
+  requireAuth,
   requirePermissionMiddleware('cruise:read'),
   cruiseEnquiryController.getEnquiryById
 );
 
 // Get enquiries by email
 router.get('/email/:email', 
-  requireAuth, 
+  requireAuth,
   requirePermissionMiddleware('cruise:read'),
   cruiseEnquiryController.getEnquiriesByEmail
 );
 
 // Get enquiries by cruise ID
 router.get('/cruise/:cruiseId', 
-  requireAuth, 
+  requireAuth,
   requirePermissionMiddleware('cruise:read'),
   cruiseEnquiryController.getEnquiriesByCruiseId
 );
 
 // Update enquiry
 router.put('/:enquiryId', 
-  requireAuth, 
+  requireAuth,
   requirePermissionMiddleware('cruise:update'),
   validateRequestBody(updateCruiseEnquiryValidator),
   cruiseEnquiryController.updateEnquiry
@@ -64,7 +64,7 @@ router.put('/:enquiryId',
 
 // Delete enquiry (Admin only)
 router.delete('/:enquiryId', 
-  requireAuth, 
+  requireAuth,
   requirePermissionMiddleware('cruise:delete'),
   cruiseEnquiryController.deleteEnquiry
 );

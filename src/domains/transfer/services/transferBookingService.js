@@ -7,8 +7,8 @@ const { v4: uuidv4 } = require('uuid');
  * Create HotelBeds API headers
  */
 const createHeaders = () => {
-  const apiKey = process.env.HOTELBEDS_TRANSFERS_API_KEY;
-  const secret = process.env.HOTELBEDS_TRANSFERS_SECRET;
+  const apiKey = process.env.HOTELBEDS_TRANSFER_API_KEY;
+  const secret = process.env.HOTELBEDS_TRANSFER_SECRET;
   const timestamp = Math.floor(Date.now() / 1000).toString();
   const signature = crypto
     .createHash('sha256')

@@ -6,8 +6,8 @@ const crypto = require('crypto');
 const { setCacheData, getCacheData } = require('../../../shared/utils/nodeCache');
 
 const createHeaders = () => {
-  const apiKey = process.env.HOTELBEDS_API_KEY;
-  const secret = process.env.HOTELBEDS_SECRET;
+  const apiKey = process.env.HOTELBEDS_ACTIVITY_API_KEY;
+  const secret = process.env.HOTELBEDS_ACTIVITY_SECRET;
   const timestamp = Math.floor(Date.now() / 1000).toString();
   const signature = crypto
     .createHash('sha256')
@@ -113,7 +113,7 @@ const createAvailabilityRequest = async (requestData) => {
 const searchActivities = async (destination, adult, child, departure, arrival, req) => {
   try {
     const uniqueSearchId = uuidv4();
-    
+
     // Create availability request record
     const requestData = {
       destination,
@@ -122,7 +122,7 @@ const searchActivities = async (destination, adult, child, departure, arrival, r
       language: 'en',
       filters: [{ type: 'destination', value: destination }]
     };
-    
+
     await createAvailabilityRequest(requestData);
 
     const url = `${process.env.HOTELBEDS_API_ENDPOINT}activity-api/3.0/activities/availability`;
@@ -146,7 +146,7 @@ const searchActivities = async (destination, adult, child, departure, arrival, r
     }, {});
 
     console.log('total activities content return hotelbeds:', activitiesData.length);
-    
+
     // Get halal activities data
     const halalActivitiesData = await HalalActivityRating.find({ isStructure: false });
     const halalActivitiesDataObj = halalActivitiesData.reduce((obj, activity) => {
@@ -156,7 +156,7 @@ const searchActivities = async (destination, adult, child, departure, arrival, r
       };
       return obj;
     }, {});
-    
+
     const halalActivitiesDataCodes = Object.keys(halalActivitiesDataObj);
     console.log(JSON.stringify(halalActivitiesDataCodes, null, 2));
 
@@ -199,9 +199,9 @@ const searchActivities = async (destination, adult, child, departure, arrival, r
       }
       return activityData;
     });
-    
+
     const setResult = await setCacheData(uniqueSearchId, paginatedActivitiesData);
-    
+
     return {
       success: true,
       searchId: uniqueSearchId,
@@ -222,14 +222,14 @@ const searchFilterActivities = async (req) => {
     const searchId = req.searchId;
     const minHalalRating = parseInt(req.halalRating) || null;
     const activityCacheDataRes = await getCacheData(searchId);
-    
+
     if (!activityCacheDataRes.success) {
       return {
         success: false,
         error: 'Data not found in cache'
       }
     }
-    
+
     const activityCacheData = activityCacheDataRes.cache;
 
     const filteredActivities = activityCacheData.filter(activity => {
@@ -245,7 +245,7 @@ const searchFilterActivities = async (req) => {
         message: 'Please change the filter parameter'
       }
     }
-    
+
     const page = req.page;
     const pageNumber = parseInt(page, 10) || 1;
     const pageSize = parseInt(req.pageSize, 10) || 100;
@@ -292,7 +292,7 @@ const searchActivitiesDetails = async (code, adult, child, departure, arrival, r
       },
       order: 'DEFAULT',
     };
-    
+
     console.log(data);
     const response = await postData(url, data, successMessage, errorMessage);
 
@@ -302,7 +302,7 @@ const searchActivitiesDetails = async (code, adult, child, departure, arrival, r
         error: 'An error occurred while searching activities.',
       };
     }
-    
+
     if (halalActivity && response.data) {
       return {
         success: true,
@@ -311,7 +311,7 @@ const searchActivitiesDetails = async (code, adult, child, departure, arrival, r
         halalData: halalActivity,
       };
     }
-    
+
     return {
       success: false,
       message: 'No halal Activity found with the specified ID',
@@ -342,9 +342,9 @@ const getAllAvailabilityRequests = async (page = 1, pageSize = 100) => {
       .skip(skip)
       .limit(pageSize)
       .sort({ createdAt: -1 });
-    
+
     const total = await ActivityAvailabilityRequest.countDocuments();
-    
+
     return {
       data: availabilityRequests,
       pagination: {

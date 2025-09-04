@@ -1,7 +1,5 @@
 const express = require('express');
 const router = express.Router();
-const { requireAuth } = require('../../auth/middleware/auth');
-const { requireServiceAccessMiddleware } = require('../../auth/middleware/authorization');
 
 // Import sub-routes
 const cruisePackageRoutes = require('./cruisePackageRoutes');
@@ -9,9 +7,7 @@ const cruiseEnquiryRoutes = require('./cruiseEnquiryRoutes');
 const cruiseBookingRoutes = require('./cruiseBookingRoutes');
 const cruiseMasterDataRoutes = require('./cruiseMasterDataRoutes');
 
-// Apply authentication and service access middleware to all cruise routes
-router.use(requireAuth);
-router.use(requireServiceAccessMiddleware('cruise'));
+// Note: Authentication and service access middleware are applied at src/routes.js level
 
 // Health check route
 router.get('/health', (req, res) => {

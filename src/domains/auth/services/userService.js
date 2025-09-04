@@ -31,16 +31,32 @@ const findById = async (userId) => {
  * Create user with default role if not provided
  */
 const createUser = async (userData) => {
-  // Find default role if not provided
+  // Handle role processing
   if (!userData.role) {
+    // No role provided, use default
     const defaultRole = await Role.findOne({ name: ROLES.CUSTOMER });
     if (!defaultRole) {
       throw new Error('Default role not found');
     }
     userData.role = defaultRole._id;
+  } else if (typeof userData.role === 'string' && !userData.role.match(/^[0-9a-fA-F]{24}$/)) {
+    // Role provided as name string, convert to ID
+    const role = await Role.findOne({ name: userData.role });
+    if (!role) {
+      throw new Error(`Role '${userData.role}' not found`);
+    }
+    userData.role = role._id;
   }
   
-  return await User.create(userData);
+  const user = await User.create(userData);
+  
+  // Return user with populated role and permissions
+  return await User.findById(user._id).populate({
+    path: 'role',
+    populate: {
+      path: 'permissions'
+    }
+  });
 };
 
 /**

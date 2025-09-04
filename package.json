@@ -9,11 +9,27 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
-    "test:unit": "jest --testPathPattern=unit",
     "test:integration": "jest --testPathPattern=integration",
+    "test:integration:run": "node src/__tests__/run-integration-tests.js",
     "test:auth": "jest --testPathPattern=auth",
     "test:middleware": "jest --testPathPattern=middleware",
-    "test:services": "jest --testPathPattern=services"
+    "test:services": "jest --testPathPattern=services",
+    "test:hotel": "jest --testPathPattern=hotel.integration.test.js",
+    "test:activity": "jest --testPathPattern=activity.integration.test.js",
+    "test:system": "jest --testPathPattern=system.integration.test.js",
+    "test:unit": "jest --testPathPattern=unit",
+    "test:unit:run": "node src/__tests__/run-unit-tests.js",
+    "test:unit:auth": "jest --testPathPattern=authService.test.js",
+    "test:unit:hotel": "jest --testPathPattern=hotelService.test.js",
+    "test:unit:cruise": "jest --testPathPattern=src/__tests__/unit/cruise",
+    "test:unit:holiday": "jest --testPathPattern=src/__tests__/unit/holiday",
+    "test:integration:cruise": "jest --testPathPattern=cruise.integration.test.js",
+    "test:integration:holiday": "jest --testPathPattern=holiday.integration.test.js",
+    "test:unit:middleware": "jest --testPathPattern=auth.test.js",
+    "test:unit:validators": "jest --testPathPattern=validators.test.js",
+    "test:all": "node src/__tests__/run-all-tests.js",
+    "test:all:unit": "npm run test:unit:run",
+    "test:all:integration": "npm run test:integration:run"
   },
   "keywords": [
     "halal",
@@ -48,25 +64,5 @@
     "mongodb-memory-server": "^10.1.4",
     "nodemon": "^3.0.1",
     "supertest": "^6.3.3"
-  },
-  "jest": {
-    "testEnvironment": "node",
-    "setupFilesAfterEnv": [
-      "<rootDir>/src/__tests__/setup.js"
-    ],
-    "testTimeout": 30000,
-    "collectCoverageFrom": [
-      "src/**/*.js",
-      "!src/**/*.test.js",
-      "!src/**/*.spec.js",
-      "!src/server.js",
-      "!src/index.js"
-    ],
-    "coverageDirectory": "coverage",
-    "coverageReporters": [
-      "text",
-      "lcov",
-      "html"
-    ]
   }
 }

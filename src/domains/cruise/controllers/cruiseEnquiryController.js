@@ -7,7 +7,7 @@ const { sendSuccessResponse, sendErrorResponse } = require('../../../shared/util
 const createEnquiry = async (req, res) => {
   try {
     const enquiry = await cruiseEnquiryService.createEnquiry(req.body);
-    sendSuccessResponse(res, 'Cruise enquiry created successfully', enquiry);
+    sendSuccessResponse(res, enquiry, 'Cruise enquiry created successfully');
   } catch (error) {
     sendErrorResponse(res, error.message);
   }
@@ -19,7 +19,7 @@ const createEnquiry = async (req, res) => {
 const getAllEnquiries = async (req, res) => {
   try {
     const enquiries = await cruiseEnquiryService.getAllEnquiries();
-    sendSuccessResponse(res, 'Enquiries retrieved successfully', enquiries);
+    sendSuccessResponse(res, enquiries, 'Enquiries retrieved successfully');
   } catch (error) {
     sendErrorResponse(res, error.message);
   }
@@ -32,7 +32,7 @@ const getEnquiryById = async (req, res) => {
   try {
     const { enquiryId } = req.params;
     const enquiry = await cruiseEnquiryService.getEnquiryById(enquiryId);
-    sendSuccessResponse(res, 'Enquiry retrieved successfully', enquiry);
+    sendSuccessResponse(res, enquiry, 'Enquiry retrieved successfully');
   } catch (error) {
     sendErrorResponse(res, error.message);
   }
@@ -45,7 +45,7 @@ const getEnquiriesByEmail = async (req, res) => {
   try {
     const { email } = req.params;
     const enquiries = await cruiseEnquiryService.getEnquiriesByEmail(email);
-    sendSuccessResponse(res, 'Enquiries retrieved successfully', enquiries);
+    sendSuccessResponse(res, enquiries, 'Enquiries retrieved successfully');
   } catch (error) {
     sendErrorResponse(res, error.message);
   }
@@ -58,7 +58,7 @@ const getEnquiriesByCruiseId = async (req, res) => {
   try {
     const { cruiseId } = req.params;
     const enquiries = await cruiseEnquiryService.getEnquiriesByCruiseId(cruiseId);
-    sendSuccessResponse(res, 'Enquiries retrieved successfully', enquiries);
+    sendSuccessResponse(res, enquiries, 'Enquiries retrieved successfully');
   } catch (error) {
     sendErrorResponse(res, error.message);
   }
@@ -71,7 +71,7 @@ const updateEnquiry = async (req, res) => {
   try {
     const { enquiryId } = req.params;
     const enquiry = await cruiseEnquiryService.updateEnquiry(enquiryId, req.body);
-    sendSuccessResponse(res, 'Enquiry updated successfully', enquiry);
+    sendSuccessResponse(res, enquiry, 'Enquiry updated successfully');
   } catch (error) {
     sendErrorResponse(res, error.message);
   }
@@ -84,7 +84,7 @@ const deleteEnquiry = async (req, res) => {
   try {
     const { enquiryId } = req.params;
     const enquiry = await cruiseEnquiryService.deleteEnquiry(enquiryId);
-    sendSuccessResponse(res, 'Enquiry deleted successfully', enquiry);
+    sendSuccessResponse(res, enquiry, 'Enquiry deleted successfully');
   } catch (error) {
     sendErrorResponse(res, error.message);
   }
@@ -97,7 +97,7 @@ const searchEnquiries = async (req, res) => {
   try {
     const criteria = req.query;
     const enquiries = await cruiseEnquiryService.searchEnquiries(criteria);
-    sendSuccessResponse(res, 'Enquiries search completed', enquiries);
+    sendSuccessResponse(res, enquiries, 'Enquiries search completed');
   } catch (error) {
     sendErrorResponse(res, error.message);
   }
